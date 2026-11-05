@@ -27,11 +27,6 @@ export default function LoginPage() {
     }
   };
 
-  const handleDemoFill = (demoEmail, demoPass) => {
-    setEmail(demoEmail);
-    setPassword(demoPass);
-  };
-
   return (
     <div className="min-h-screen flex bg-background">
       {/* Left Column: Brand Hero Panel */}
@@ -132,42 +127,6 @@ export default function LoginPage() {
               <LogIn className="w-4 h-4 mr-2" /> Masuk ke Jajapin
             </Button>
           </form>
-
-          {/* Quick Demo Accounts */}
-          <div className="p-4 rounded-2xl bg-muted/40 border border-border space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] uppercase tracking-wider font-body font-bold text-muted-foreground">
-                Akun Uji Coba (Demo Mode)
-              </span>
-              <span className="text-[10px] text-primary font-body font-semibold">Klik untuk mengisi</span>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
-              <button
-                type="button"
-                onClick={() => handleDemoFill('admin@jajapin.id', 'admin123')}
-                className="p-2 rounded-xl bg-card border border-border text-left hover:border-primary transition-colors text-xs font-body"
-              >
-                <span className="font-semibold block text-foreground">Super Admin</span>
-                <span className="text-[10px] text-muted-foreground block truncate">admin@jajapin.id</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDemoFill('owner@bukitsenja.id', 'owner123')}
-                className="p-2 rounded-xl bg-card border border-border text-left hover:border-primary transition-colors text-xs font-body"
-              >
-                <span className="font-semibold block text-foreground">Pemilik Mitra</span>
-                <span className="text-[10px] text-muted-foreground block truncate">owner@bukitsenja.id</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDemoFill('tamu@gmail.com', 'tamu123')}
-                className="p-2 rounded-xl bg-card border border-border text-left hover:border-primary transition-colors text-xs font-body"
-              >
-                <span className="font-semibold block text-foreground">Tamu Wisata</span>
-                <span className="text-[10px] text-muted-foreground block truncate">tamu@gmail.com</span>
-              </button>
-            </div>
-          </div>
 
           <div className="text-center text-xs text-muted-foreground font-body">
             Belum memiliki akun?{' '}
