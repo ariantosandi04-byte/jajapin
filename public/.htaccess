@@ -1,0 +1,14 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Forward API Midtrans ke file PHP (jika di cPanel / Apache)
+  RewriteRule ^api/create-midtrans-token/?$ api/create-midtrans-token.php [L,QSA]
+  RewriteRule ^api/midtrans-notification/?$ api/midtrans-notification.php [L,QSA]
+
+  # Routing SPA React
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>

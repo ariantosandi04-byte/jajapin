@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 36 40% 96%;
+  --foreground: 200 8% 8%;
+  --card: 0 0% 100%;
+  --primary: 141 66% 22%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 38 30% 91%;
+  --muted: 40 22% 93%;
+  --muted-foreground: 45 6% 40%;
+  --accent: 32 47% 45%;
+  --border: 40 16% 87%;
+  --brand-forest: 141 66% 22%;
+  --brand-forest-deep: 143 69% 13%;
+  --brand-leaf: 134 61% 34%;
+  --brand-lime: 91 57% 49%;
+  --brand-sand: 38 33% 90%;
+  --radius: 0.85rem;
+}
+
+@layer base {
+  html {
+    font-family: 'Manrope', sans-serif;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  * {
+    border-color: hsl(var(--border));
+  }
+}
+
+/* Font utility classes */
+.font-display {
+  font-family: 'Fraunces', serif;
+}
+
+.font-body {
+  font-family: 'Manrope', sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--foreground));
+}
+
+/* Smooth scroll for anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Selection color */
+::selection {
+  background-color: hsl(var(--brand-leaf) / 0.3);
+  color: hsl(var(--foreground));
+}
