@@ -90,10 +90,23 @@ export default function DashboardPage() {
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [invoiceFilter, setInvoiceFilter] = useState('semua');
 
-  // Properties state (supports CRUD)
+  // Properties state (supports CRUD and syncs with stays.js catalog)
   const [properties, setProperties] = useState(() => {
     const saved = localStorage.getItem('jajapin_properties');
-    return saved ? JSON.parse(saved) : initialStays;
+    if (!saved) return initialStays;
+    try {
+      const parsed = JSON.parse(saved);
+      const existingIds = new Set(parsed.map((p) => p.id));
+      const missing = initialStays.filter((s) => !existingIds.has(s.id));
+      if (missing.length > 0) {
+        const merged = [...parsed, ...missing];
+        localStorage.setItem('jajapin_properties', JSON.stringify(merged));
+        return merged;
+      }
+      return parsed;
+    } catch {
+      return initialStays;
+    }
   });
 
   // Filter properties based on role

@@ -14,7 +14,13 @@ import { ArrowRight } from 'lucide-react';
 
 export default function HomePage() {
   const [loading, setLoading] = useState(true);
-  const topStays = [...stays].sort((a, b) => b.rating - a.rating).slice(0, 3);
+  const topStays = [...stays]
+    .sort((a, b) => {
+      if (a.is_jajapin_verified && !b.is_jajapin_verified) return -1;
+      if (!a.is_jajapin_verified && b.is_jajapin_verified) return 1;
+      return b.rating - a.rating;
+    })
+    .slice(0, 6);
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 800);
@@ -38,10 +44,10 @@ export default function HomePage() {
           </Link>
         </div>
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[1,2,3].map(i => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="space-y-3">
-                <Skeleton className="aspect-[4/3] w-full" />
+                <Skeleton className="aspect-[4/3] w-full rounded-2xl" />
                 <Skeleton className="h-4 w-3/4" />
                 <Skeleton className="h-6 w-1/2" />
                 <Skeleton className="h-4 w-full" />
@@ -49,8 +55,8 @@ export default function HomePage() {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {topStays.map(stay => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {topStays.map((stay) => (
               <StayCard key={stay.id} stay={stay} />
             ))}
           </div>

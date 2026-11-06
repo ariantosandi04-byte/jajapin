@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { Star, MapPin, Users, BedDouble, Bath, DoorOpen, Clock, ChevronRight } from 'lucide-react';
+import { Star, MapPin, Users, BedDouble, Bath, DoorOpen, Clock, ChevronRight, ShieldCheck, Sparkles, ExternalLink } from 'lucide-react';
 import SiteHeader from '../components/site/SiteHeader';
 import SiteFooter from '../components/site/SiteFooter';
 import BookingWidget from '../components/stay/BookingWidget';
@@ -66,17 +66,35 @@ export default function StayDetailPage() {
             {/* Main content */}
             <div className="lg:col-span-2 space-y-8">
               <div>
-                <Badge variant="lime" className="mb-3">{stay.type}</Badge>
+                <div className="flex flex-wrap items-center gap-2 mb-3">
+                  <Badge variant="lime">{stay.type}</Badge>
+                  {stay.is_jajapin_verified && (
+                    <span className="inline-flex items-center gap-1.5 text-xs font-body font-semibold px-2.5 py-1 rounded-full bg-emerald-600 text-white shadow-sm">
+                      <ShieldCheck className="w-3.5 h-3.5 stroke-[2.5]" /> Properti Resmi Jajapin Network
+                    </span>
+                  )}
+                </div>
                 <h1 className="font-display font-semibold text-3xl sm:text-4xl tracking-tight text-foreground mb-2">{stay.name}</h1>
                 <div className="flex items-center gap-4 text-sm font-body text-muted-foreground mb-3">
-                  <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {stay.address}</span>
+                  <span className="flex items-center gap-1"><MapPin className="w-4 h-4 text-primary" /> {stay.address}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Star className="w-5 h-5 fill-brand-lime text-brand-lime" />
                   <span className="font-body font-semibold">{stay.rating}</span>
-                  <span className="text-sm text-muted-foreground font-body">({stay.review_count} ulasan)</span>
+                  <span className="text-sm text-muted-foreground font-body">({stay.review_count} ulasan di Google & OTA)</span>
                 </div>
               </div>
+
+              {stay.is_jajapin_verified && (
+                <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 text-xs font-body text-emerald-900 space-y-1.5">
+                  <div className="font-semibold flex items-center gap-1.5 text-emerald-800 text-sm">
+                    <Sparkles className="w-4 h-4 text-emerald-600" /> Penginapan Terdaftar & Terintegrasi
+                  </div>
+                  <p className="text-[11px] leading-relaxed text-emerald-700">
+                    Properti ini terdaftar di Google Maps dan platform OTA resmi (Tiket.com, Agoda, Traveloka). Pemesanan langsung via situs resmi Jajapin.id bebas biaya perantara dan mendapatkan konfirmasi instan.
+                  </p>
+                </div>
+              )}
 
               <p className="font-display text-xl italic text-accent">{stay.tagline}</p>
               <p className="font-body text-foreground/80 leading-relaxed">{stay.description}</p>
