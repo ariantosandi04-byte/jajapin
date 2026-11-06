@@ -34,9 +34,10 @@ export default function InvoiceModal({ isOpen, onClose, booking }) {
     booking.invoice_number ||
     `INV/${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}/${booking.booking_code}`;
 
+  const roomCount = booking.room_count || 1;
   const nights = booking.nights || 1;
-  const ratePerNight = booking.price_per_night || Math.round((booking.total_price || 0) / nights);
-  const subtotalRoom = booking.subtotal_room || ratePerNight * nights;
+  const ratePerNight = booking.price_per_night || Math.round((booking.total_price || 0) / (nights * roomCount));
+  const subtotalRoom = booking.subtotal_room || ratePerNight * nights * roomCount;
   const extraFee = booking.extra_fee || 0;
   const discount = booking.discount || 0;
   const totalPrice = booking.total_price || subtotalRoom + extraFee - discount;
@@ -66,7 +67,7 @@ export default function InvoiceModal({ isOpen, onClose, booking }) {
       `--------------------------------\n` +
       `Tamu: ${booking.guest_name}\n` +
       `Penginapan: ${booking.property_name} (${booking.property_city})\n` +
-      `Tipe Kamar: ${booking.room_type || 'Kamar Standar'} ${booking.room_number ? `(No. ${booking.room_number})` : ''}\n` +
+      `Tipe Kamar: ${booking.room_type || 'Kamar Standar'} (${roomCount} Kamar) ${booking.room_number ? `(No. ${booking.room_number})` : ''}\n` +
       `Check-In: ${formatDate(booking.check_in)}\n` +
       `Check-Out: ${formatDate(booking.check_out)} (${nights} Malam)\n` +
       `--------------------------------\n` +
@@ -251,14 +252,16 @@ export default function InvoiceModal({ isOpen, onClose, booking }) {
                 <tr>
                   <td className="py-3 px-4">
                     <div className="font-semibold text-gray-900">
-                      Sewa Kamar — {booking.room_type || 'Deluxe Room'}
+                      Sewa Kamar — {booking.room_type || 'Deluxe Room'} ({roomCount} Kamar)
                     </div>
                     <div className="text-[11px] text-gray-500">
-                      Unit: {booking.room_number ? `Kamar ${booking.room_number}` : 'Kamar Penginapan'} • Termasuk sarapan & fasilitas
+                      Unit: {booking.room_number ? `Kamar ${booking.room_number}` : `${roomCount} Unit Kamar`} • Termasuk sarapan & fasilitas
                     </div>
                   </td>
-                  <td className="py-3 px-4 text-center">{nights} Malam</td>
-                  <td className="py-3 px-4 text-right">{formatIDR(ratePerNight)}</td>
+                  <td className="py-3 px-4 text-center">
+                    {roomCount > 1 ? `${roomCount} Kamar × ${nights} Malam` : `${nights} Malam`}
+                  </td>
+                  <td className="py-3 px-4 text-right">{formatIDR(ratePerNight)}/kamar</td>
                   <td className="py-3 px-4 text-right font-medium">{formatIDR(subtotalRoom)}</td>
                 </tr>
 

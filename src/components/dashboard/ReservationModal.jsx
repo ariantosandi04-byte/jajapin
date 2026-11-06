@@ -46,18 +46,26 @@ export default function ReservationModal({ isOpen, onClose, properties = [], onS
 
   // Room Assignment
   const roomTypes = useMemo(() => {
+    if (selectedProperty?.room_types && selectedProperty.room_types.length > 0) {
+      return selectedProperty.room_types.map((r) => ({
+        id: r.id,
+        name: r.name,
+        baseRate: r.price,
+      }));
+    }
     return [
-      { id: 'deluxe', name: 'Deluxe Room', baseRate: selectedProperty?.price || 450000 },
-      { id: 'standard', name: 'Standard Room', baseRate: Math.round((selectedProperty?.price || 450000) * 0.8) },
-      { id: 'suite', name: 'Suite / Villa Family', baseRate: Math.round((selectedProperty?.price || 450000) * 1.5) },
+      { id: 'deluxe', name: 'Deluxe Room', baseRate: selectedProperty?.price || 250000 },
+      { id: 'standard', name: 'Standard Room', baseRate: Math.round((selectedProperty?.price || 250000) * 0.8) },
+      { id: 'suite', name: 'Suite / Villa Family', baseRate: Math.round((selectedProperty?.price || 250000) * 1.5) },
     ];
   }, [selectedProperty]);
 
-  const [roomType, setRoomType] = useState('Deluxe Room');
+  const [roomType, setRoomType] = useState(() => roomTypes[0]?.name || 'Standard Room');
+  const [roomsCount, setRoomsCount] = useState(1);
   const [roomNumber, setRoomNumber] = useState('101');
 
   // Rates & Financials
-  const [ratePerNight, setRatePerNight] = useState(selectedProperty?.price || 450000);
+  const [ratePerNight, setRatePerNight] = useState(() => roomTypes[0]?.baseRate || selectedProperty?.price || 250000);
   const [extraFee, setExtraFee] = useState(0);
   const [discountAmount, setDiscountAmount] = useState(0);
   const [paymentStatus, setPaymentStatus] = useState('dibayar'); // 'dibayar' | 'dp' | 'belum_bayar'
@@ -72,8 +80,8 @@ export default function ReservationModal({ isOpen, onClose, properties = [], onS
     return Math.max(1, diff || 1);
   }, [checkIn, checkOut]);
 
-  // Total calculation
-  const subtotalRoom = Number(ratePerNight || 0) * nights;
+  // Total calculation with multi-room support
+  const subtotalRoom = Number(ratePerNight || 0) * nights * roomsCount;
   const totalPrice = Math.max(0, subtotalRoom + Number(extraFee || 0) - Number(discountAmount || 0));
 
   const amountPaid = useMemo(() => {
@@ -105,6 +113,7 @@ export default function ReservationModal({ isOpen, onClose, properties = [], onS
       guests: Number(guestsCount),
       nights: nights,
       room_type: roomType,
+      room_count: Number(roomsCount),
       room_number: roomNumber,
       price_per_night: Number(ratePerNight),
       subtotal_room: subtotalRoom,
@@ -215,15 +224,23 @@ export default function ReservationModal({ isOpen, onClose, properties = [], onS
             <label className="block text-[11px] uppercase tracking-[0.2em] font-body font-bold text-foreground">
               2. Properti & Alokasi Kamar
             </label>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="sm:col-span-1">
-                <label className="block text-xs text-muted-foreground font-body mb-1">Properti</label>
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+              <div className="sm:col-span-2">
+                <label className="block text-xs text-muted-foreground font-body mb-1">Pilih Properti</label>
                 <select
                   value={propertyId}
                   onChange={(e) => {
                     setPropertyId(e.target.value);
                     const prop = properties.find((p) => p.id === Number(e.target.value));
-                    if (prop) setRatePerNight(prop.price);
+                    if (prop) {
+                      const firstRoom = prop.room_types?.[0];
+                      if (firstRoom) {
+                        setRoomType(firstRoom.name);
+                        setRatePerNight(firstRoom.price);
+                      } else {
+                        setRatePerNight(prop.price);
+                      }
+                    }
                   }}
                   className="w-full h-10 rounded-xl border border-border bg-background px-3 font-body text-xs text-foreground focus:ring-2 focus:ring-primary/20"
                 >
@@ -248,20 +265,25 @@ export default function ReservationModal({ isOpen, onClose, properties = [], onS
                 >
                   {roomTypes.map((r) => (
                     <option key={r.id} value={r.name}>
-                      {r.name}
+                      {r.name} ({formatIDR(r.baseRate)})
                     </option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs text-muted-foreground font-body mb-1">No. Unit Kamar</label>
-                <Input
-                  value={roomNumber}
-                  onChange={(e) => setRoomNumber(e.target.value)}
-                  placeholder="Kamar 101"
-                  required
-                />
+                <label className="block text-xs text-muted-foreground font-body mb-1">Jumlah Kamar</label>
+                <select
+                  value={roomsCount}
+                  onChange={(e) => setRoomsCount(Number(e.target.value))}
+                  className="w-full h-10 rounded-xl border border-border bg-background px-3 font-body text-xs text-foreground focus:ring-2 focus:ring-primary/20 font-bold"
+                >
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
+                    <option key={n} value={n}>
+                      {n} Kamar
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>

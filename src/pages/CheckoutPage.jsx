@@ -1,6 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { ShieldCheck, Calendar, MapPin, Users, ArrowLeft, CreditCard, Sparkles, Key, CheckCircle2, ExternalLink, Zap, Check } from 'lucide-react';
+import {
+  ShieldCheck,
+  Calendar,
+  MapPin,
+  Users,
+  ArrowLeft,
+  CreditCard,
+  Sparkles,
+  Key,
+  CheckCircle2,
+  ExternalLink,
+  Zap,
+  Check,
+  BedDouble,
+  DoorOpen,
+  Plus,
+  Minus,
+} from 'lucide-react';
 import SiteHeader from '../components/site/SiteHeader';
 import SiteFooter from '../components/site/SiteFooter';
 import PaymentPanel from '../components/stay/PaymentPanel';
@@ -22,6 +39,31 @@ export default function CheckoutPage() {
   const { user } = useAuth();
   const stay = stays.find((s) => s.slug === slug);
 
+  const roomTypes = useMemo(() => {
+    if (stay?.room_types && stay.room_types.length > 0) return stay.room_types;
+    return [
+      {
+        id: 'standard',
+        name: 'Kamar Standar',
+        bed: `${stay?.beds || 1} Ranjang`,
+        capacity: stay?.guests || 2,
+        price: stay?.price || 150000,
+        description: 'Kamar standar nyaman dengan fasilitas lengkap.',
+      },
+    ];
+  }, [stay]);
+
+  const queryRoomType = searchParams.get('roomType');
+  const queryRoomsCount = Number(searchParams.get('rooms')) || 1;
+
+  const [selectedRoomId, setSelectedRoomId] = useState(() => {
+    if (queryRoomType && roomTypes.some((r) => r.id === queryRoomType)) {
+      return queryRoomType;
+    }
+    return roomTypes[0]?.id || 'standard';
+  });
+
+  const [roomsCount, setRoomsCount] = useState(Math.max(1, Math.min(10, queryRoomsCount)));
   const [checkIn, setCheckIn] = useState(searchParams.get('checkIn') || '');
   const [checkOut, setCheckOut] = useState(searchParams.get('checkOut') || '');
   const [guests, setGuests] = useState(Number(searchParams.get('guests')) || 2);
@@ -42,6 +84,11 @@ export default function CheckoutPage() {
   const [showKeyInput, setShowKeyInput] = useState(false);
   const [mockSnapData, setMockSnapData] = useState(null);
   const [mockXenditData, setMockXenditData] = useState(null);
+
+  // Selected room object
+  const selectedRoom = useMemo(() => {
+    return roomTypes.find((r) => r.id === selectedRoomId) || roomTypes[0];
+  }, [roomTypes, selectedRoomId]);
 
   // Initialize Midtrans Snap script (if needed)
   useEffect(() => {
@@ -95,8 +142,10 @@ export default function CheckoutPage() {
     );
   }
 
+  const pricePerRoomNight = selectedRoom.price || stay.price;
   const nights = checkIn && checkOut ? calculateNights(checkIn, checkOut) : 1;
-  const totalPrice = nights * stay.price;
+  const subtotalPerNight = pricePerRoomNight * roomsCount;
+  const totalPrice = nights * subtotalPerNight;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -113,7 +162,7 @@ export default function CheckoutPage() {
       booking_code: bookingCode,
       property_id: stay.id,
       property_name: stay.name,
-      property_image: stay.image,
+      property_image: selectedRoom.image || stay.image,
       property_city: stay.city,
       guest_name: form.name,
       guest_email: form.email,
@@ -122,7 +171,11 @@ export default function CheckoutPage() {
       check_out: checkOut,
       guests: guests,
       nights: nights,
-      price_per_night: stay.price,
+      room_type: selectedRoom.name,
+      room_type_id: selectedRoom.id,
+      room_count: roomsCount,
+      price_per_night: pricePerRoomNight,
+      subtotal_per_night: subtotalPerNight,
       total_price: totalPrice,
       status: 'menunggu',
       payment_status: 'menunggu_pembayaran',
@@ -150,11 +203,11 @@ export default function CheckoutPage() {
         const xenditRes = await createXenditInvoice({
           bookingCode,
           totalPrice,
-          stayName: stay.name,
+          stayName: `${stay.name} (${roomsCount}x ${selectedRoom.name})`,
           guestName: form.name,
           guestEmail: form.email,
           guestPhone: form.phone,
-          roomType: stay.type,
+          roomType: `${roomsCount} Kamar - ${selectedRoom.name}`,
           nights,
         });
 
@@ -175,7 +228,6 @@ export default function CheckoutPage() {
           baseBooking.xendit_invoice_id = xenditRes.id || xenditRes.invoice_id;
           baseBooking.xendit_invoice_url = xenditRes.invoice_url;
           saveBooking(baseBooking);
-          // Redirect langsung ke halaman pembayaran resmi Xendit
           window.location.href = xenditRes.invoice_url;
           return;
         }
@@ -183,7 +235,7 @@ export default function CheckoutPage() {
         console.warn('Kendala Xendit:', err);
       }
 
-      // Jika gagal menghubungi backend, tampilkan simulasi Xendit
+      // Fallback dialog
       setSubmitting(false);
       setMockXenditData({
         baseBooking,
@@ -203,7 +255,7 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           bookingCode,
           totalPrice,
-          stayName: stay.name,
+          stayName: `${stay.name} (${roomsCount}x ${selectedRoom.name})`,
           guestName: form.name,
           guestEmail: form.email,
           guestPhone: form.phone,
@@ -217,7 +269,7 @@ export default function CheckoutPage() {
           body: JSON.stringify({
             bookingCode,
             totalPrice,
-            stayName: stay.name,
+            stayName: `${stay.name} (${roomsCount}x ${selectedRoom.name})`,
             guestName: form.name,
             guestEmail: form.email,
             guestPhone: form.phone,
@@ -308,7 +360,7 @@ export default function CheckoutPage() {
             Konfirmasi & Pembayaran
           </h1>
           <p className="font-body text-muted-foreground text-sm mb-8">
-            Lengkapi data pemesan dan pilih metode pembayaran resmi via Xendit Payment Gateway atau metode lainnya.
+            Periksa rincian tipe kamar, durasi, jumlah kamar, dan lengkapi data pemesan sebelum menyelesaikan transaksi.
           </p>
 
           {error && (
@@ -318,12 +370,127 @@ export default function CheckoutPage() {
           )}
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            {/* Left Column: Form & Payment */}
+            {/* Left Column: Form, Room Selection & Payment */}
             <div className="lg:col-span-7 space-y-6">
+              {/* CARD PILIHAN TIPE KAMAR & JUMLAH KAMAR */}
+              <Card className="border-border">
+                <CardContent className="p-6 space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-border">
+                    <div>
+                      <h2 className="font-display font-semibold text-lg text-foreground flex items-center gap-2">
+                        <BedDouble className="w-5 h-5 text-emerald-600" /> Tipe & Jumlah Kamar
+                      </h2>
+                      <p className="text-xs text-muted-foreground font-body">
+                        Anda dapat mengubah tipe kamar atau memesan lebih dari satu unit
+                      </p>
+                    </div>
+                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-body self-start sm:self-auto">
+                      {roomsCount} Kamar Dipilih
+                    </span>
+                  </div>
+
+                  {/* Pilihan Tipe Kamar */}
+                  <div className="space-y-2.5">
+                    <label className="block text-[11px] uppercase tracking-wider font-semibold text-muted-foreground font-body">
+                      Pilih Tipe Kamar:
+                    </label>
+                    <div className="space-y-2">
+                      {roomTypes.map((room) => {
+                        const isSelected = room.id === selectedRoomId;
+                        return (
+                          <button
+                            key={room.id}
+                            type="button"
+                            onClick={() => setSelectedRoomId(room.id)}
+                            className={`w-full text-left p-3.5 rounded-2xl border transition-all text-xs font-body ${
+                              isSelected
+                                ? 'border-emerald-600 bg-emerald-50/60 dark:bg-emerald-950/20 ring-1 ring-emerald-500'
+                                : 'border-border bg-card hover:bg-muted/40'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="flex items-center gap-2.5">
+                                <div
+                                  className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${
+                                    isSelected
+                                      ? 'border-emerald-600 bg-emerald-600 text-white'
+                                      : 'border-border'
+                                  }`}
+                                >
+                                  {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                                </div>
+                                <div>
+                                  <span className="font-semibold text-foreground text-sm block">
+                                    {room.name}
+                                  </span>
+                                  <span className="text-[11px] text-muted-foreground block mt-0.5">
+                                    {room.bed} • Maks {room.capacity} orang
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="text-right shrink-0">
+                                <span className="font-display font-bold text-base text-emerald-700 dark:text-emerald-400">
+                                  {formatIDR(room.price)}
+                                </span>
+                                <span className="text-[10px] text-muted-foreground block">/kamar/malam</span>
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Counter Jumlah Kamar */}
+                  <div className="pt-2 border-t border-border/60">
+                    <div className="flex items-center justify-between p-3.5 rounded-2xl bg-muted/40 border border-border">
+                      <div>
+                        <span className="font-semibold text-foreground text-sm font-body block">
+                          Jumlah Kamar Dipesan
+                        </span>
+                        <span className="text-xs text-muted-foreground font-body">
+                          Kapasitas total:{' '}
+                          <strong className="text-foreground">
+                            {selectedRoom.capacity * roomsCount} tamu
+                          </strong>
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setRoomsCount(Math.max(1, roomsCount - 1))}
+                          disabled={roomsCount <= 1}
+                          className="w-9 h-9 rounded-full border border-border bg-card flex items-center justify-center text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                          aria-label="Kurangi kamar"
+                        >
+                          <Minus className="w-4 h-4" />
+                        </button>
+                        <span className="w-10 text-center font-display font-bold text-lg text-foreground">
+                          {roomsCount}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setRoomsCount(Math.min(10, roomsCount + 1))}
+                          disabled={roomsCount >= 10}
+                          className="w-9 h-9 rounded-full border border-border bg-card flex items-center justify-center text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                          aria-label="Tambah kamar"
+                        >
+                          <Plus className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* FORM DATA TAMU */}
               <form onSubmit={handleSubmit} id="checkout-form">
                 <Card className="border-border">
                   <CardContent className="p-6 space-y-4">
-                    <h2 className="font-display font-semibold text-lg text-foreground">Data Tamu Utama</h2>
+                    <h2 className="font-display font-semibold text-lg text-foreground">
+                      Data Tamu Utama (Pemesan)
+                    </h2>
                     <Input
                       label="Nama Lengkap"
                       value={form.name}
@@ -358,7 +525,7 @@ export default function CheckoutPage() {
                         onChange={(e) => setForm({ ...form, notes: e.target.value })}
                         rows={3}
                         className="w-full rounded-2xl border border-border bg-card px-4 py-2.5 font-body text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary transition-all duration-300 resize-none"
-                        placeholder="Permintaan kamar bebas asap rokok, perkiraan jam tiba, dll."
+                        placeholder="Permintaan kamar bersebelahan, perkiraan jam tiba, dll."
                       />
                     </div>
                   </CardContent>
@@ -371,7 +538,10 @@ export default function CheckoutPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-foreground font-semibold">
                       <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                      <span>Xendit Invoicing V2: <span className="text-emerald-700 dark:text-emerald-400">Siap & Terhubung</span></span>
+                      <span>
+                        Xendit Invoicing V2:{' '}
+                        <span className="text-emerald-700 dark:text-emerald-400">Siap & Terhubung</span>
+                      </span>
                     </div>
                     <Badge variant="lime" className="text-[10px]">Merchant Terverifikasi</Badge>
                   </div>
@@ -462,7 +632,7 @@ export default function CheckoutPage() {
                   ? gateway === 'xendit'
                     ? 'Menghubungi Xendit Invoicing...'
                     : 'Memproses Gateway...'
-                  : `Bayar Sekarang · ${formatIDR(totalPrice)}`}
+                  : `Bayar Sekarang (${roomsCount} Kamar) · ${formatIDR(totalPrice)}`}
               </Button>
 
               {/* Compliance & Security Assurance */}
@@ -489,14 +659,14 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* Right Column: Order Summary */}
+            {/* Right Column: Order Summary with Room Type & Multi-room Calculation */}
             <div className="lg:col-span-5">
               <Card className="border-border sticky top-24 shadow-sm">
                 <CardContent className="p-6 space-y-5">
                   <div className="flex gap-4">
                     <img
-                      src={stay.image}
-                      alt={stay.name}
+                      src={selectedRoom.image || stay.image}
+                      alt={selectedRoom.name}
                       className="w-24 h-24 rounded-2xl object-cover shrink-0"
                     />
                     <div>
@@ -513,6 +683,20 @@ export default function CheckoutPage() {
                   <hr className="border-border" />
 
                   <div className="space-y-3 font-body text-sm">
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground flex items-center gap-1.5">
+                        <BedDouble className="w-4 h-4 text-emerald-600" /> Tipe Kamar
+                      </span>
+                      <span className="font-semibold text-foreground text-right">
+                        {selectedRoom.name}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground flex items-center gap-1.5">
+                        <DoorOpen className="w-4 h-4 text-primary" /> Jumlah Kamar
+                      </span>
+                      <span className="font-semibold text-foreground">{roomsCount} Kamar</span>
+                    </div>
                     <div className="flex justify-between items-center">
                       <span className="text-muted-foreground flex items-center gap-1.5">
                         <Calendar className="w-4 h-4 text-primary" /> Check-in
@@ -541,7 +725,13 @@ export default function CheckoutPage() {
 
                   <div className="space-y-2 font-body text-sm">
                     <div className="flex justify-between text-muted-foreground">
-                      <span>{formatIDR(stay.price)} × {nights} malam</span>
+                      <span>Tarif per kamar</span>
+                      <span>{formatIDR(pricePerRoomNight)} /mlm</span>
+                    </div>
+                    <div className="flex justify-between text-muted-foreground">
+                      <span>
+                        {roomsCount} kamar × {nights} malam
+                      </span>
                       <span className="text-foreground">{formatIDR(totalPrice)}</span>
                     </div>
                     <div className="flex justify-between text-muted-foreground">
@@ -556,8 +746,12 @@ export default function CheckoutPage() {
 
                   <div className="border-t border-border pt-4 flex justify-between items-baseline">
                     <div>
-                      <span className="font-display font-semibold text-lg text-foreground block">Total Tagihan</span>
-                      <span className="text-[11px] text-muted-foreground font-body">Sudah termasuk seluruh biaya</span>
+                      <span className="font-display font-semibold text-lg text-foreground block">
+                        Total Tagihan
+                      </span>
+                      <span className="text-[11px] text-muted-foreground font-body">
+                        {roomsCount} Kamar, {nights} Malam
+                      </span>
                     </div>
                     <span className="font-display font-bold text-2xl text-emerald-700 dark:text-emerald-400">
                       {formatIDR(totalPrice)}
@@ -574,7 +768,6 @@ export default function CheckoutPage() {
       {mockXenditData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
           <div className="bg-card w-full max-w-lg rounded-3xl border border-border shadow-2xl overflow-hidden font-body">
-            {/* Header Dialog */}
             <div className="bg-slate-900 p-6 text-white flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-emerald-500 flex items-center justify-center text-slate-900 font-black text-xl">
@@ -600,12 +793,23 @@ export default function CheckoutPage() {
             <div className="p-6 space-y-5">
               <div className="flex justify-between items-baseline p-4 rounded-2xl bg-emerald-50/50 border border-emerald-200">
                 <div>
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground block">Kode Reservasi</span>
-                  <span className="font-mono font-bold text-sm text-foreground">{mockXenditData.bookingCode}</span>
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground block">
+                    Kode Reservasi
+                  </span>
+                  <span className="font-mono font-bold text-sm text-foreground">
+                    {mockXenditData.bookingCode}
+                  </span>
+                  <span className="text-xs text-muted-foreground block mt-1">
+                    {mockXenditData.baseBooking?.room_count || 1} Kamar ({mockXenditData.baseBooking?.room_type})
+                  </span>
                 </div>
                 <div className="text-right">
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground block">Total Tagihan</span>
-                  <span className="font-display font-bold text-lg text-emerald-700">{formatIDR(mockXenditData.totalPrice)}</span>
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground block">
+                    Total Tagihan
+                  </span>
+                  <span className="font-display font-bold text-lg text-emerald-700">
+                    {formatIDR(mockXenditData.totalPrice)}
+                  </span>
                 </div>
               </div>
 
@@ -615,13 +819,15 @@ export default function CheckoutPage() {
                 </p>
                 <div className="p-3.5 rounded-xl bg-muted/50 border border-border space-y-1.5 text-[11px] text-muted-foreground leading-relaxed">
                   <p>
-                    ✓ Endpoint backend PHP telah aktif di <code className="font-mono text-foreground font-bold">public/api/create-xendit-invoice.php</code>
+                    ✓ Endpoint backend PHP telah aktif di{' '}
+                    <code className="font-mono text-foreground font-bold">public/api/create-xendit-invoice.php</code>
                   </p>
                   <p>
-                    ✓ Listener Webhook Callback siap di <code className="font-mono text-foreground font-bold">public/api/xendit-callback.php</code>
+                    ✓ Listener Webhook Callback siap di{' '}
+                    <code className="font-mono text-foreground font-bold">public/api/xendit-callback.php</code>
                   </p>
                   <p>
-                    ✓ Saat Live Secret Key diisi di Hostinger (<code className="font-mono">XENDIT_SECRET_KEY</code>), tamu akan langsung diarahkan ke halaman pembayaran resmi Xendit.
+                    ✓ Mendukung reservasi multi-kamar dan multi-tipe kamar secara otomatis.
                   </p>
                 </div>
               </div>
@@ -667,12 +873,20 @@ export default function CheckoutPage() {
             <div className="p-6 space-y-5">
               <div className="flex justify-between items-baseline p-4 rounded-2xl bg-muted/40 border border-border">
                 <div>
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground block">Order ID</span>
-                  <span className="font-mono font-bold text-sm text-foreground">{mockSnapData.bookingCode}</span>
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground block">
+                    Order ID
+                  </span>
+                  <span className="font-mono font-bold text-sm text-foreground">
+                    {mockSnapData.bookingCode}
+                  </span>
                 </div>
                 <div className="text-right">
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground block">Total Tagihan</span>
-                  <span className="font-display font-bold text-lg text-primary">{formatIDR(mockSnapData.totalPrice)}</span>
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground block">
+                    Total Tagihan
+                  </span>
+                  <span className="font-display font-bold text-lg text-primary">
+                    {formatIDR(mockSnapData.totalPrice)}
+                  </span>
                 </div>
               </div>
 

@@ -182,7 +182,7 @@ export default function BookingsTable({
                     {/* Middle: Room & Schedule */}
                     <div className="bg-muted/40 p-3 rounded-xl space-y-1 text-muted-foreground">
                       <div className="text-foreground font-medium">
-                        {b.property_name} • {b.room_type || 'Deluxe Room'}{' '}
+                        {b.property_name} • {b.room_count ? `${b.room_count}x ` : ''}{b.room_type || 'Deluxe Room'}{' '}
                         {b.room_number ? `(${b.room_number})` : ''}
                       </div>
                       <div className="flex justify-between text-[11px]">
@@ -319,7 +319,7 @@ export default function BookingsTable({
                         <td className="py-3.5 px-4 font-medium text-foreground">
                           {b.property_name}
                           <span className="block text-[11px] text-muted-foreground font-normal">
-                            {b.room_type || 'Deluxe Room'}{' '}
+                            {b.room_count ? `${b.room_count}x ` : ''}{b.room_type || 'Deluxe Room'}{' '}
                             {b.room_number ? `(Unit ${b.room_number})` : ''} • {b.property_city}
                           </span>
                         </td>

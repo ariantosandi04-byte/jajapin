@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { CheckCircle2, Calendar, MapPin, Users, Phone, Mail, Clock, Download, Home, ListOrdered, FileText } from 'lucide-react';
+import { CheckCircle2, Calendar, MapPin, Users, Phone, Mail, Clock, Download, Home, ListOrdered, FileText, BedDouble, DoorOpen } from 'lucide-react';
 import SiteHeader from '../components/site/SiteHeader';
 import SiteFooter from '../components/site/SiteFooter';
 import InvoiceModal from '../components/dashboard/InvoiceModal';
@@ -107,6 +107,36 @@ export default function ConfirmationPage() {
               </div>
 
               <hr className="border-border" />
+
+              {/* Room Type & Quantity Highlights */}
+              <div className="p-4 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-body">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                    <BedDouble className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-emerald-800 dark:text-emerald-300 block">
+                      Tipe Kamar Dipesan
+                    </span>
+                    <span className="font-semibold text-sm text-foreground">
+                      {booking.room_type || 'Standard Room'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4 text-xs">
+                  <div className="bg-card px-3 py-1.5 rounded-xl border border-border">
+                    <span className="text-muted-foreground block text-[10px]">Jumlah Kamar</span>
+                    <span className="font-bold text-foreground">{booking.room_count || 1} Unit Kamar</span>
+                  </div>
+                  <div className="bg-card px-3 py-1.5 rounded-xl border border-border text-right">
+                    <span className="text-muted-foreground block text-[10px]">Tarif Satuan</span>
+                    <span className="font-bold text-emerald-700">
+                      {formatIDR(booking.price_per_night || booking.total_price / ((booking.room_count || 1) * (booking.nights || 1)))}/mlm
+                    </span>
+                  </div>
+                </div>
+              </div>
 
               {/* Dates & Guests Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
