@@ -294,8 +294,12 @@ export default function DashboardPage() {
   // Filter bookings for current view
   const currentPropertyBookings = useMemo(() => {
     if (isAdmin && selectedPropertyId === 0) return bookings;
-    return bookings.filter((b) => b.property_id === selectedPropertyId);
-  }, [bookings, selectedPropertyId, isAdmin]);
+    return bookings.filter(
+      (b) =>
+        b.property_id === selectedPropertyId ||
+        (activeProperty?.name && b.property_name === activeProperty.name)
+    );
+  }, [bookings, selectedPropertyId, isAdmin, activeProperty]);
 
   // CRUD for Bookings
   const handleUpdateBookingStatus = (code, newStatus) => {

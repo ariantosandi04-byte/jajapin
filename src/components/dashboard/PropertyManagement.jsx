@@ -100,8 +100,13 @@ export default function PropertyManagement({ properties = [], isAdmin, currentOw
                         className="w-20 h-20 rounded-2xl object-cover shrink-0"
                       />
                       <div>
-                        <div className="flex items-center gap-2 mb-1">
+                        <div className="flex flex-wrap items-center gap-2 mb-1">
                           <Badge variant="lime">{prop.type}</Badge>
+                          {prop.is_jajapin_verified && (
+                            <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-600 text-white">
+                              ✓ Jajapin Official
+                            </span>
+                          )}
                           <span className="text-xs text-muted-foreground font-body">ID: #{prop.id}</span>
                           <span className="text-xs text-primary font-body font-semibold">
                             Pemilik: {prop.owner_email}

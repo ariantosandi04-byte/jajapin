@@ -3,7 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Calendar, Users } from 'lucide-react';
 import { Button } from '../ui/Button';
 
-const cities = ['Ubud', 'Yogyakarta', 'Kuta', 'Lembang', 'Labuan Bajo', 'Pelabuhan Ratu', 'Jakarta Selatan'];
+const cities = [
+  { value: 'Pelabuhan Ratu', label: 'Pelabuhan Ratu (Sukabumi)' },
+  { value: 'Pangandaran', label: 'Pangandaran' },
+  { value: 'Bandung', label: 'Bandung' },
+  { value: 'Cisayong, Tasikmalaya', label: 'Tasikmalaya (Galunggung)' },
+  { value: 'Cicurug, Sukabumi', label: 'Cicurug (Sukabumi)' },
+  { value: 'Bukittinggi', label: 'Bukittinggi (Sumbar)' },
+  { value: 'Yogyakarta', label: 'Yogyakarta' },
+  { value: 'Ubud', label: 'Ubud (Bali)' },
+  { value: 'Labuan Bajo', label: 'Labuan Bajo' },
+  { value: 'Kuta', label: 'Kuta (Lombok)' },
+];
 
 export default function SearchBar() {
   const navigate = useNavigate();
@@ -23,29 +34,66 @@ export default function SearchBar() {
   };
 
   return (
-    <form onSubmit={handleSearch} className="bg-white/10 backdrop-blur-xl rounded-full border border-white/20 p-2 flex flex-col lg:flex-row items-stretch lg:items-center gap-2 max-w-4xl">
+    <form
+      onSubmit={handleSearch}
+      className="bg-white/10 backdrop-blur-xl rounded-full border border-white/20 p-2 flex flex-col lg:flex-row items-stretch lg:items-center gap-2 max-w-4xl"
+    >
       <div className="flex items-center gap-2 px-4 flex-1 min-w-0">
         <MapPin className="w-4 h-4 text-white/50 shrink-0" />
-        <select value={city} onChange={(e) => setCity(e.target.value)} className="bg-transparent text-white text-sm font-body w-full py-2 focus:outline-none appearance-none cursor-pointer" aria-label="Destinasi">
-          <option value="" className="text-foreground">Semua destinasi</option>
-          {cities.map(c => <option key={c} value={c} className="text-foreground">{c}</option>)}
+        <select
+          value={city}
+          onChange={(e) => setCity(e.target.value)}
+          className="bg-transparent text-white text-sm font-body w-full py-2 focus:outline-none appearance-none cursor-pointer"
+          aria-label="Destinasi"
+        >
+          <option value="" className="text-foreground">
+            Semua Destinasi Jajapin
+          </option>
+          {cities.map((c) => (
+            <option key={c.value} value={c.value} className="text-foreground">
+              {c.label}
+            </option>
+          ))}
         </select>
       </div>
       <div className="hidden lg:block w-px h-8 bg-white/20" />
       <div className="flex items-center gap-2 px-4 flex-1">
         <Calendar className="w-4 h-4 text-white/50 shrink-0" />
-        <input type="date" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} className="bg-transparent text-white text-sm font-body w-full py-2 focus:outline-none" aria-label="Check-in" placeholder="Check-in" />
+        <input
+          type="date"
+          value={checkIn}
+          onChange={(e) => setCheckIn(e.target.value)}
+          className="bg-transparent text-white text-sm font-body w-full py-2 focus:outline-none"
+          aria-label="Check-in"
+          placeholder="Check-in"
+        />
       </div>
       <div className="hidden lg:block w-px h-8 bg-white/20" />
       <div className="flex items-center gap-2 px-4 flex-1">
         <Calendar className="w-4 h-4 text-white/50 shrink-0" />
-        <input type="date" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} className="bg-transparent text-white text-sm font-body w-full py-2 focus:outline-none" aria-label="Check-out" placeholder="Check-out" />
+        <input
+          type="date"
+          value={checkOut}
+          onChange={(e) => setCheckOut(e.target.value)}
+          className="bg-transparent text-white text-sm font-body w-full py-2 focus:outline-none"
+          aria-label="Check-out"
+          placeholder="Check-out"
+        />
       </div>
       <div className="hidden lg:block w-px h-8 bg-white/20" />
       <div className="flex items-center gap-2 px-4">
         <Users className="w-4 h-4 text-white/50 shrink-0" />
-        <select value={guests} onChange={(e) => setGuests(e.target.value)} className="bg-transparent text-white text-sm font-body py-2 focus:outline-none appearance-none cursor-pointer" aria-label="Jumlah tamu">
-          {[1,2,3,4,5,6].map(n => <option key={n} value={n} className="text-foreground">{n} tamu</option>)}
+        <select
+          value={guests}
+          onChange={(e) => setGuests(e.target.value)}
+          className="bg-transparent text-white text-sm font-body py-2 focus:outline-none appearance-none cursor-pointer"
+          aria-label="Jumlah tamu"
+        >
+          {[1, 2, 3, 4, 5, 6].map((n) => (
+            <option key={n} value={n} className="text-foreground">
+              {n} tamu
+            </option>
+          ))}
         </select>
       </div>
       <Button type="submit" variant="lime" className="rounded-full px-6 shrink-0">
