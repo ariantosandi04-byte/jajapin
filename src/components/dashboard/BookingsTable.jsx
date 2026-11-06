@@ -137,8 +137,141 @@ export default function BookingsTable({
             </div>
           </div>
 
-          {/* Table */}
-          <div className="overflow-x-auto -mx-6">
+          {/* Responsive View: Desktop Table & Mobile Card View */}
+          {/* 1. MOBILE CARD VIEW (< md screen) */}
+          <div className="block md:hidden space-y-3">
+            {filtered.length === 0 ? (
+              <div className="py-12 text-center text-muted-foreground text-xs font-body">
+                Tidak ada reservasi yang cocok dengan pencarian.
+              </div>
+            ) : (
+              filtered.map((b) => {
+                const channel = getChannelInfo(b.source);
+                const phone = (b.guest_phone || '').replace(/[^0-9]/g, '');
+                const cleanPhone = phone.startsWith('0') ? '62' + phone.slice(1) : phone;
+
+                return (
+                  <div
+                    key={b.booking_code}
+                    className="p-4 rounded-2xl bg-card border border-border shadow-sm space-y-3 font-body text-xs"
+                  >
+                    {/* Top: Guest & Badges */}
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <h4 className="font-semibold text-sm text-foreground">{b.guest_name}</h4>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <span className="font-mono text-[11px] text-primary">{b.booking_code}</span>
+                          <span
+                            className={`px-1.5 py-0.5 rounded text-[9px] border font-semibold ${channel.badgeClass}`}
+                          >
+                            {channel.name}
+                          </span>
+                        </div>
+                        {b.ota_booking_id && (
+                          <span className="text-[10px] text-sky-800 font-medium block mt-0.5">
+                            Ref: {b.ota_booking_id}
+                          </span>
+                        )}
+                      </div>
+
+                      <Badge className={STATUS_COLORS[b.status] || 'bg-muted'}>
+                        {STATUS_LABELS[b.status] || b.status}
+                      </Badge>
+                    </div>
+
+                    {/* Middle: Room & Schedule */}
+                    <div className="bg-muted/40 p-3 rounded-xl space-y-1 text-muted-foreground">
+                      <div className="text-foreground font-medium">
+                        {b.property_name} • {b.room_type || 'Deluxe Room'}{' '}
+                        {b.room_number ? `(${b.room_number})` : ''}
+                      </div>
+                      <div className="flex justify-between text-[11px]">
+                        <span>
+                          {formatDate(b.check_in)} — {formatDate(b.check_out)}
+                        </span>
+                        <span className="font-semibold text-foreground">{b.nights || 1} Malam</span>
+                      </div>
+                    </div>
+
+                    {/* Financials & Status */}
+                    <div className="flex items-center justify-between pt-1">
+                      <div>
+                        <span className="text-[10px] text-muted-foreground block">Total Tagihan:</span>
+                        <span className="font-display font-bold text-base text-foreground">
+                          {formatIDR(b.total_price)}
+                        </span>
+                      </div>
+                      <span
+                        className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider ${
+                          PAYMENT_STATUS_COLORS[b.payment_status] || 'bg-muted'
+                        }`}
+                      >
+                        {PAYMENT_STATUS_LABELS[b.payment_status] || b.payment_status}
+                      </span>
+                    </div>
+
+                    {/* Mobile Quick Action Buttons (Touch Friendly) */}
+                    <div className="pt-2 border-t border-border flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setSelectedInvoice(b)}
+                          className="h-9 px-3 text-xs gap-1"
+                        >
+                          <FileText className="w-3.5 h-3.5" />
+                          <span>Invoice</span>
+                        </Button>
+
+                        {cleanPhone && (
+                          <a
+                            href={`https://wa.me/${cleanPhone}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center justify-center h-9 px-2.5 rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 transition-colors text-xs font-medium"
+                          >
+                            <Phone className="w-3.5 h-3.5" />
+                          </a>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-1.5">
+                        {b.status === 'menunggu' && (
+                          <Button
+                            size="sm"
+                            onClick={() => onUpdateStatus(b.booking_code, 'dikonfirmasi')}
+                            className="h-9 text-xs"
+                          >
+                            Konfirmasi
+                          </Button>
+                        )}
+                        {b.status === 'dikonfirmasi' && (
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => onUpdateStatus(b.booking_code, 'selesai')}
+                            className="h-9 text-xs"
+                          >
+                            Check-Out
+                          </Button>
+                        )}
+                        <button
+                          onClick={() => onDeleteBooking(b.booking_code)}
+                          className="p-2 rounded-xl text-red-500 hover:bg-red-50"
+                          title="Hapus"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          {/* 2. DESKTOP TABLE VIEW (>= md screen) */}
+          <div className="hidden md:block overflow-x-auto -mx-6">
             <table className="w-full text-left text-xs font-body">
               <thead className="bg-muted/40 text-[10px] uppercase tracking-wider text-muted-foreground border-y border-border">
                 <tr>

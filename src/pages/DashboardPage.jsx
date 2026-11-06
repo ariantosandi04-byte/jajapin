@@ -506,7 +506,7 @@ export default function DashboardPage() {
         </header>
 
         {/* Dashboard Body Content */}
-        <main className="p-4 sm:p-8 space-y-8 flex-1 overflow-y-auto">
+        <main className="p-3 sm:p-8 space-y-6 sm:space-y-8 flex-1 overflow-y-auto pb-28 lg:pb-8">
           {/* Page Subheader */}
           <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 border-b border-border/80 pb-4">
             <div>
@@ -1105,6 +1105,70 @@ export default function DashboardPage() {
             />
           )}
         </main>
+
+        {/* Mobile Bottom Navigation Bar (App-like UX for smartphone screens) */}
+        <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-border shadow-[0_-8px_20px_rgba(0,0,0,0.06)] px-2 py-2 flex items-center justify-around">
+          <button
+            onClick={() => setActiveTab('dasbor')}
+            className={`flex flex-col items-center gap-1 text-[10px] font-body transition-colors ${
+              activeTab === 'dasbor' ? 'text-primary font-bold' : 'text-muted-foreground'
+            }`}
+          >
+            <LayoutDashboard className="w-5 h-5" />
+            <span>Dasbor</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('tape-chart')}
+            className={`flex flex-col items-center gap-1 text-[10px] font-body transition-colors ${
+              activeTab === 'tape-chart' ? 'text-primary font-bold' : 'text-muted-foreground'
+            }`}
+          >
+            <CalendarDays className="w-5 h-5" />
+            <span>Kalender</span>
+          </button>
+
+          {/* Mobile Central FAB - Quick Reservation Button */}
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="flex flex-col items-center -mt-6 group"
+            title="Tambah Reservasi Cepat"
+          >
+            <div className="w-12 h-12 rounded-full bg-brand-forest text-brand-lime flex items-center justify-center shadow-lg shadow-brand-forest/30 border-2 border-white transition-transform active:scale-95">
+              <Plus className="w-6 h-6" />
+            </div>
+            <span className="text-[10px] font-bold text-foreground mt-0.5">+ Booking</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('reservasi')}
+            className={`flex flex-col items-center gap-1 text-[10px] font-body transition-colors ${
+              activeTab === 'reservasi' ? 'text-primary font-bold' : 'text-muted-foreground'
+            }`}
+          >
+            <BookOpen className="w-5 h-5" />
+            <span>Reservasi</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('invoice')}
+            className={`flex flex-col items-center gap-1 text-[10px] font-body transition-colors ${
+              activeTab === 'invoice' ? 'text-primary font-bold' : 'text-muted-foreground'
+            }`}
+          >
+            <Receipt className="w-5 h-5" />
+            <span>Invoice</span>
+          </button>
+
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="flex flex-col items-center gap-1 text-[10px] font-body text-muted-foreground"
+            title="Buka Menu Lainnya"
+          >
+            <Menu className="w-5 h-5" />
+            <span>Menu</span>
+          </button>
+        </nav>
       </div>
 
       {/* New Reservation Modal */}
