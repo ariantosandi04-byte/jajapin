@@ -42,9 +42,11 @@ import BookingsTable from '../components/dashboard/BookingsTable';
 import PmsPanel from '../components/dashboard/PmsPanel';
 import ReservationModal from '../components/dashboard/ReservationModal';
 import InvoiceModal from '../components/dashboard/InvoiceModal';
+import OwnerPayoutPanel from '../components/dashboard/OwnerPayoutPanel';
 import RoomManagement from '../components/dashboard/RoomManagement';
 import HousekeepingGrid from '../components/dashboard/HousekeepingGrid';
 import PropertyManagement from '../components/dashboard/PropertyManagement';
+import { ACTUAL_BOOKINGS_DATA } from '../data/actualBookings';
 import { Card, CardContent } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
@@ -115,9 +117,21 @@ export default function DashboardPage() {
     return properties.find((p) => p.id === selectedPropertyId) || properties[0];
   }, [properties, selectedPropertyId]);
 
-  // Bookings state (stored in localStorage)
+  // Bookings state (stored in localStorage, synced with actual 2-8 Nov transactions)
   const [bookings, setBookings] = useState(() => {
-    return JSON.parse(localStorage.getItem('jajapin_bookings') || '[]');
+    const saved = JSON.parse(localStorage.getItem('jajapin_bookings') || '[]');
+    const existingCodes = new Set(saved.map((b) => b.booking_code));
+    const missing = ACTUAL_BOOKINGS_DATA.filter((b) => !existingCodes.has(b.booking_code));
+    if (missing.length > 0) {
+      const merged = [...missing, ...saved];
+      try {
+        localStorage.setItem('jajapin_bookings', JSON.stringify(merged));
+      } catch (e) {
+        // storage quota fallback
+      }
+      return merged;
+    }
+    return saved.length > 0 ? saved : ACTUAL_BOOKINGS_DATA;
   });
 
   // Seed default sample bookings if empty
@@ -342,7 +356,7 @@ export default function DashboardPage() {
       heading: 'KEUANGAN',
       items: [
         { id: 'invoice', label: 'Invoice', icon: Receipt },
-        { id: 'laporan', label: 'Laporan Pemilik', icon: FileSpreadsheet },
+        { id: 'laporan', label: 'Rekap & Payout Owner', icon: FileSpreadsheet },
       ],
     },
     {
@@ -1052,33 +1066,12 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* TAB 8: LAPORAN PEMILIK */}
+          {/* TAB 8: REKAPITULASI & PAYOUT OWNER */}
           {activeTab === 'laporan' && (
-            <Card className="border-border bg-card">
-              <CardContent className="p-6">
-                <h3 className="font-display font-semibold text-lg text-foreground mb-1">
-                  Laporan Keuangan Pemilik Properti
-                </h3>
-                <p className="text-xs text-muted-foreground font-body mb-6">
-                  Rincian pembayaran, bagi hasil, dan komisi sistem reservasi Jajapin.
-                </p>
-
-                <div className="p-5 rounded-2xl bg-muted/40 border border-border space-y-3">
-                  <div className="flex justify-between text-sm font-body">
-                    <span className="text-muted-foreground">Pendapatan Kotor Bulan Ini</span>
-                    <span className="font-semibold">{formatIDR(stats.monthlyRevenue)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm font-body">
-                    <span className="text-muted-foreground">Biaya Komisi Platform Jajapin (0% Promo)</span>
-                    <span className="font-semibold text-primary">Rp0</span>
-                  </div>
-                  <div className="border-t border-border pt-3 flex justify-between font-display font-semibold text-lg">
-                    <span>Pendapatan Bersih (Net Payout)</span>
-                    <span className="text-primary">{formatIDR(stats.monthlyRevenue)}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <OwnerPayoutPanel
+              bookings={bookings}
+              propertyName={activeProperty?.name || 'Jajapin Hotel Putri Sari'}
+            />
           )}
 
           {/* TAB 9: PROPERTI CRUD */}
