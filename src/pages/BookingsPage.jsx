@@ -1,8 +1,9 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, MapPin, Users as UsersIcon, ArrowRight, Ban } from 'lucide-react';
+import { Calendar, MapPin, Users as UsersIcon, ArrowRight, Ban, FileText } from 'lucide-react';
 import SiteHeader from '../components/site/SiteHeader';
 import SiteFooter from '../components/site/SiteFooter';
+import InvoiceModal from '../components/dashboard/InvoiceModal';
 import { Card, CardContent } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
@@ -14,6 +15,7 @@ export default function BookingsPage() {
   const { user } = useAuth();
   const [filter, setFilter] = useState('semua');
   const [refreshKey, setRefreshKey] = useState(0);
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
 
   const bookings = useMemo(() => {
     return getBookings(user?.email);
@@ -137,9 +139,17 @@ export default function BookingsPage() {
                                 <Ban className="w-3.5 h-3.5" /> Batalkan
                               </button>
                             )}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setSelectedInvoice(b)}
+                              className="text-xs"
+                            >
+                              <FileText className="w-3.5 h-3.5 mr-1" /> Invoice
+                            </Button>
                             <Link to={`/konfirmasi/${b.booking_code}`}>
                               <Button size="sm" variant="outline">
-                                Detail Tiket <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                                Detail <ArrowRight className="w-3.5 h-3.5 ml-1" />
                               </Button>
                             </Link>
                           </div>
@@ -153,6 +163,11 @@ export default function BookingsPage() {
           )}
         </div>
       </div>
+      <InvoiceModal
+        isOpen={!!selectedInvoice}
+        onClose={() => setSelectedInvoice(null)}
+        booking={selectedInvoice}
+      />
       <SiteFooter />
     </div>
   );

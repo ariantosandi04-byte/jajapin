@@ -1,8 +1,9 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { CheckCircle2, Calendar, MapPin, Users, Phone, Mail, Clock, Download, Home, ListOrdered } from 'lucide-react';
+import { CheckCircle2, Calendar, MapPin, Users, Phone, Mail, Clock, Download, Home, ListOrdered, FileText } from 'lucide-react';
 import SiteHeader from '../components/site/SiteHeader';
 import SiteFooter from '../components/site/SiteFooter';
+import InvoiceModal from '../components/dashboard/InvoiceModal';
 import { Card, CardContent } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
@@ -11,6 +12,7 @@ import { formatIDR, formatDateLong } from '../lib/format';
 
 export default function ConfirmationPage() {
   const { id } = useParams();
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const booking = useMemo(() => getBookingByCode(id), [id]);
 
   if (!booking) {
@@ -164,21 +166,30 @@ export default function ConfirmationPage() {
           </Card>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button variant="default" onClick={() => setShowInvoiceModal(true)}>
+              <FileText className="w-4 h-4 mr-2" /> Lihat Invoice Resmi
+            </Button>
             <Button variant="outline" onClick={handlePrint}>
               <Download className="w-4 h-4 mr-2" /> Cetak / Unduh Bukti
             </Button>
             <Link to="/bookings">
               <Button variant="secondary">
-                <ListOrdered className="w-4 h-4 mr-2" /> Lihat Booking Saya
+                <ListOrdered className="w-4 h-4 mr-2" /> Booking Saya
               </Button>
             </Link>
             <Link to="/">
-              <Button variant="default">
-                <Home className="w-4 h-4 mr-2" /> Kembali ke Beranda
+              <Button variant="outline">
+                <Home className="w-4 h-4 mr-2" /> Beranda
               </Button>
             </Link>
           </div>
+
+          <InvoiceModal
+            isOpen={showInvoiceModal}
+            onClose={() => setShowInvoiceModal(false)}
+            booking={booking}
+          />
         </div>
       </div>
       <SiteFooter />

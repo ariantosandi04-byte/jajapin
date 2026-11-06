@@ -26,7 +26,13 @@ import { useAuth } from '../contexts/AuthContext';
 import { stays as initialStays } from '../data/stays';
 import { siteMedia } from '../data/siteMedia';
 import { formatIDR, formatDate } from '../lib/format';
-import { getBookings, saveBooking } from '../lib/bookingStatus';
+import {
+  getBookings,
+  saveBooking,
+  getChannelInfo,
+  PAYMENT_STATUS_LABELS,
+  PAYMENT_STATUS_COLORS,
+} from '../lib/bookingStatus';
 
 // Sub-components
 import StatCards from '../components/dashboard/StatCards';
@@ -35,6 +41,7 @@ import ArrivalsList from '../components/dashboard/ArrivalsList';
 import BookingsTable from '../components/dashboard/BookingsTable';
 import PmsPanel from '../components/dashboard/PmsPanel';
 import ReservationModal from '../components/dashboard/ReservationModal';
+import InvoiceModal from '../components/dashboard/InvoiceModal';
 import RoomManagement from '../components/dashboard/RoomManagement';
 import HousekeepingGrid from '../components/dashboard/HousekeepingGrid';
 import PropertyManagement from '../components/dashboard/PropertyManagement';
@@ -78,6 +85,8 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState('dasbor');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [invoiceFilter, setInvoiceFilter] = useState('semua');
 
   // Properties state (supports CRUD)
   const [properties, setProperties] = useState(() => {
@@ -117,50 +126,136 @@ export default function DashboardPage() {
       const sample = [
         {
           booking_code: 'JP-928410',
+          invoice_number: 'INV/202611/JP-928410',
           property_id: 6,
           property_name: 'Jajapin Hotel Putri Sari',
           property_image: '/assets/putri-sari/cover.jpg',
           property_city: 'Pelabuhan Ratu',
           guest_name: 'Budi Santoso',
+          guest_id_number: '3202102901920001',
           guest_email: 'budi@gmail.com',
           guest_phone: '081234567890',
           check_in: '2026-11-04',
           check_out: '2026-11-06',
           guests: 2,
           nights: 2,
+          room_type: 'Deluxe Ocean View',
+          room_number: '101',
           price_per_night: 350000,
+          subtotal_room: 700000,
+          extra_fee: 0,
+          discount: 0,
           total_price: 700000,
+          amount_paid: 700000,
+          balance_due: 0,
           status: 'dikonfirmasi',
           payment_status: 'dibayar',
-          payment_method: 'qris',
+          payment_method: 'Tunai / Kasir Resepsionis',
           midtrans_order_id: 'MID-1730700000',
           paid_at: '2026-11-04T10:00:00Z',
-          notes: 'Minta kamar lantai 1',
-          source: 'jajapin',
+          notes: 'Minta kamar lantai 1 menghadap taman',
+          source: 'direct_walkin',
+          source_name: 'Direct / Walk-In',
           created_at: '2026-11-04T09:00:00Z',
         },
         {
+          booking_code: 'JP-301984',
+          invoice_number: 'INV/202611/JP-301984',
+          property_id: 6,
+          property_name: 'Jajapin Hotel Putri Sari',
+          property_image: '/assets/putri-sari/cover.jpg',
+          property_city: 'Pelabuhan Ratu',
+          guest_name: 'Hendra Gunawan',
+          guest_id_number: '3202111004880003',
+          guest_email: 'hendra.g@gmail.com',
+          guest_phone: '085711223344',
+          check_in: '2026-11-06',
+          check_out: '2026-11-08',
+          guests: 2,
+          nights: 2,
+          room_type: 'Standard Double',
+          room_number: '105',
+          price_per_night: 350000,
+          subtotal_room: 700000,
+          extra_fee: 50000,
+          discount: 50000,
+          total_price: 700000,
+          amount_paid: 350000,
+          balance_due: 350000,
+          status: 'dikonfirmasi',
+          payment_status: 'dp',
+          payment_method: 'Transfer BCA (DP 50%)',
+          notes: 'Tamu booking via WhatsApp, sisa Rp350.000 bayar saat check-in',
+          source: 'direct_whatsapp',
+          source_name: 'WhatsApp / Chat',
+          created_at: '2026-11-05T14:15:00Z',
+        },
+        {
+          booking_code: 'JP-774102',
+          invoice_number: 'INV/202611/JP-774102',
+          property_id: 6,
+          property_name: 'Jajapin Hotel Putri Sari',
+          property_image: '/assets/putri-sari/cover.jpg',
+          property_city: 'Pelabuhan Ratu',
+          guest_name: 'Sarah Wijaya',
+          guest_id_number: '3171092801940002',
+          guest_email: 'sarah.wijaya@yahoo.com',
+          guest_phone: '081388997700',
+          check_in: '2026-11-07',
+          check_out: '2026-11-09',
+          guests: 2,
+          nights: 2,
+          room_type: 'Deluxe Ocean View',
+          room_number: '201',
+          price_per_night: 350000,
+          subtotal_room: 700000,
+          extra_fee: 0,
+          discount: 0,
+          total_price: 700000,
+          amount_paid: 700000,
+          balance_due: 0,
+          status: 'dikonfirmasi',
+          payment_status: 'dibayar',
+          payment_method: 'OTA Virtual Card',
+          notes: 'Reservasi otomatis tersinkron dari Traveloka',
+          source: 'ota_traveloka',
+          source_name: 'Traveloka',
+          ota_booking_id: 'TVLK-8849102',
+          created_at: '2026-11-05T18:30:00Z',
+        },
+        {
           booking_code: 'JP-184920',
+          invoice_number: 'INV/202611/JP-184920',
           property_id: 1,
           property_name: 'Bukit Senja Lodge',
           property_image: '/assets/destinasi-labuan-bajo.png',
           property_city: 'Labuan Bajo',
           guest_name: 'Dewi Lestari',
+          guest_id_number: '3172085903910005',
           guest_email: 'dewi@gmail.com',
           guest_phone: '081987654321',
           check_in: '2026-11-05',
           check_out: '2026-11-08',
           guests: 4,
           nights: 3,
+          room_type: 'Suite Villa Sunset',
+          room_number: 'Villa 02',
           price_per_night: 2150000,
+          subtotal_room: 6450000,
+          extra_fee: 0,
+          discount: 0,
           total_price: 6450000,
+          amount_paid: 6450000,
+          balance_due: 0,
           status: 'dikonfirmasi',
           payment_status: 'dibayar',
-          payment_method: 'bca_va',
+          payment_method: 'Tiket.com Pay',
           midtrans_order_id: 'MID-1730701111',
           paid_at: '2026-11-03T14:00:00Z',
-          notes: 'Antar jemput bandara',
-          source: 'jajapin',
+          notes: 'Antar jemput bandara Komodo Labuan Bajo',
+          source: 'ota_tiket',
+          source_name: 'Tiket.com',
+          ota_booking_id: 'TKT-991204',
           created_at: '2026-11-03T13:30:00Z',
         },
       ];
@@ -729,12 +824,240 @@ export default function DashboardPage() {
           {/* TAB 6: HOUSEKEEPING */}
           {activeTab === 'housekeeping' && <HousekeepingGrid />}
 
-          {/* TAB 7 & 8: KEUANGAN (Invoice & Laporan) */}
-          {(activeTab === 'invoice' || activeTab === 'laporan') && (
+          {/* TAB 7: INVOICE MANAGEMENT CENTER */}
+          {activeTab === 'invoice' && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <h3 className="font-display font-semibold text-xl text-foreground">
+                    Pusat Faktur & Invoice Reservasi
+                  </h3>
+                  <p className="text-xs text-muted-foreground font-body">
+                    Kelola dan cetak faktur resmi untuk tamu dari Direct Booking, Walk-in, WhatsApp, maupun OTA
+                  </p>
+                </div>
+                <Button size="sm" onClick={() => setIsModalOpen(true)} className="gap-1.5">
+                  <Plus className="w-4 h-4" /> Buat Reservasi & Invoice Baru
+                </Button>
+              </div>
+
+              {/* Invoice Metric Cards */}
+              {(() => {
+                const totalInvoiced = currentPropertyBookings.reduce(
+                  (acc, b) => acc + (b.total_price || 0),
+                  0
+                );
+                const totalPaid = currentPropertyBookings.reduce((acc, b) => {
+                  if (b.payment_status === 'dibayar') return acc + (b.total_price || 0);
+                  if (b.payment_status === 'dp') return acc + (b.amount_paid || Math.round((b.total_price || 0) * 0.5));
+                  return acc;
+                }, 0);
+                const totalReceivable = Math.max(0, totalInvoiced - totalPaid);
+
+                return (
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                    <Card className="border-border bg-card">
+                      <CardContent className="p-4">
+                        <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-body font-bold block">
+                          Total Nilai Invoice
+                        </span>
+                        <span className="font-display font-bold text-xl text-foreground block mt-1">
+                          {formatIDR(totalInvoiced)}
+                        </span>
+                        <span className="text-[11px] text-muted-foreground font-body">
+                          {currentPropertyBookings.length} Lembar Invoice
+                        </span>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-border bg-card">
+                      <CardContent className="p-4">
+                        <span className="text-[10px] uppercase tracking-wider text-emerald-700 font-body font-bold block">
+                          Pembayaran Diterima (Lunas)
+                        </span>
+                        <span className="font-display font-bold text-xl text-emerald-800 block mt-1">
+                          {formatIDR(totalPaid)}
+                        </span>
+                        <span className="text-[11px] text-muted-foreground font-body">
+                          Kasir, transfer, & OTA
+                        </span>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-border bg-card">
+                      <CardContent className="p-4">
+                        <span className="text-[10px] uppercase tracking-wider text-amber-700 font-body font-bold block">
+                          Sisa Piutang / Pelunasan
+                        </span>
+                        <span className="font-display font-bold text-xl text-amber-800 block mt-1">
+                          {formatIDR(totalReceivable)}
+                        </span>
+                        <span className="text-[11px] text-muted-foreground font-body">
+                          Dilunasi saat tamu check-in
+                        </span>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-border bg-card">
+                      <CardContent className="p-4">
+                        <span className="text-[10px] uppercase tracking-wider text-primary font-body font-bold block">
+                          Status Pembayaran
+                        </span>
+                        <span className="font-display font-bold text-xl text-primary block mt-1">
+                          {Math.round((totalPaid / (totalInvoiced || 1)) * 100)}%
+                        </span>
+                        <span className="text-[11px] text-muted-foreground font-body">
+                          Rasio Pelunasan Kasir
+                        </span>
+                      </CardContent>
+                    </Card>
+                  </div>
+                );
+              })()}
+
+              {/* Invoice List Card */}
+              <Card className="border-border bg-card">
+                <CardContent className="p-6">
+                  {/* Filter Pills */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+                    <div className="flex gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+                      {[
+                        { id: 'semua', label: 'Semua Invoice' },
+                        { id: 'dibayar', label: 'Lunas' },
+                        { id: 'dp', label: 'Uang Muka (DP)' },
+                        { id: 'belum_bayar', label: 'Belum Bayar' },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setInvoiceFilter(item.id)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-body font-medium transition-colors ${
+                            invoiceFilter === item.id
+                              ? 'bg-primary text-primary-foreground font-semibold'
+                              : 'bg-muted/60 text-muted-foreground hover:bg-muted'
+                          }`}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Invoice Table */}
+                  <div className="overflow-x-auto -mx-6">
+                    <table className="w-full text-left text-xs font-body">
+                      <thead className="bg-muted/40 text-[10px] uppercase tracking-wider text-muted-foreground border-y border-border">
+                        <tr>
+                          <th className="py-3 px-6">No. Invoice & Tanggal</th>
+                          <th className="py-3 px-4">Tamu Pemesan</th>
+                          <th className="py-3 px-4">Saluran / Channel</th>
+                          <th className="py-3 px-4">Kamar & Durasi</th>
+                          <th className="py-3 px-4">Total & Status Bayar</th>
+                          <th className="py-3 px-6 text-right">Aksi</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border/60">
+                        {currentPropertyBookings
+                          .filter((b) => invoiceFilter === 'semua' || b.payment_status === invoiceFilter)
+                          .map((b) => {
+                            const channel = getChannelInfo(b.source);
+                            const invoiceNum =
+                              b.invoice_number ||
+                              `INV/${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}/${b.booking_code}`;
+
+                            const amountPaid =
+                              b.payment_status === 'dibayar'
+                                ? b.total_price
+                                : b.amount_paid !== undefined
+                                ? b.amount_paid
+                                : b.payment_status === 'dp'
+                                ? Math.round((b.total_price || 0) * 0.5)
+                                : 0;
+                            const balanceDue = Math.max(0, (b.total_price || 0) - amountPaid);
+
+                            return (
+                              <tr key={b.booking_code} className="hover:bg-muted/20 transition-colors">
+                                <td className="py-3.5 px-6">
+                                  <div className="font-mono font-bold text-foreground text-xs">
+                                    {invoiceNum}
+                                  </div>
+                                  <div className="text-[11px] text-muted-foreground">
+                                    {formatDate(b.created_at || b.check_in)}
+                                  </div>
+                                </td>
+                                <td className="py-3.5 px-4">
+                                  <div className="font-semibold text-foreground text-sm">
+                                    {b.guest_name}
+                                  </div>
+                                  <div className="text-[11px] text-muted-foreground">
+                                    {b.guest_phone || b.guest_email}
+                                  </div>
+                                </td>
+                                <td className="py-3.5 px-4">
+                                  <span
+                                    className={`px-2 py-0.5 rounded-md border text-[10px] inline-block ${channel.badgeClass}`}
+                                  >
+                                    {channel.name}
+                                  </span>
+                                  {b.ota_booking_id && (
+                                    <div className="text-[10px] text-sky-800 font-medium mt-0.5">
+                                      Ref: {b.ota_booking_id}
+                                    </div>
+                                  )}
+                                </td>
+                                <td className="py-3.5 px-4">
+                                  <div className="text-foreground font-medium">
+                                    {b.room_type || 'Deluxe Room'}{' '}
+                                    {b.room_number ? `(${b.room_number})` : ''}
+                                  </div>
+                                  <div className="text-[11px] text-muted-foreground">
+                                    {b.nights || 1} Malam ({formatDate(b.check_in)} - {formatDate(b.check_out)})
+                                  </div>
+                                </td>
+                                <td className="py-3.5 px-4">
+                                  <div className="font-bold text-foreground text-sm">
+                                    {formatIDR(b.total_price)}
+                                  </div>
+                                  <div className="flex items-center gap-1.5 mt-0.5">
+                                    <span
+                                      className={`px-1.5 py-0.5 rounded text-[9px] uppercase font-bold tracking-wider ${
+                                        PAYMENT_STATUS_COLORS[b.payment_status] || 'bg-muted'
+                                      }`}
+                                    >
+                                      {PAYMENT_STATUS_LABELS[b.payment_status] || b.payment_status}
+                                    </span>
+                                  </div>
+                                  {balanceDue > 0 && (
+                                    <div className="text-[10px] text-amber-700 font-medium mt-0.5">
+                                      Sisa: {formatIDR(balanceDue)}
+                                    </div>
+                                  )}
+                                </td>
+                                <td className="py-3.5 px-6 text-right">
+                                  <Button
+                                    size="sm"
+                                    onClick={() => setSelectedInvoice(b)}
+                                    className="gap-1.5 text-xs"
+                                  >
+                                    <Receipt className="w-3.5 h-3.5" /> Buka Invoice
+                                  </Button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* TAB 8: LAPORAN PEMILIK */}
+          {activeTab === 'laporan' && (
             <Card className="border-border bg-card">
               <CardContent className="p-6">
                 <h3 className="font-display font-semibold text-lg text-foreground mb-1">
-                  {activeTab === 'invoice' ? 'Rekapitulasi Faktur & Invoice' : 'Laporan Keuangan Pemilik'}
+                  Laporan Keuangan Pemilik Properti
                 </h3>
                 <p className="text-xs text-muted-foreground font-body mb-6">
                   Rincian pembayaran, bagi hasil, dan komisi sistem reservasi Jajapin.
@@ -790,6 +1113,13 @@ export default function DashboardPage() {
         onClose={() => setIsModalOpen(false)}
         properties={userProperties}
         onSave={handleCreateReservation}
+      />
+
+      {/* Invoice Viewer & Printable Modal */}
+      <InvoiceModal
+        isOpen={!!selectedInvoice}
+        onClose={() => setSelectedInvoice(null)}
+        booking={selectedInvoice}
       />
     </div>
   );
