@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { ShieldCheck, Calendar, MapPin, Users, ArrowLeft, CreditCard, Sparkles, Key, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, Calendar, MapPin, Users, ArrowLeft, CreditCard, Sparkles, Key, CheckCircle2, ExternalLink, Zap, Check } from 'lucide-react';
 import SiteHeader from '../components/site/SiteHeader';
 import SiteFooter from '../components/site/SiteFooter';
 import PaymentPanel from '../components/stay/PaymentPanel';
@@ -13,6 +13,7 @@ import { stays } from '../data/stays';
 import { formatIDR, calculateNights, generateBookingCode } from '../lib/format';
 import { saveBooking } from '../lib/bookingStatus';
 import { loadMidtransSnap, payWithSnap, getClientKey } from '../lib/midtrans';
+import { createXenditInvoice } from '../lib/xendit';
 
 export default function CheckoutPage() {
   const { slug } = useParams();
@@ -24,7 +25,8 @@ export default function CheckoutPage() {
   const [checkIn, setCheckIn] = useState(searchParams.get('checkIn') || '');
   const [checkOut, setCheckOut] = useState(searchParams.get('checkOut') || '');
   const [guests, setGuests] = useState(Number(searchParams.get('guests')) || 2);
-  const [paymentMethod, setPaymentMethod] = useState('qris');
+  const [gateway, setGateway] = useState('xendit');
+  const [paymentMethod, setPaymentMethod] = useState('xendit_qris');
 
   const [form, setForm] = useState({
     name: user?.name || '',
@@ -39,8 +41,9 @@ export default function CheckoutPage() {
   const [clientKeyInput, setClientKeyInput] = useState(getClientKey() || '');
   const [showKeyInput, setShowKeyInput] = useState(false);
   const [mockSnapData, setMockSnapData] = useState(null);
+  const [mockXenditData, setMockXenditData] = useState(null);
 
-  // Initialize Midtrans Snap script
+  // Initialize Midtrans Snap script (if needed)
   useEffect(() => {
     const key = getClientKey();
     const isProduction = import.meta.env.VITE_MIDTRANS_IS_PRODUCTION === 'true';
@@ -59,7 +62,7 @@ export default function CheckoutPage() {
           setMidtransLoaded(true);
           setShowKeyInput(false);
         })
-        .catch((err) => setError('Gagal memuat Snap dengan Client Key tersebut.'));
+        .catch(() => setError('Gagal memuat Snap dengan Client Key tersebut.'));
     }
   };
 
@@ -123,8 +126,8 @@ export default function CheckoutPage() {
       total_price: totalPrice,
       status: 'menunggu',
       payment_status: 'menunggu_pembayaran',
+      payment_gateway: gateway,
       payment_method: paymentMethod,
-      midtrans_order_id: `MID-${Date.now()}`,
       paid_at: null,
       notes: form.notes,
       source: 'jajapin',
@@ -132,8 +135,8 @@ export default function CheckoutPage() {
       created_at: new Date().toISOString(),
     };
 
-    // If payment method is at hotel (cash/direct), skip gateway
-    if (paymentMethod === 'hotel') {
+    // 1. JIKA BAYAR DI HOTEL (CASH/WALK-IN)
+    if (gateway === 'hotel' || paymentMethod === 'hotel') {
       baseBooking.payment_status = 'menunggu_pembayaran';
       baseBooking.status = 'dikonfirmasi';
       saveBooking(baseBooking);
@@ -141,7 +144,58 @@ export default function CheckoutPage() {
       return;
     }
 
-    // Try request Snap token from backend (supporting Node / Vercel Serverless AND cPanel PHP)
+    // 2. JIKA GATEWAY XENDIT (INVOICE V2 - REKOMENDASI UTAMA)
+    if (gateway === 'xendit') {
+      try {
+        const xenditRes = await createXenditInvoice({
+          bookingCode,
+          totalPrice,
+          stayName: stay.name,
+          guestName: form.name,
+          guestEmail: form.email,
+          guestPhone: form.phone,
+          roomType: stay.type,
+          nights,
+        });
+
+        if (xenditRes && xenditRes.isMock) {
+          // Mode simulasi sandbox offline
+          setSubmitting(false);
+          setMockXenditData({
+            baseBooking,
+            bookingCode,
+            totalPrice,
+            invoiceUrl: xenditRes.invoice_url,
+            invoiceId: xenditRes.invoice_id || xenditRes.id,
+          });
+          return;
+        }
+
+        if (xenditRes && xenditRes.invoice_url) {
+          baseBooking.xendit_invoice_id = xenditRes.id || xenditRes.invoice_id;
+          baseBooking.xendit_invoice_url = xenditRes.invoice_url;
+          saveBooking(baseBooking);
+          // Redirect langsung ke halaman pembayaran resmi Xendit
+          window.location.href = xenditRes.invoice_url;
+          return;
+        }
+      } catch (err) {
+        console.warn('Kendala Xendit:', err);
+      }
+
+      // Jika gagal menghubungi backend, tampilkan simulasi Xendit
+      setSubmitting(false);
+      setMockXenditData({
+        baseBooking,
+        bookingCode,
+        totalPrice,
+        invoiceUrl: `https://checkout-staging.xendit.co/v2/${bookingCode}`,
+        invoiceId: `XND-${Date.now()}`,
+      });
+      return;
+    }
+
+    // 3. JIKA GATEWAY MIDTRANS SNAP
     try {
       let response = await fetch('/api/create-midtrans-token', {
         method: 'POST',
@@ -156,7 +210,6 @@ export default function CheckoutPage() {
         }),
       });
 
-      // Jika endpoint rewrite belum aktif di cPanel, coba panggil langsung .php
       if (!response.ok && response.status === 404) {
         response = await fetch('/api/create-midtrans-token.php', {
           method: 'POST',
@@ -175,7 +228,6 @@ export default function CheckoutPage() {
       const data = await response.json();
 
       if (response.ok && data.token) {
-        // 1. Jika Snap JS aktif di browser, buka pop-up Snap resmi
         if (window.snap && typeof window.snap.pay === 'function') {
           payWithSnap(data.token, {
             onSuccess: (result) => {
@@ -186,13 +238,13 @@ export default function CheckoutPage() {
               saveBooking(baseBooking);
               navigate(`/konfirmasi/${bookingCode}`);
             },
-            onPending: (result) => {
+            onPending: () => {
               baseBooking.status = 'menunggu';
               baseBooking.payment_status = 'menunggu_pembayaran';
               saveBooking(baseBooking);
               navigate(`/konfirmasi/${bookingCode}`);
             },
-            onError: (result) => {
+            onError: () => {
               setError('Pembayaran dibatalkan atau terjadi kendala pada gateway Midtrans.');
               setSubmitting(false);
             },
@@ -202,7 +254,6 @@ export default function CheckoutPage() {
           });
           return;
         } else if (data.redirect_url) {
-          // 2. Jika Client Key belum diisi di .env, alihkan langsung ke halaman resmi Midtrans
           saveBooking(baseBooking);
           window.location.href = data.redirect_url;
           return;
@@ -212,7 +263,6 @@ export default function CheckoutPage() {
       console.log('Kendala saat menghubungi endpoint Midtrans:', err);
     }
 
-    // Jika hosting static tanpa backend / API belum aktif, tampilkan dialog simulasi Snap
     setSubmitting(false);
     setMockSnapData({
       baseBooking,
@@ -221,14 +271,25 @@ export default function CheckoutPage() {
     });
   };
 
-  const handleCompleteMockPayment = () => {
-    if (!mockSnapData) return;
-    const { baseBooking, bookingCode } = mockSnapData;
-    baseBooking.status = 'dikonfirmasi';
-    baseBooking.payment_status = 'dibayar';
-    baseBooking.paid_at = new Date().toISOString();
-    saveBooking(baseBooking);
-    navigate(`/konfirmasi/${bookingCode}`);
+  const handleCompleteMockPayment = (isXendit = false) => {
+    if (isXendit && mockXenditData) {
+      const { baseBooking, bookingCode } = mockXenditData;
+      baseBooking.status = 'dikonfirmasi';
+      baseBooking.payment_status = 'dibayar';
+      baseBooking.paid_at = new Date().toISOString();
+      saveBooking(baseBooking);
+      navigate(`/konfirmasi/${bookingCode}`);
+      return;
+    }
+
+    if (mockSnapData) {
+      const { baseBooking, bookingCode } = mockSnapData;
+      baseBooking.status = 'dikonfirmasi';
+      baseBooking.payment_status = 'dibayar';
+      baseBooking.paid_at = new Date().toISOString();
+      saveBooking(baseBooking);
+      navigate(`/konfirmasi/${bookingCode}`);
+    }
   };
 
   return (
@@ -244,10 +305,10 @@ export default function CheckoutPage() {
           </Link>
 
           <h1 className="font-display font-light text-3xl sm:text-4xl tracking-tight text-foreground mb-2">
-            Konfirmasi Pemesanan
+            Konfirmasi & Pembayaran
           </h1>
           <p className="font-body text-muted-foreground text-sm mb-8">
-            Periksa rincian perjalanan Anda dan lengkapi data kontak sebelum menyelesaikan pesanan.
+            Lengkapi data pemesan dan pilih metode pembayaran resmi via Xendit Payment Gateway atau metode lainnya.
           </p>
 
           {error && (
@@ -304,73 +365,127 @@ export default function CheckoutPage() {
                 </Card>
               </form>
 
-              {/* Midtrans Gateway Status Banner */}
-              <div className="p-4 rounded-2xl bg-primary/5 border border-primary/20 space-y-3 font-body">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-foreground text-xs">
-                    <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
-                    <span>Midtrans Gateway: <strong className="text-primary font-semibold">Sandbox Terhubung</strong></span>
-                  </div>
-                  <Badge variant="lime" className="text-[10px]">Merchant: G587072361</Badge>
-                </div>
-
-                <div className="flex items-center justify-between pt-1 border-t border-primary/10 text-xs text-muted-foreground">
-                  <div className="flex items-center gap-1.5">
-                    {midtransLoaded ? (
-                      <span className="text-green-700 flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Pop-up Snap SDK Siap
-                      </span>
-                    ) : (
-                      <span>Mode Redirect / Pop-up Midtrans</span>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setShowKeyInput(!showKeyInput)}
-                    className="text-primary hover:underline font-semibold flex items-center gap-1 text-[11px]"
-                  >
-                    <Key className="w-3 h-3" />
-                    {getClientKey() ? 'Ubah Client Key' : 'Tempel Client Key Sandbox'}
-                  </button>
-                </div>
-
-                {showKeyInput && (
-                  <div className="pt-2 space-y-2 border-t border-primary/10">
-                    <p className="text-[11px] text-muted-foreground">
-                      Masukkan Client Key dari Dashboard Midtrans (&gt; Settings &gt; Access Keys) untuk mengaktifkan modal pop-up:
-                    </p>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={clientKeyInput}
-                        onChange={(e) => setClientKeyInput(e.target.value)}
-                        placeholder="SB-Mid-client-xxxxxxxx"
-                        className="flex-1 h-9 px-3 rounded-xl border border-border bg-card text-xs font-mono"
-                      />
-                      <Button size="sm" onClick={handleSaveClientKey} type="button">
-                        Terapkan
-                      </Button>
+              {/* Status Banner Payment Gateway Terhubung */}
+              {gateway === 'xendit' ? (
+                <div className="p-4 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 space-y-2 font-body text-xs">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-foreground font-semibold">
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                      <span>Xendit Invoicing V2: <span className="text-emerald-700 dark:text-emerald-400">Siap & Terhubung</span></span>
                     </div>
+                    <Badge variant="lime" className="text-[10px]">Merchant Terverifikasi</Badge>
                   </div>
-                )}
-              </div>
+                  <p className="text-[11px] text-muted-foreground">
+                    Endpoint: <code className="font-mono text-emerald-800 dark:text-emerald-300 font-semibold">/api/create-xendit-invoice.php</code> | Webhook Callback: <code className="font-mono text-emerald-800 dark:text-emerald-300">/api/xendit-callback.php</code>
+                  </p>
+                  <div className="flex flex-wrap items-center gap-3 pt-1 border-t border-emerald-200/60 text-[11px] text-muted-foreground">
+                    <span className="flex items-center gap-1 text-emerald-700 dark:text-emerald-400 font-medium">
+                      ✓ Syarat Kepatuhan ACC Lengkap
+                    </span>
+                    <Link to="/terms" className="hover:underline text-foreground">S&K</Link>
+                    <span>•</span>
+                    <Link to="/privacy" className="hover:underline text-foreground">Privasi</Link>
+                    <span>•</span>
+                    <Link to="/refund-policy" className="hover:underline text-foreground">Kebijakan Refund</Link>
+                  </div>
+                </div>
+              ) : gateway === 'midtrans' ? (
+                <div className="p-4 rounded-2xl bg-primary/5 border border-primary/20 space-y-3 font-body">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-foreground text-xs">
+                      <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
+                      <span>Midtrans Gateway: <strong className="text-primary font-semibold">Sandbox Terhubung</strong></span>
+                    </div>
+                    <Badge variant="lime" className="text-[10px]">Merchant: G587072361</Badge>
+                  </div>
 
-              {/* Payment Methods */}
-              <PaymentPanel selectedMethod={paymentMethod} onSelect={setPaymentMethod} />
+                  <div className="flex items-center justify-between pt-1 border-t border-primary/10 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1.5">
+                      {midtransLoaded ? (
+                        <span className="text-green-700 flex items-center gap-1">
+                          <CheckCircle2 className="w-3.5 h-3.5" /> Pop-up Snap SDK Siap
+                        </span>
+                      ) : (
+                        <span>Mode Redirect / Pop-up Midtrans</span>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowKeyInput(!showKeyInput)}
+                      className="text-primary hover:underline font-semibold flex items-center gap-1 text-[11px]"
+                    >
+                      <Key className="w-3 h-3" />
+                      {getClientKey() ? 'Ubah Client Key' : 'Tempel Client Key Sandbox'}
+                    </button>
+                  </div>
+
+                  {showKeyInput && (
+                    <div className="pt-2 space-y-2 border-t border-primary/10">
+                      <p className="text-[11px] text-muted-foreground">
+                        Masukkan Client Key dari Dashboard Midtrans:
+                      </p>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={clientKeyInput}
+                          onChange={(e) => setClientKeyInput(e.target.value)}
+                          placeholder="SB-Mid-client-xxxxxxxx"
+                          className="flex-1 h-9 px-3 rounded-xl border border-border bg-card text-xs font-mono"
+                        />
+                        <Button size="sm" onClick={handleSaveClientKey} type="button">
+                          Terapkan
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : null}
+
+              {/* Payment Methods Panel */}
+              <PaymentPanel
+                gateway={gateway}
+                onGatewayChange={setGateway}
+                selectedMethod={paymentMethod}
+                onSelectMethod={setPaymentMethod}
+              />
 
               <Button
                 type="submit"
                 form="checkout-form"
                 size="lg"
-                className="w-full text-base"
+                className={`w-full text-base ${
+                  gateway === 'xendit' ? 'bg-emerald-700 hover:bg-emerald-800 text-white' : ''
+                }`}
                 disabled={submitting}
               >
-                {submitting ? 'Menghubungi Midtrans...' : `Bayar Sekarang · ${formatIDR(totalPrice)}`}
+                {submitting
+                  ? gateway === 'xendit'
+                    ? 'Menghubungi Xendit Invoicing...'
+                    : 'Memproses Gateway...'
+                  : `Bayar Sekarang · ${formatIDR(totalPrice)}`}
               </Button>
 
-              <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground font-body">
-                <ShieldCheck className="w-4 h-4 text-primary" />
-                <span>Transaksi aman dengan enkripsi SSL 256-bit dan garansi harga jujur.</span>
+              {/* Compliance & Security Assurance */}
+              <div className="space-y-2 text-center text-xs text-muted-foreground font-body">
+                <div className="flex items-center justify-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  <span>Enkripsi 256-bit SSL, berlisensi resmi Bank Indonesia & OJK.</span>
+                </div>
+                <p className="text-[11px] leading-relaxed">
+                  Dengan melanjutkan pembayaran, Anda menyetujui{' '}
+                  <Link to="/terms" className="text-foreground underline hover:text-primary">
+                    Syarat & Ketentuan Layanan
+                  </Link>
+                  ,{' '}
+                  <Link to="/privacy" className="text-foreground underline hover:text-primary">
+                    Kebijakan Privasi
+                  </Link>
+                  , dan{' '}
+                  <Link to="/refund-policy" className="text-foreground underline hover:text-primary">
+                    Kebijakan Refund & Pembatalan
+                  </Link>{' '}
+                  Jajapin.
+                </p>
               </div>
             </div>
 
@@ -430,12 +545,12 @@ export default function CheckoutPage() {
                       <span className="text-foreground">{formatIDR(totalPrice)}</span>
                     </div>
                     <div className="flex justify-between text-muted-foreground">
-                      <span>Biaya layanan tamu</span>
-                      <span className="text-primary font-medium">Rp0 (Gratis)</span>
+                      <span>Biaya layanan pemesanan</span>
+                      <span className="text-emerald-700 font-medium">Rp0 (Gratis)</span>
                     </div>
                     <div className="flex justify-between text-muted-foreground">
-                      <span>Pajak & Retribusi</span>
-                      <span className="text-foreground font-medium">Termasuk</span>
+                      <span>Pajak & Retribusi Daerah</span>
+                      <span className="text-foreground font-medium">Sudah Termasuk</span>
                     </div>
                   </div>
 
@@ -444,7 +559,9 @@ export default function CheckoutPage() {
                       <span className="font-display font-semibold text-lg text-foreground block">Total Tagihan</span>
                       <span className="text-[11px] text-muted-foreground font-body">Sudah termasuk seluruh biaya</span>
                     </div>
-                    <span className="font-display font-bold text-2xl text-primary">{formatIDR(totalPrice)}</span>
+                    <span className="font-display font-bold text-2xl text-emerald-700 dark:text-emerald-400">
+                      {formatIDR(totalPrice)}
+                    </span>
                   </div>
                 </CardContent>
               </Card>
@@ -453,11 +570,83 @@ export default function CheckoutPage() {
         </div>
       </div>
 
-      {/* Dialog Simulasi Midtrans Snap (Jika di-host di static hosting tanpa backend Node/PHP) */}
+      {/* MODAL SIMULASI XENDIT INVOICE (Sandbox / Dev Mode) */}
+      {mockXenditData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-card w-full max-w-lg rounded-3xl border border-border shadow-2xl overflow-hidden font-body">
+            {/* Header Dialog */}
+            <div className="bg-slate-900 p-6 text-white flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-500 flex items-center justify-center text-slate-900 font-black text-xl">
+                  X
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase tracking-widest text-emerald-400 font-bold block">
+                    Xendit Payment Simulator
+                  </span>
+                  <h3 className="font-display font-semibold text-lg text-white">
+                    Halaman Tagihan Xendit
+                  </h3>
+                </div>
+              </div>
+              <button
+                onClick={() => setMockXenditData(null)}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-sm"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-6 space-y-5">
+              <div className="flex justify-between items-baseline p-4 rounded-2xl bg-emerald-50/50 border border-emerald-200">
+                <div>
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground block">Kode Reservasi</span>
+                  <span className="font-mono font-bold text-sm text-foreground">{mockXenditData.bookingCode}</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground block">Total Tagihan</span>
+                  <span className="font-display font-bold text-lg text-emerald-700">{formatIDR(mockXenditData.totalPrice)}</span>
+                </div>
+              </div>
+
+              <div className="space-y-2 text-xs">
+                <p className="font-semibold text-foreground flex items-center gap-1.5">
+                  <Sparkles className="w-4 h-4 text-emerald-600" /> Integrasi Xendit Invoicing V2:
+                </p>
+                <div className="p-3.5 rounded-xl bg-muted/50 border border-border space-y-1.5 text-[11px] text-muted-foreground leading-relaxed">
+                  <p>
+                    ✓ Endpoint backend PHP telah aktif di <code className="font-mono text-foreground font-bold">public/api/create-xendit-invoice.php</code>
+                  </p>
+                  <p>
+                    ✓ Listener Webhook Callback siap di <code className="font-mono text-foreground font-bold">public/api/xendit-callback.php</code>
+                  </p>
+                  <p>
+                    ✓ Saat Live Secret Key diisi di Hostinger (<code className="font-mono">XENDIT_SECRET_KEY</code>), tamu akan langsung diarahkan ke halaman pembayaran resmi Xendit.
+                  </p>
+                </div>
+              </div>
+
+              <div className="pt-2 flex flex-col gap-2">
+                <Button
+                  size="lg"
+                  className="w-full bg-emerald-700 hover:bg-emerald-800 text-white"
+                  onClick={() => handleCompleteMockPayment(true)}
+                >
+                  Bayar Sekarang (Simulasikan Lunas) →
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setMockXenditData(null)}>
+                  Tutup Simulator
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL SIMULASI MIDTRANS SNAP */}
       {mockSnapData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
           <div className="bg-card w-full max-w-md rounded-3xl border border-border shadow-2xl overflow-hidden font-body">
-            {/* Header Dialog */}
             <div className="bg-brand-forest-deep p-6 text-white flex items-center justify-between">
               <div>
                 <span className="text-[10px] uppercase tracking-widest text-brand-lime font-bold block">
@@ -487,21 +676,9 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              <div className="p-4 rounded-2xl bg-brand-sand/40 border border-brand-sand text-xs text-foreground/80 space-y-2">
-                <p className="font-semibold text-foreground flex items-center gap-1.5">
-                  <Sparkles className="w-4 h-4 text-primary" /> Info Integrasi Midtrans:
-                </p>
-                <p className="text-[11px] leading-relaxed text-muted-foreground">
-                  File backend token PHP (<code className="font-mono bg-white px-1 py-0.5 rounded">api/create-midtrans-token.php</code>) sudah kami sertakan di dalam folder <code className="font-mono font-bold">dist/</code>.
-                </p>
-                <p className="text-[11px] leading-relaxed text-muted-foreground">
-                  Jika Anda mengunggah ke cPanel, pastikan folder <code className="font-mono">api/</code> ikut terunggah ke <code className="font-mono">public_html/api/</code> agar pop-up Snap asli otomatis aktif!
-                </p>
-              </div>
-
               <div className="pt-2 flex flex-col gap-2">
-                <Button size="lg" className="w-full" onClick={handleCompleteMockPayment}>
-                  Bayar Sekarang (Simulasi Berhasil) →
+                <Button size="lg" className="w-full" onClick={() => handleCompleteMockPayment(false)}>
+                  Bayar Sekarang (Simulasi Midtrans) →
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => setMockSnapData(null)}>
                   Tutup

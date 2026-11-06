@@ -14,6 +14,9 @@ const RegisterPage = lazy(() => import('@/pages/RegisterPage'))
 const ForgotPasswordPage = lazy(() => import('@/pages/ForgotPasswordPage'))
 const ResetPasswordPage = lazy(() => import('@/pages/ResetPasswordPage'))
 const DashboardPage = lazy(() => import('@/pages/DashboardPage'))
+const TermsPage = lazy(() => import('@/pages/TermsPage'))
+const PrivacyPage = lazy(() => import('@/pages/PrivacyPage'))
+const RefundPolicyPage = lazy(() => import('@/pages/RefundPolicyPage'))
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
 
 function LoadingFallback() {
@@ -71,6 +74,9 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/refund-policy" element={<RefundPolicyPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
