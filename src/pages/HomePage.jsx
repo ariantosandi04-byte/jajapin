@@ -23,6 +23,7 @@ export default function HomePage() {
     .slice(0, 6);
 
   useEffect(() => {
+    document.title = 'Jajapin - Platform Resmi Booking Hotel & Penginapan Murah Indonesia | jajapin.id';
     const timer = setTimeout(() => setLoading(false), 800);
     return () => clearTimeout(timer);
   }, []);

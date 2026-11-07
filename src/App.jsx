@@ -75,8 +75,11 @@ export default function App() {
             }
           />
           <Route path="/terms" element={<TermsPage />} />
+          <Route path="/syarat-ketentuan" element={<TermsPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/kebijakan-privasi" element={<PrivacyPage />} />
           <Route path="/refund-policy" element={<RefundPolicyPage />} />
+          <Route path="/kebijakan-pengembalian" element={<RefundPolicyPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>

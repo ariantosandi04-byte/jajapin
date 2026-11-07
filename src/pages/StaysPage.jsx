@@ -24,6 +24,7 @@ export default function StaysPage() {
   });
 
   useEffect(() => {
+    document.title = 'Pilihan Hotel & Penginapan Terbaik - Jajapin | jajapin.id';
     const timer = setTimeout(() => setLoading(false), 500);
     return () => clearTimeout(timer);
   }, []);

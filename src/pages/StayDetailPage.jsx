@@ -49,6 +49,12 @@ export default function StayDetailPage() {
   const [selectedRoomId, setSelectedRoomId] = useState(stay.room_types?.[0]?.id || 'standard');
   const [roomsCount, setRoomsCount] = useState(1);
 
+  useEffect(() => {
+    if (stay) {
+      document.title = `${stay.name} (${stay.city}) - Pesan Kamar Online | Jajapin.id`;
+    }
+  }, [stay]);
+
   const stayReviews = allReviews.filter((r) => r.property_id === stay.id);
   const allImages = [stay.image, ...(stay.gallery || [])];
 

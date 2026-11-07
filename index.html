@@ -3,31 +3,123 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Jajapin — Platform pemesanan hotel, homestay, villa, dan resort pilihan nusantara langsung ke pengelolanya dengan harga jujur." />
+    
+    <!-- SEO Judul Utama & Meta Brand Jajapin -->
+    <title>Jajapin - Platform Resmi Booking Hotel & Penginapan Murah Indonesia | jajapin.id</title>
+    <meta
+      name="description"
+      content="Jajapin (jajapin.id) adalah website resmi pemesanan hotel, homestay, villa, glamping, dan penginapan murah nusantara langsung ke pengelola. Booking aman, jaminan harga jujur, dan konfirmasi instan."
+    />
+    <meta
+      name="keywords"
+      content="jajapin, jajapin id, jajapin.id, jajapin indonesia, booking hotel jajapin, penginapan jajapin, hotel murah jajapin, sewa penginapan, pms jajapin, channel manager jajapin, homestay murah indonesia, liburan murah jajapin"
+    />
+    <meta name="author" content="Jajapin Indonesia" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <link rel="canonical" href="https://jajapin.id/" />
+    
+    <!-- Geo Target Indonesia -->
+    <meta name="geo.region" content="ID" />
+    <meta name="geo.placename" content="Indonesia" />
     <meta name="theme-color" content="#0a381c" />
 
-    <!-- Open Graph / Meta Sosial -->
+    <!-- Open Graph / Meta Sosial Facebook, WhatsApp, LinkedIn -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://jajapin.id/" />
-    <meta property="og:title" content="Jajapin — Pesona Penginapan Indonesia" />
-    <meta property="og:description" content="Menginap di jantung pesona Indonesia. Hotel, villa, dan homestay pilihan langsung ke pengelolanya." />
-    <meta property="og:image" content="/assets/hero-sawah.png" />
+    <meta property="og:site_name" content="Jajapin" />
+    <meta property="og:locale" content="id_ID" />
+    <meta property="og:title" content="Jajapin - Platform Resmi Booking Hotel & Penginapan Nusantara" />
+    <meta property="og:description" content="Pesan hotel, glamping, villa, dan homestay di Jajapin.id langsung ke pengelola tanpa perantara dengan jaminan harga jujur." />
+    <meta property="og:image" content="https://jajapin.id/assets/logo-jajapin.jpg" />
 
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://jajapin.id/" />
-    <meta property="twitter:title" content="Jajapin — Pesona Penginapan Indonesia" />
-    <meta property="twitter:description" content="Hotel, villa, dan homestay pilihan dari Sabang sampai Merauke." />
-    <meta property="twitter:image" content="/assets/hero-sawah.png" />
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@jajapin_id" />
+    <meta name="twitter:creator" content="@jajapin_id" />
+    <meta name="twitter:url" content="https://jajapin.id/" />
+    <meta name="twitter:title" content="Jajapin - Platform Resmi Booking Hotel & Penginapan Nusantara" />
+    <meta name="twitter:description" content="Pesan hotel dan penginapan terbaik di Indonesia langsung di jajapin.id." />
+    <meta name="twitter:image" content="https://jajapin.id/assets/logo-jajapin.jpg" />
 
+    <!-- Favicon & Icons -->
     <link rel="icon" type="image/jpeg" href="/assets/logo-jajapin.jpg" />
+    <link rel="apple-touch-icon" href="/assets/logo-jajapin.jpg" />
+
+    <!-- Preconnect & Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=Manrope:wght@300;400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <title>Jajapin — Menginap di Jantung Pesona Indonesia</title>
+
+    <!-- Schema.org JSON-LD Structured Data untuk Google Search Brand Authority -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://jajapin.id/#website",
+            "url": "https://jajapin.id/",
+            "name": "Jajapin",
+            "alternateName": ["jajapin.id", "Jajapin Indonesia", "Platform Jajapin", "Aplikasi Jajapin"],
+            "description": "Platform resmi pemesanan hotel, villa, glamping, dan homestay pilihan nusantara.",
+            "inLanguage": "id-ID",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://jajapin.id/stays?q={search_term_string}"
+              },
+              "query-input": "required name=search_term_string"
+            }
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://jajapin.id/#organization",
+            "name": "Jajapin",
+            "legalName": "PT Jajapin Nusantara",
+            "alternateName": ["jajapin.id", "Jajapin Indonesia"],
+            "url": "https://jajapin.id/",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://jajapin.id/assets/logo-jajapin.jpg",
+              "caption": "Logo Resmi Jajapin"
+            },
+            "image": "https://jajapin.id/assets/logo-jajapin.jpg",
+            "description": "Platform marketplace dan sistem manajemen properti penginapan (PMS) terpercaya di Indonesia.",
+            "address": {
+              "@type": "PostalAddress",
+              "addressCountry": "ID"
+            },
+            "contactPoint": [
+              {
+                "@type": "ContactPoint",
+                "telephone": "+6281234567890",
+                "contactType": "customer service",
+                "areaServed": "ID",
+                "availableLanguage": ["id", "en"]
+              }
+            ]
+          },
+          {
+            "@type": "TravelAgency",
+            "@id": "https://jajapin.id/#travelagency",
+            "name": "Jajapin",
+            "url": "https://jajapin.id/",
+            "image": "https://jajapin.id/assets/logo-jajapin.jpg",
+            "priceRange": "Rp 100.000 - Rp 1.500.000",
+            "currenciesAccepted": "IDR",
+            "paymentAccepted": "Cash, Bank Transfer, QRIS, Midtrans, Xendit, Credit Card",
+            "parentOrganization": {
+              "@id": "https://jajapin.id/#organization"
+            }
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

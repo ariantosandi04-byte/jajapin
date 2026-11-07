@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /checkout
+Disallow: /pesan/
+Disallow: /api/
+
+# Googlebot spesifik
+User-agent: Googlebot
+Allow: /
+Allow: /stays
+Allow: /stay/*
+Allow: /assets/*
+
+Sitemap: https://jajapin.id/sitemap.xml
+Host: https://jajapin.id
