@@ -324,11 +324,51 @@ export default function DashboardPage() {
     localStorage.setItem('jajapin_bookings', JSON.stringify(updated));
   };
 
-  // CRUD for Property
-  const handleSaveProperty = (updatedProp) => {
-    const updated = properties.map((p) =>
-      p.id === updatedProp.id ? { ...p, ...updatedProp } : p
-    );
+  // CRUD for Property (Create & Update)
+  const handleSaveProperty = (savedProp) => {
+    let updated;
+    const isExisting = properties.some((p) => p.id === savedProp.id);
+
+    if (isExisting) {
+      updated = properties.map((p) =>
+        p.id === savedProp.id ? { ...p, ...savedProp } : p
+      );
+    } else {
+      const newId = Math.max(0, ...properties.map((p) => Number(p.id) || 0)) + 1;
+      const slug =
+        savedProp.slug ||
+        savedProp.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const newProperty = {
+        ...savedProp,
+        id: newId,
+        slug: slug || `property-${newId}`,
+        image: savedProp.image || '/assets/destinasi-bandung.png',
+        gallery: savedProp.gallery || ['/assets/destinasi-ubud.png', '/assets/destinasi-lombok.png'],
+        rating: savedProp.rating || 4.7,
+        review_count: savedProp.review_count || 12,
+        guests: savedProp.guests || 2,
+        bedrooms: savedProp.bedrooms || 1,
+        beds: savedProp.beds || 1,
+        bathrooms: savedProp.bathrooms || 1,
+        is_active: true,
+        is_jajapin_verified: true,
+        owner_email: user?.email || 'admin@jajapin.id',
+        room_types: savedProp.room_types || [
+          {
+            id: 'standard',
+            name: 'Kamar Standar',
+            bed: '1 Ranjang',
+            capacity: 2,
+            price: Number(savedProp.price) || 250000,
+            available_units: 5,
+            description: 'Kamar nyaman terintegrasi Agoda & Jajapin.',
+            amenities: ['AC / Kipas', 'Kamar Mandi Dalam', 'WiFi Gratis'],
+          },
+        ],
+      };
+      updated = [newProperty, ...properties];
+    }
+
     setProperties(updated);
     localStorage.setItem('jajapin_properties', JSON.stringify(updated));
   };

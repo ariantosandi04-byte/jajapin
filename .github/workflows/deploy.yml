@@ -8,6 +8,10 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    env:
+      FTP_SERVER: ${{ secrets.FTP_SERVER }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
 
     steps:
       - name: 📥 Checkout repository
@@ -28,11 +32,16 @@ jobs:
           VITE_MIDTRANS_IS_PRODUCTION: false
           VITE_MIDTRANS_CLIENT_KEY: ${{ secrets.VITE_MIDTRANS_CLIENT_KEY || 'tempel_kode_SB-Mid-client_kamu_di_sini' }}
 
+      - name: 📦 Simpan Build Artifact (dist)
+        uses: actions/upload-artifact@v4
+        with:
+          name: jajapin-production-dist
+          path: ./dist/
+          retention-days: 7
+
       - name: 🚀 Upload ke Hostinger via FTP
-        if: ${{ env.FTP_SERVER != '' }}
+        if: ${{ env.FTP_SERVER != '' && env.FTP_SERVER != null }}
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        env:
-          FTP_SERVER: ${{ secrets.FTP_SERVER }}
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
@@ -42,9 +51,19 @@ jobs:
           dangerous-clean-slate: false
 
       - name: ℹ️ Info Deployment Hostinger
-        if: ${{ env.FTP_SERVER == '' }}
-        env:
-          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+        if: ${{ env.FTP_SERVER == '' || env.FTP_SERVER == null }}
         run: |
-          echo "FTP Secrets belum diset. Build Vite berhasil diverifikasi (100% lulus)."
-          echo "Hostinger menarik dan mem-build kode langsung dari repository GitHub."
+          echo "=========================================================="
+          echo "✅ Build Vite Production Berhasil 100%!"
+          echo "Build artifact telah disimpan dan siap digunakan."
+          echo ""
+          echo "ℹ️ Catatan Deployment Hostinger:"
+          echo "Jika website di Hostinger terhubung via Git Auto-Deployment di hPanel,"
+          echo "Hostinger akan otomatis menarik perubahan dari branch main."
+          echo ""
+          echo "Jika ingin deploy otomatis via FTP dari GitHub Actions, tambahkan Secrets di:"
+          echo "GitHub Repo -> Settings -> Secrets and variables -> Actions:"
+          echo "  - FTP_SERVER    (contoh: ftp.jajapin.id atau IP Hostinger)"
+          echo "  - FTP_USERNAME  (username akun FTP Hostinger)"
+          echo "  - FTP_PASSWORD  (password akun FTP Hostinger)"
+          echo "=========================================================="
