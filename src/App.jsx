@@ -48,22 +48,9 @@ export default function App() {
           <Route path="/putri-sari" element={<PutriSariPage />} />
           <Route path="/stays" element={<StaysPage />} />
           <Route path="/stays/:slug" element={<StayDetailPage />} />
-          <Route
-            path="/pesan/:slug"
-            element={
-              <ProtectedRoute>
-                <CheckoutPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/konfirmasi/:id"
-            element={
-              <ProtectedRoute>
-                <ConfirmationPage />
-              </ProtectedRoute>
-            }
-          />
+          {/* Pemesanan Tanpa Wajib Buat Akun (Guest Direct Booking) */}
+          <Route path="/pesan/:slug" element={<CheckoutPage />} />
+          <Route path="/konfirmasi/:id" element={<ConfirmationPage />} />
           <Route
             path="/bookings"
             element={

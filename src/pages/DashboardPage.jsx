@@ -889,7 +889,11 @@ export default function DashboardPage() {
 
           {/* TAB 5: KAMAR & TIPE (CRUD) */}
           {activeTab === 'kamar' && (
-            <RoomManagement propertyName={activeProperty?.name || 'Properti'} />
+            <RoomManagement
+              property={activeProperty}
+              propertyName={activeProperty?.name || 'Properti'}
+              onUpdateProperty={handleSaveProperty}
+            />
           )}
 
           {/* TAB 6: HOUSEKEEPING */}

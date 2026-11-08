@@ -42,8 +42,22 @@ export default function PutriSariPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // Ambil data properti Hotel Putri Sari
-  const stay = stays.find((s) => s.id === 1 || s.slug === 'jajapin-hotel-putri-sari') || stays[0];
+  // Ambil data properti Hotel Putri Sari (sinkron dengan perubahan dashboard / PMS)
+  const stay = useMemo(() => {
+    try {
+      const savedProperties = JSON.parse(localStorage.getItem('jajapin_properties') || '[]');
+      const fromStorage = savedProperties.find(
+        (s) =>
+          s.id === 1 ||
+          s.slug === 'jajapin-hotel-putri-sari' ||
+          s.name?.toLowerCase().includes('putri sari')
+      );
+      if (fromStorage) return fromStorage;
+    } catch (e) {
+      // fallback
+    }
+    return stays.find((s) => s.id === 1 || s.slug === 'jajapin-hotel-putri-sari') || stays[0];
+  }, []);
 
   // Booking Widget State
   const todayStr = new Date().toISOString().split('T')[0];

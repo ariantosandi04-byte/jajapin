@@ -37,7 +37,17 @@ export default function CheckoutPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const stay = stays.find((s) => s.slug === slug);
+  
+  const stay = useMemo(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('jajapin_properties') || '[]');
+      const found = saved.find((s) => s.slug === slug);
+      if (found) return found;
+    } catch (e) {
+      // fallback
+    }
+    return stays.find((s) => s.slug === slug);
+  }, [slug]);
 
   const roomTypes = useMemo(() => {
     if (stay?.room_types && stay.room_types.length > 0) return stay.room_types;
@@ -488,9 +498,15 @@ export default function CheckoutPage() {
               <form onSubmit={handleSubmit} id="checkout-form">
                 <Card className="border-border">
                   <CardContent className="p-6 space-y-4">
-                    <h2 className="font-display font-semibold text-lg text-foreground">
-                      Data Tamu Utama (Pemesan)
-                    </h2>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-border">
+                      <h2 className="font-display font-semibold text-lg text-foreground">
+                        Data Tamu Utama (Pemesan)
+                      </h2>
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold self-start sm:self-auto">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                        Pesan Langsung Tanpa Wajib Buat Akun
+                      </span>
+                    </div>
                     <Input
                       label="Nama Lengkap"
                       value={form.name}
