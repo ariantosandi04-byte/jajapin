@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ShieldCheck,
@@ -30,6 +30,8 @@ import {
   Wifi,
   ChevronLeft,
   Bath,
+  Check,
+  Info,
 } from 'lucide-react';
 import { stays } from '../data/stays';
 import { reviews as allReviews } from '../data/reviews';
@@ -68,6 +70,9 @@ export default function PutriSariPage() {
   const [roomsCount, setRoomsCount] = useState(1);
   const [guestsCount, setGuestsCount] = useState(2);
 
+  // Active section tab for mobile navigation
+  const [activeTab, setActiveTab] = useState('kamar');
+
   // Gallery Modal
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [activePhotoIdx, setActivePhotoIdx] = useState(0);
@@ -77,6 +82,9 @@ export default function PutriSariPage() {
   const [voucherCodeInput, setVoucherCodeInput] = useState('');
   const [searchedBooking, setSearchedBooking] = useState(null);
   const [voucherError, setVoucherError] = useState('');
+
+  // Mobile drawer menu
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Hitung jumlah malam
   const nights = useMemo(() => {
@@ -104,26 +112,26 @@ export default function PutriSariPage() {
     {
       src: '/assets/putri-sari/cover.jpg',
       title: 'Foto Gerbang Depan Asli',
-      caption: 'Papan nama kayu Hotel Putri Sari dan gerbang masuk berpagar hijau asri di Pelabuhan Ratu.',
+      caption: 'Papan nama kayu Hotel Putri Sari dan gerbang masuk berpagar hijau di pinggir jalan raya pantai.',
     },
     {
       src: '/assets/putri-sari/3.jpg',
       title: 'Deluxe King Suite (Kasur Hijau)',
-      caption: 'Kamar luas dengan kasur King Size bersprei hijau elegan, lemari pakaian 3 pintu, dan AC sejuk.',
+      caption: 'Kamar luas dengan kasur King Size bersprei hijau elegan, dipan kepala kulit, lemari 3 pintu, dan AC sejuk.',
     },
     {
       src: '/assets/putri-sari/2.jpg',
-      title: 'Standard Room dengan Balkon & Arah Kiblat (Kasur Oranye)',
-      caption: 'Kamar berpintu balkon dengan pemandangan pepohonan hijau rindang dan stiker arah kiblat di plafon.',
+      title: 'Standard Room Balkon & Arah Kiblat (Kasur Oranye)',
+      caption: 'Kamar berpintu balkon dengan pemandangan pepohonan rindang dan stiker arah kiblat di plafon.',
     },
     {
       src: '/assets/putri-sari/4.jpg',
       title: 'Double Bed Standard AC',
-      caption: 'Tempat tidur ganda yang nyaman dan bersih berpendingin AC untuk 2 orang.',
+      caption: 'Tempat tidur ganda higienis berpendingin AC yang cocok untuk 2 orang tamu.',
     },
     {
       src: '/assets/putri-sari/1.jpg',
-      title: 'Single Bed Standard & Kipas',
+      title: 'Single Bed Standard',
       caption: 'Kamar hemat yang higienis, tenang, dan cocok untuk pelancong santai maupun solo traveler.',
     },
     {
@@ -168,385 +176,503 @@ export default function PutriSariPage() {
     'Halo Resepsionis Hotel Putri Sari Pelabuhan Ratu, saya ingin menanyakan ketersediaan kamar di depan Pantai Kumala.'
   )}`;
 
+  const scrollToSection = (id, tabName) => {
+    setActiveTab(tabName);
+    const element = document.getElementById(id);
+    if (element) {
+      const yOffset = -120;
+      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[#fcfbf9] text-foreground font-body">
-      {/* TOP NETWORK BAR */}
-      <div className="bg-[#0b1f14] text-white/90 text-[11px] py-1.5 px-4 border-b border-emerald-900/60 font-body">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400" />
-            <span className="text-emerald-300 font-semibold uppercase tracking-wider text-[10px]">
-              Subdomain Resmi:
+    <div className="min-h-screen bg-[#faf9f6] text-stone-900 font-body antialiased pb-28 sm:pb-8">
+      
+      {/* 1. TOP NETWORK CONNECTOR BAR (Compact on mobile) */}
+      <div className="bg-[#0b1f14] text-white text-[11px] py-2 px-3 sm:px-6 border-b border-emerald-900/60 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 truncate">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
+            <span className="text-emerald-300 font-bold uppercase tracking-wider text-[10px] hidden xs:inline">
+              Resmi:
             </span>
-            <span className="font-mono text-emerald-200">putrisari.jajapin.id</span>
-            <span className="hidden sm:inline text-white/60">• Terhubung langsung dengan sistem inventori & reservasi jajapin.id</span>
+            <span className="font-mono text-emerald-200 text-xs">putrisari.jajapin.id</span>
+            <span className="hidden md:inline text-white/60">• Jaringan JAJAPIN Pesona Indonesia</span>
           </div>
 
-          <Link
-            to="/"
-            className="text-emerald-300 hover:text-white font-semibold inline-flex items-center gap-1 transition-colors text-[11px]"
-          >
-            ← Kembali ke Beranda jajapin.id
-          </Link>
+          <div className="flex items-center gap-3 shrink-0">
+            <Link
+              to="/"
+              className="text-emerald-300 hover:text-white font-semibold inline-flex items-center gap-1 text-[11px] transition-colors"
+            >
+              ← <span className="hidden sm:inline">Beranda</span> jajapin.id
+            </Link>
+          </div>
         </div>
       </div>
 
-      {/* 1. TOP NAVBAR KHUSUS PUTRI SARI & JAJAPIN */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-border/80 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
-          {/* Logo Brand */}
-          <Link to="/" className="flex items-center gap-3">
-            <img
-              src="/assets/logo-jajapin.jpg"
-              alt="Jajapin Logo"
-              className="w-11 h-11 rounded-full object-cover border-2 border-emerald-600/30 shadow-xs"
-            />
-            <div>
-              <span className="font-display font-bold text-xl tracking-tight text-emerald-950 block leading-tight">
-                JAJAPIN
-              </span>
-              <span className="text-[10px] uppercase tracking-[0.24em] text-emerald-700 font-semibold block">
-                Jalan Jalan Pesona Indonesia
-              </span>
-            </div>
-          </Link>
-
-          {/* Navigation Links */}
-          <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-            <Link
-              to="/stays"
-              className="text-muted-foreground hover:text-emerald-800 transition-colors"
-            >
-              Jelajah Penginapan
+      {/* 2. MAIN HEADER NAVBAR */}
+      <header className="bg-white/95 backdrop-blur-md border-b border-stone-200/80 sticky top-[33px] z-40 shadow-2xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between">
+          
+          {/* Logo & Hotel Title */}
+          <div className="flex items-center gap-2.5">
+            <Link to="/" className="flex items-center gap-2">
+              <img
+                src="/assets/logo-jajapin.jpg"
+                alt="Jajapin"
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover border border-emerald-700/30 shrink-0"
+              />
+              <div className="leading-tight">
+                <span className="font-display font-bold text-base sm:text-lg text-emerald-950 block">
+                  Hotel Putri Sari
+                </span>
+                <span className="text-[9px] uppercase tracking-wider text-emerald-700 font-semibold block sm:hidden">
+                  Pelabuhan Ratu
+                </span>
+              </div>
             </Link>
-            <span className="flex items-center gap-1.5 text-emerald-800 font-bold bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200/80">
-              <ShieldCheck className="w-4 h-4 text-emerald-700" />
-              Hotel Putri Sari (Unggulan)
-            </span>
+          </div>
+
+          {/* Desktop Nav Items */}
+          <nav className="hidden lg:flex items-center gap-6 text-xs font-semibold text-stone-600">
+            <button
+              onClick={() => scrollToSection('kamar-section', 'kamar')}
+              className={`hover:text-emerald-800 transition-colors ${activeTab === 'kamar' ? 'text-emerald-800 font-bold' : ''}`}
+            >
+              Pilihan Kamar & Tarif
+            </button>
+            <button
+              onClick={() => scrollToSection('galeri-section', 'foto')}
+              className={`hover:text-emerald-800 transition-colors ${activeTab === 'foto' ? 'text-emerald-800 font-bold' : ''}`}
+            >
+              Foto Asli (6)
+            </button>
+            <button
+              onClick={() => scrollToSection('lokasi-section', 'lokasi')}
+              className={`hover:text-emerald-800 transition-colors ${activeTab === 'lokasi' ? 'text-emerald-800 font-bold' : ''}`}
+            >
+              Lokasi & Akses Pantai
+            </button>
+            <button
+              onClick={() => scrollToSection('fasilitas-section', 'fasilitas')}
+              className={`hover:text-emerald-800 transition-colors ${activeTab === 'fasilitas' ? 'text-emerald-800 font-bold' : ''}`}
+            >
+              Fasilitas & Layanan
+            </button>
             <button
               onClick={() => setIsVoucherModalOpen(true)}
-              className="text-muted-foreground hover:text-emerald-800 transition-colors flex items-center gap-1 cursor-pointer"
+              className="text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-1 rounded-full border border-emerald-200 transition-colors flex items-center gap-1.5"
             >
-              <FileCheck className="w-4 h-4" />
+              <FileCheck className="w-3.5 h-3.5" />
               Cek E-Voucher
             </button>
+          </nav>
+
+          {/* Header Action Buttons */}
+          <div className="flex items-center gap-2">
             <a
               href={waReceptionUrl}
               target="_blank"
               rel="noreferrer"
-              className="text-muted-foreground hover:text-emerald-800 transition-colors flex items-center gap-1"
+              className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-300 text-emerald-900 text-xs font-semibold flex items-center gap-1.5 transition-colors"
             >
-              <MessageCircle className="w-4 h-4 text-emerald-600" />
-              Bantuan WhatsApp
+              <MessageCircle className="w-3.5 h-3.5 text-emerald-700" />
+              <span className="hidden sm:inline">WhatsApp</span>
             </a>
-          </nav>
 
-          {/* Portal Mitra Button */}
-          <div className="flex items-center gap-3">
-            <Link to="/dashboard">
-              <button className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200 text-emerald-900 text-xs font-semibold transition-all">
-                <KeyRound className="w-3.5 h-3.5 text-emerald-700" />
-                <span>Portal Mitra</span>
-                <span className="px-1.5 py-0.5 rounded-md bg-emerald-700 text-white text-[9px] font-bold">
-                  Kunci Akses
-                </span>
-              </button>
+            <Link
+              to="/dashboard"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold transition-colors"
+            >
+              <KeyRound className="w-3.5 h-3.5 text-stone-600" />
+              <span>Portal Mitra</span>
             </Link>
+
+            <button
+              onClick={() => setIsVoucherModalOpen(true)}
+              className="sm:hidden p-2 text-stone-700 hover:text-emerald-800"
+              title="Cek E-Voucher"
+            >
+              <FileCheck className="w-5 h-5" />
+            </button>
           </div>
+        </div>
+
+        {/* Mobile Sticky Segmented Control Bar */}
+        <div className="lg:hidden border-t border-stone-200/60 bg-stone-50/80 backdrop-blur-xs overflow-x-auto no-scrollbar py-2 px-3 flex items-center gap-2 text-xs font-medium">
+          <button
+            onClick={() => scrollToSection('kamar-section', 'kamar')}
+            className={`px-3 py-1.5 rounded-full shrink-0 transition-colors ${
+              activeTab === 'kamar' ? 'bg-emerald-800 text-white font-bold' : 'bg-white text-stone-700 border border-stone-200'
+            }`}
+          >
+            Pilihan Kamar
+          </button>
+          <button
+            onClick={() => scrollToSection('galeri-section', 'foto')}
+            className={`px-3 py-1.5 rounded-full shrink-0 transition-colors ${
+              activeTab === 'foto' ? 'bg-emerald-800 text-white font-bold' : 'bg-white text-stone-700 border border-stone-200'
+            }`}
+          >
+            Foto Asli (6)
+          </button>
+          <button
+            onClick={() => scrollToSection('lokasi-section', 'lokasi')}
+            className={`px-3 py-1.5 rounded-full shrink-0 transition-colors ${
+              activeTab === 'lokasi' ? 'bg-emerald-800 text-white font-bold' : 'bg-white text-stone-700 border border-stone-200'
+            }`}
+          >
+            Akses Pantai
+          </button>
+          <button
+            onClick={() => scrollToSection('fasilitas-section', 'fasilitas')}
+            className={`px-3 py-1.5 rounded-full shrink-0 transition-colors ${
+              activeTab === 'fasilitas' ? 'bg-emerald-800 text-white font-bold' : 'bg-white text-stone-700 border border-stone-200'
+            }`}
+          >
+            Fasilitas
+          </button>
+          <button
+            onClick={() => scrollToSection('booking-section', 'booking')}
+            className={`px-3 py-1.5 rounded-full shrink-0 transition-colors ${
+              activeTab === 'booking' ? 'bg-emerald-800 text-white font-bold' : 'bg-white text-stone-700 border border-stone-200'
+            }`}
+          >
+            Pesan Cepat
+          </button>
         </div>
       </header>
 
-      {/* 2. NOTICE BAR PENGINAPAN PILIHAN UTAMA */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-2">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100/90 text-emerald-900 text-xs font-bold tracking-wider uppercase mb-2">
+      {/* 3. MOBILE HERO: SWIPEABLE / HORIZONTAL PHOTO STRIP + QUICK TITLE */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-2">
+        
+        {/* Mobile Title & Badge Card */}
+        <div className="bg-white rounded-3xl p-4 sm:p-6 border border-stone-200/80 shadow-2xs mb-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
-              <span>Penginapan Pilihan Utama Jajapin</span>
+              Listing Terverifikasi Jajapin
+            </span>
+
+            <div className="flex items-center gap-1 text-amber-500 font-bold text-xs">
+              <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+              <span className="text-stone-900">4.9</span>
+              <span className="text-stone-400 font-normal">(128 Ulasan Riil)</span>
             </div>
-            <h1 className="font-display font-bold text-3xl sm:text-4xl text-emerald-950 tracking-tight">
-              Hotel Putri Sari
-            </h1>
-            <p className="text-xs sm:text-sm text-muted-foreground font-body flex items-center gap-1.5 mt-1">
-              <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span className="font-semibold text-emerald-900">
-                Depan Pantai Kumala, Jl. Raya Cisolok, Pelabuhan Ratu, Jawa Barat
-              </span>
-              <span className="hidden sm:inline text-border">·</span>
-              <span className="hidden sm:inline text-emerald-700 font-medium">
-                Pelabuhan Ratu - Pantai Selatan
-              </span>
-            </p>
           </div>
 
-          {/* Action Buttons Header */}
-          <div className="flex items-center gap-3">
-            <a
-              href={waReceptionUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl border border-emerald-600/40 bg-white hover:bg-emerald-50 text-emerald-800 text-xs sm:text-sm font-semibold transition-all shadow-xs"
-            >
-              <MessageCircle className="w-4 h-4 text-emerald-600" />
-              <span>WhatsApp Resepsionis</span>
-            </a>
+          <h1 className="font-display font-light text-2xl sm:text-4xl text-stone-900 tracking-tight leading-tight">
+            Hotel Putri Sari <span className="font-semibold text-emerald-800">Pelabuhan Ratu</span>
+          </h1>
+
+          <p className="text-xs sm:text-sm text-stone-600 font-body flex items-start gap-1.5 mt-1.5">
+            <MapPin className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+            <span>Jl. Raya Cisolok, Tepat di Depan Pantai Kumala, Pelabuhan Ratu, Sukabumi</span>
+          </p>
+
+          {/* Quick Pillars (Mobile Friendly Grid) */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4 pt-3 border-t border-stone-100 text-xs text-stone-700">
+            <div className="flex items-center gap-2 p-2 rounded-xl bg-stone-50">
+              <Waves className="w-4 h-4 text-emerald-700 shrink-0" />
+              <span className="truncate">0m ke Pantai Kumala</span>
+            </div>
+            <div className="flex items-center gap-2 p-2 rounded-xl bg-stone-50">
+              <Compass className="w-4 h-4 text-emerald-700 shrink-0" />
+              <span className="truncate">Arah Kiblat di Plafon</span>
+            </div>
+            <div className="flex items-center gap-2 p-2 rounded-xl bg-stone-50">
+              <Wind className="w-4 h-4 text-emerald-700 shrink-0" />
+              <span className="truncate">AC Dingin & Terawat</span>
+            </div>
+            <div className="flex items-center gap-2 p-2 rounded-xl bg-stone-50">
+              <Car className="w-4 h-4 text-emerald-700 shrink-0" />
+              <span className="truncate">Parkir Mobil Luas</span>
+            </div>
+          </div>
+        </div>
+
+        {/* PHOTO STRIP: Horizontal scroll on mobile, refined grid on desktop */}
+        <div id="galeri-section" className="relative">
+          <div className="flex gap-2.5 overflow-x-auto no-scrollbar snap-x snap-mandatory rounded-3xl pb-1">
+            {galleryPhotos.map((photo, idx) => (
+              <div
+                key={photo.src}
+                onClick={() => {
+                  setActivePhotoIdx(idx);
+                  setIsGalleryOpen(true);
+                }}
+                className="relative snap-center shrink-0 w-[82vw] sm:w-[48vw] lg:w-[32%] aspect-[4/3] rounded-3xl overflow-hidden bg-stone-900 border border-stone-200 cursor-pointer group shadow-2xs"
+              >
+                <img
+                  src={photo.src}
+                  alt={photo.title}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-black/20" />
+                
+                <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[10px] font-medium border border-white/20">
+                  {idx === 0 ? 'Foto Gerbang Asli' : photo.title}
+                </span>
+
+                <div className="absolute bottom-3 left-3 right-3 text-white">
+                  <p className="text-xs font-semibold truncate">{photo.title}</p>
+                  <p className="text-[10px] text-white/70 line-clamp-1">{photo.caption}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Gallery View All Button */}
+          <div className="flex justify-between items-center mt-2 px-1">
+            <span className="text-[11px] text-stone-500 font-body">
+              Geser untuk melihat 6 foto asli hotel & kamar
+            </span>
             <button
               onClick={() => {
-                document.getElementById('booking-section')?.scrollIntoView({ behavior: 'smooth' });
+                setActivePhotoIdx(0);
+                setIsGalleryOpen(true);
               }}
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-emerald-900 hover:bg-emerald-950 text-white text-xs sm:text-sm font-semibold transition-all shadow-md"
+              className="text-xs font-bold text-emerald-800 hover:underline inline-flex items-center gap-1"
             >
-              <span>Lihat Semua Detail</span>
-              <ArrowRight className="w-4 h-4" />
+              <Camera className="w-3.5 h-3.5" />
+              <span>Buka Galeri Foto (6)</span>
             </button>
           </div>
         </div>
-      </div>
 
-      {/* 3. HERO GRID UTAMA (Sesuai Screenshot User) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* KOLOM KIRI (5 Kolom): CARD GERBANG ASLI & DESKRIPSI UTAMA */}
-          <div className="lg:col-span-5 bg-white rounded-3xl border border-border shadow-xs overflow-hidden flex flex-col justify-between">
-            <div>
-              {/* Image Gerbang Depan Asli */}
-              <div className="relative aspect-4/3 w-full overflow-hidden bg-muted">
-                <img
-                  src="/assets/putri-sari/cover.jpg"
-                  alt="Hotel Putri Sari Gerbang Asli"
-                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                />
-                <span className="absolute top-3 left-3 px-3 py-1 rounded-full bg-emerald-900/90 text-white text-[11px] font-semibold tracking-wide flex items-center gap-1 backdrop-blur-xs">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-brand-lime" />
-                  Mitra Terverifikasi JAJAPIN
-                </span>
-                <span className="absolute bottom-3 right-3 px-3 py-1 rounded-xl bg-black/70 text-white text-[10px] font-medium backdrop-blur-xs">
-                  Foto Gerbang Depan Asli
-                </span>
-              </div>
-
-              {/* Info & Rekomendasi */}
-              <div className="p-5 sm:p-6 space-y-4">
-                <div className="flex items-center justify-between border-b border-border pb-3">
-                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
-                    Hotel Rekomendasi Wisata
-                  </span>
-                  <div className="flex items-center gap-1 text-amber-500 font-bold text-xs font-body">
-                    <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                    <span className="text-foreground">4.9</span>
-                    <span className="text-muted-foreground font-normal">(128 ulasan)</span>
-                  </div>
-                </div>
-
-                <p className="text-xs sm:text-[13px] text-muted-foreground leading-relaxed font-body">
-                  Hotel Putri Sari adalah pilihan penginapan favorit berstandar JAJAPIN yang menyajikan atmosfer
-                  sejuk, tenang, dan keramahan khas Indonesia. Berada tepat di seberang Pantai Kumala, Pelabuhan
-                  Ratu. Dilengkapi kamar bersih berpendingin AC, penunjuk arah kiblat di plafon kamar, balkon asri,
-                  kasur empuk, serta area parkir mobil yang aman dan leluasa.
-                </p>
-
-                {/* 4 Keunggulan Berbentuk Grid 2x2 */}
-                <div className="grid grid-cols-2 gap-2.5 pt-2">
-                  <div className="flex items-center gap-2 p-2.5 rounded-xl bg-emerald-50/70 text-emerald-900 text-xs font-medium">
-                    <Compass className="w-4 h-4 text-emerald-700 shrink-0" />
-                    <span>Arah Kiblat Plafon</span>
-                  </div>
-                  <div className="flex items-center gap-2 p-2.5 rounded-xl bg-emerald-50/70 text-emerald-900 text-xs font-medium">
-                    <Wind className="w-4 h-4 text-emerald-700 shrink-0" />
-                    <span>AC Dingin & Terawat</span>
-                  </div>
-                  <div className="flex items-center gap-2 p-2.5 rounded-xl bg-emerald-50/70 text-emerald-900 text-xs font-medium">
-                    <BedDouble className="w-4 h-4 text-emerald-700 shrink-0" />
-                    <span>Kasur King & Queen</span>
-                  </div>
-                  <div className="flex items-center gap-2 p-2.5 rounded-xl bg-emerald-50/70 text-emerald-900 text-xs font-medium">
-                    <Car className="w-4 h-4 text-emerald-700 shrink-0" />
-                    <span>Parkir Mobil Aman</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom Row: Tarif Mulai & Trigger Galeri */}
-            <div className="p-5 sm:p-6 bg-muted/20 border-t border-border flex items-center justify-between">
-              <div>
-                <span className="text-[11px] text-muted-foreground block font-body">Mulai dari</span>
-                <span className="font-display font-bold text-xl text-emerald-800">
-                  {formatIDR(100000)}
-                </span>
-                <span className="text-[11px] text-muted-foreground"> /malam</span>
-              </div>
-              <button
-                onClick={() => {
-                  setActivePhotoIdx(0);
-                  setIsGalleryOpen(true);
-                }}
-                className="text-xs font-bold text-emerald-800 hover:text-emerald-950 hover:underline flex items-center gap-1"
-              >
-                <Camera className="w-4 h-4 text-emerald-600" />
-                <span>Buka Galeri Foto Lengkap (6)</span>
-              </button>
-            </div>
-          </div>
-
-          {/* KOLOM KANAN (7 Kolom): 2 TIPE KAMAR UNGGULAN SESUAI SCREENSHOT */}
-          <div className="lg:col-span-7 space-y-4">
-            {/* KAMAR 1: Deluxe King Suite (Kasur Hijau) */}
-            <div className="bg-white rounded-3xl border border-border shadow-xs overflow-hidden transition-all hover:border-emerald-300">
-              <div className="grid grid-cols-1 sm:grid-cols-12">
-                {/* Foto Kamar */}
-                <div className="sm:col-span-5 relative aspect-4/3 sm:aspect-auto h-full min-h-[200px] overflow-hidden bg-muted">
-                  <img
-                    src="/assets/putri-sari/3.jpg"
-                    alt="Deluxe King Suite (Kasur Hijau)"
-                    className="w-full h-full object-cover"
-                  />
-                  <span className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-lg bg-emerald-900/90 text-white text-[10px] font-bold tracking-wider uppercase">
-                    Kamar Kasur Hijau
-                  </span>
-                </div>
-
-                {/* Info & Tombol Pesan */}
-                <div className="sm:col-span-7 p-5 flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-display font-bold text-base sm:text-lg text-foreground leading-snug">
-                        Deluxe King Suite (Kasur Hijau)
-                      </h3>
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold uppercase tracking-wider shrink-0">
-                        Paling Favorit
-                      </span>
-                    </div>
-
-                    <p className="text-[11px] text-emerald-800 font-semibold mt-1 flex items-center gap-2">
-                      <span>1 King Bed Ekstra Luas</span>
-                      <span>·</span>
-                      <span>2 Tamu</span>
-                      <span>·</span>
-                      <span>AC & Lemari</span>
-                    </p>
-
-                    <p className="text-xs text-muted-foreground mt-2 line-clamp-3 leading-relaxed">
-                      Kamar luas dengan kasur King Size bersprei hijau elegan, dipan empuk berkepala kulit modern,
-                      lemari pakaian geser 3 pintu motif kayu, AC dingin, dan meja rias lengkap.
-                    </p>
-                  </div>
-
-                  <div className="pt-4 mt-3 border-t border-border flex items-center justify-between">
-                    <div>
-                      <span className="text-[11px] text-muted-foreground line-through block">
-                        Rp 420.000
-                      </span>
-                      <div className="flex items-baseline gap-1">
-                        <span className="font-display font-bold text-lg text-emerald-700">
-                          {formatIDR(350000)}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground">/malam</span>
-                      </div>
-                    </div>
-                    <Button
-                      size="sm"
-                      onClick={() => handleBookNow('deluxe_king_hijau')}
-                      className="bg-emerald-800 hover:bg-emerald-900 text-white font-bold px-4 rounded-xl"
-                    >
-                      Pesan Kamar Ini
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* KAMAR 2: Standard Room dengan Balkon & Arah Kiblat (Kasur Oranye) */}
-            <div className="bg-white rounded-3xl border border-border shadow-xs overflow-hidden transition-all hover:border-emerald-300">
-              <div className="grid grid-cols-1 sm:grid-cols-12">
-                {/* Foto Kamar */}
-                <div className="sm:col-span-5 relative aspect-4/3 sm:aspect-auto h-full min-h-[200px] overflow-hidden bg-muted">
-                  <img
-                    src="/assets/putri-sari/2.jpg"
-                    alt="Standard Room dengan Balkon & Arah Kiblat (Kasur Oranye)"
-                    className="w-full h-full object-cover"
-                  />
-                  <span className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-lg bg-orange-800/90 text-white text-[10px] font-bold tracking-wider uppercase">
-                    Kamar Kasur Oranye + Balkon
-                  </span>
-                  <span className="absolute bottom-2.5 left-2.5 px-2 py-0.5 rounded-md bg-black/70 text-white text-[9px] flex items-center gap-1">
-                    <Compass className="w-3 h-3 text-brand-lime" />
-                    Penunjuk Arah Kiblat
-                  </span>
-                </div>
-
-                {/* Info & Tombol Pesan */}
-                <div className="sm:col-span-7 p-5 flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-display font-bold text-base sm:text-lg text-foreground leading-snug">
-                        Standard Room dengan Balkon & Arah Kiblat (Kasur Oranye)
-                      </h3>
-                      <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-bold uppercase tracking-wider shrink-0">
-                        Balkon Asri
-                      </span>
-                    </div>
-
-                    <p className="text-[11px] text-emerald-800 font-semibold mt-1 flex items-center gap-2">
-                      <span>1 Queen Bed + Balkon</span>
-                      <span>·</span>
-                      <span>Balkon Terbuka</span>
-                      <span>·</span>
-                      <span>Arah Kiblat Plafon</span>
-                    </p>
-
-                    <p className="text-xs text-muted-foreground mt-2 line-clamp-3 leading-relaxed">
-                      Kamar sejuk dengan pintu balkon yang menghadap pepohonan hijau rindang, dipan podium modern
-                      berwarna putih, stiker penunjuk arah kiblat di plafon, dan suasana tenang menenangkan.
-                    </p>
-                  </div>
-
-                  <div className="pt-4 mt-3 border-t border-border flex items-center justify-between">
-                    <div>
-                      <span className="text-[11px] text-muted-foreground line-through block">
-                        Rp 350.000
-                      </span>
-                      <div className="flex items-baseline gap-1">
-                        <span className="font-display font-bold text-lg text-emerald-700">
-                          {formatIDR(285000)}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground">/malam</span>
-                      </div>
-                    </div>
-                    <Button
-                      size="sm"
-                      onClick={() => handleBookNow('standard_balkon_oranye')}
-                      className="bg-emerald-800 hover:bg-emerald-900 text-white font-bold px-4 rounded-xl"
-                    >
-                      Pesan Kamar Ini
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </section>
 
-      {/* 4. FAST BOOKING ENGINE WIDGET */}
-      <section id="booking-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="bg-emerald-950 text-white p-6 sm:p-8 rounded-3xl shadow-xl border border-emerald-800/50">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-emerald-800 pb-4">
-            <div>
-              <span className="text-[10px] uppercase tracking-[0.25em] font-bold text-brand-lime">
-                Fast Online Reservation
-              </span>
-              <h2 className="font-display font-bold text-xl sm:text-2xl text-white mt-0.5">
-                Pesan Kamar Hotel Putri Sari Langsung (Jaminan Harga Terbaik)
-              </h2>
-            </div>
-            <div className="text-xs text-emerald-200/80 flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-brand-lime shrink-0" />
-              <span>Konfirmasi Otomatis & Terkoneksi Pembayaran Xendit / QRIS</span>
+      {/* 4. SECTION PILIHAN KAMAR (MOBILE-FIRST CARDS) */}
+      <section id="kamar-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-5 gap-2">
+          <div>
+            <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-widest block">
+              PILIHAN KAMAR RESMI
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-display font-semibold text-stone-900">
+              Kamar Bersih, AC Dingin, Tanpa Wajib Buat Akun
+            </h2>
+          </div>
+          <p className="text-xs text-stone-500">
+            Semua kamar dilengkapi kasur empuk, AC dingin, dan penunjuk arah kiblat
+          </p>
+        </div>
+
+        {/* List Kamar Berjejer Mobile-First */}
+        <div className="space-y-4">
+          
+          {/* KAMAR 1: Deluxe King Suite (Kasur Hijau) */}
+          <div className="bg-white rounded-3xl border border-stone-200 overflow-hidden shadow-xs hover:border-emerald-300 transition-all">
+            <div className="grid grid-cols-1 md:grid-cols-12 items-stretch">
+              {/* Foto Kamar */}
+              <div className="md:col-span-5 relative aspect-[4/3] md:aspect-auto overflow-hidden bg-stone-900">
+                <img
+                  src="/assets/putri-sari/3.jpg"
+                  alt="Deluxe King Suite (Kasur Hijau)"
+                  className="w-full h-full object-cover"
+                />
+                <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-emerald-900/90 text-white text-[10px] font-bold uppercase tracking-wider backdrop-blur-xs">
+                  Kamar Kasur Hijau • Terfavorit
+                </span>
+                <span className="absolute bottom-3 left-3 px-2 py-0.5 rounded-md bg-black/60 text-white text-[10px]">
+                  1 King Bed • 2 Tamu
+                </span>
+              </div>
+
+              {/* Detail Kamar & Aksi */}
+              <div className="md:col-span-7 p-5 sm:p-6 flex flex-col justify-between space-y-4">
+                <div>
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <h3 className="font-display font-bold text-lg sm:text-xl text-stone-900">
+                        Deluxe King Suite (Kasur Hijau)
+                      </h3>
+                      <p className="text-xs text-emerald-800 font-semibold mt-0.5">
+                        1 King Bed Ekstra Luas • AC Dingin • Lemari Geser 3 Pintu
+                      </p>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-900 text-[10px] font-bold uppercase tracking-wider shrink-0">
+                      Diskon Langsung
+                    </span>
+                  </div>
+
+                  <p className="text-xs sm:text-sm text-stone-600 mt-2.5 leading-relaxed font-body">
+                    Kamar lapang dengan kasur King Size bersprei hijau elegan, dipan empuk berkepala kulit modern, lemari pakaian 3 pintu motif kayu, AC sejuk, meja rias, dan kamar mandi dalam yang bersih.
+                  </p>
+
+                  <div className="flex flex-wrap gap-1.5 mt-3">
+                    {['Kasur King Luas', 'AC Dingin', 'Arah Kiblat Plafon', 'Kamar Mandi Dalam', 'Parkir Aman'].map((amen) => (
+                      <span key={amen} className="inline-flex items-center gap-1 text-[11px] bg-stone-50 border border-stone-200/80 px-2.5 py-1 rounded-lg text-stone-700">
+                        <Check className="w-3 h-3 text-emerald-700" />
+                        {amen}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-stone-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <span className="text-[10px] text-stone-400 line-through block">Harga OTA: Rp 420.000</span>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-2xl font-bold text-stone-900">{formatIDR(350000)}</span>
+                      <span className="text-xs text-stone-500 font-body">/ malam (Nett)</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Button
+                      onClick={() => handleBookNow('deluxe_king_hijau')}
+                      className="w-full sm:w-auto h-12 sm:h-11 px-6 rounded-2xl bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs sm:text-sm shadow-sm"
+                    >
+                      Pesan Kamar Ini (Tanpa Akun)
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          {/* KAMAR 2: Standard Room Balkon (Kasur Oranye) */}
+          <div className="bg-white rounded-3xl border border-stone-200 overflow-hidden shadow-xs hover:border-emerald-300 transition-all">
+            <div className="grid grid-cols-1 md:grid-cols-12 items-stretch">
+              {/* Foto Kamar */}
+              <div className="md:col-span-5 relative aspect-[4/3] md:aspect-auto overflow-hidden bg-stone-900">
+                <img
+                  src="/assets/putri-sari/2.jpg"
+                  alt="Standard Room dengan Balkon & Arah Kiblat (Kasur Oranye)"
+                  className="w-full h-full object-cover"
+                />
+                <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-amber-700/90 text-white text-[10px] font-bold uppercase tracking-wider backdrop-blur-xs">
+                  Kamar Kasur Oranye + Balkon
+                </span>
+                <span className="absolute bottom-3 left-3 px-2 py-0.5 rounded-md bg-black/60 text-white text-[10px] flex items-center gap-1">
+                  <Compass className="w-3 h-3 text-emerald-400" />
+                  Penunjuk Arah Kiblat
+                </span>
+              </div>
+
+              {/* Detail Kamar & Aksi */}
+              <div className="md:col-span-7 p-5 sm:p-6 flex flex-col justify-between space-y-4">
+                <div>
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <h3 className="font-display font-bold text-lg sm:text-xl text-stone-900">
+                        Standard Room dengan Balkon (Kasur Oranye)
+                      </h3>
+                      <p className="text-xs text-emerald-800 font-semibold mt-0.5">
+                        1 Queen Bed • Pintu Balkon Menghadap Pepohonan • Penunjuk Kiblat
+                      </p>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 text-[10px] font-bold uppercase tracking-wider shrink-0">
+                      Balkon Asri
+                    </span>
+                  </div>
+
+                  <p className="text-xs sm:text-sm text-stone-600 mt-2.5 leading-relaxed font-body">
+                    Kamar sejuk dengan pintu balkon yang menghadap pepohonan hijau rindang, dipan podium modern berwarna putih, sprei oranye segar, stiker penunjuk arah kiblat di plafon, dan atmosfer hening untuk istirahat optimal.
+                  </p>
+
+                  <div className="flex flex-wrap gap-1.5 mt-3">
+                    {['Balkon Asri', '1 Queen Bed', 'Arah Kiblat Plafon', 'AC Dingin', 'Parkir Aman'].map((amen) => (
+                      <span key={amen} className="inline-flex items-center gap-1 text-[11px] bg-stone-50 border border-stone-200/80 px-2.5 py-1 rounded-lg text-stone-700">
+                        <Check className="w-3 h-3 text-emerald-700" />
+                        {amen}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-stone-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <span className="text-[10px] text-stone-400 line-through block">Harga OTA: Rp 350.000</span>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-2xl font-bold text-stone-900">{formatIDR(285000)}</span>
+                      <span className="text-xs text-stone-500 font-body">/ malam (Nett)</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Button
+                      onClick={() => handleBookNow('standard_queen_oranye')}
+                      className="w-full sm:w-auto h-12 sm:h-11 px-6 rounded-2xl bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs sm:text-sm shadow-sm"
+                    >
+                      Pesan Kamar Ini (Tanpa Akun)
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* KAMAR 3: Double Bed Standard AC */}
+          <div className="bg-white rounded-3xl border border-stone-200 overflow-hidden shadow-xs hover:border-emerald-300 transition-all">
+            <div className="grid grid-cols-1 md:grid-cols-12 items-stretch">
+              <div className="md:col-span-5 relative aspect-[4/3] md:aspect-auto overflow-hidden bg-stone-900">
+                <img
+                  src="/assets/putri-sari/4.jpg"
+                  alt="Double Bed Standard AC"
+                  className="w-full h-full object-cover"
+                />
+                <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-stone-800/90 text-white text-[10px] font-bold uppercase tracking-wider backdrop-blur-xs">
+                  Double Bed AC
+                </span>
+              </div>
+              <div className="md:col-span-7 p-5 sm:p-6 flex flex-col justify-between space-y-4">
+                <div>
+                  <h3 className="font-display font-bold text-lg sm:text-xl text-stone-900">
+                    Double Bed Standard AC
+                  </h3>
+                  <p className="text-xs text-emerald-800 font-semibold mt-0.5">
+                    1 Double Bed • AC Dingin • Kamar Mandi Dalam
+                  </p>
+                  <p className="text-xs sm:text-sm text-stone-600 mt-2.5 leading-relaxed font-body">
+                    Pilihan hemat dan nyaman dengan tempat tidur ganda bersih, AC dingin terawat, serta lokasi strategis selangkah ke bibir pantai.
+                  </p>
+                </div>
+                <div className="pt-4 border-t border-stone-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <span className="text-2xl font-bold text-stone-900">{formatIDR(250000)}</span>
+                    <span className="text-xs text-stone-500 font-body">/ malam</span>
+                  </div>
+                  <Button
+                    onClick={() => handleBookNow('double_bed_standard')}
+                    className="w-full sm:w-auto h-12 sm:h-11 px-6 rounded-2xl bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs sm:text-sm shadow-sm"
+                  >
+                    Pesan Kamar Ini
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      {/* 5. FAST BOOKING ENGINE (OPTIMIZED FOR TOUCH & MOBILE) */}
+      <section id="booking-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="bg-emerald-950 text-white p-5 sm:p-8 rounded-3xl shadow-xl border border-emerald-800/50">
+          
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6 border-b border-emerald-800/80 pb-4">
+            <div>
+              <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-emerald-400 block">
+                Reservasi Mandiri Instan
+              </span>
+              <h2 className="font-display font-bold text-xl sm:text-2xl text-white mt-0.5">
+                Pesan Langsung Tanpa Perlu Daftar Akun
+              </h2>
+            </div>
+            <span className="text-xs text-emerald-300 font-body">
+              ✓ E-voucher resmi langsung terbit setelah bayar
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            
             {/* Check-In */}
             <div>
               <label className="block text-[11px] uppercase tracking-wider text-emerald-200 font-semibold mb-1.5">
@@ -557,21 +683,21 @@ export default function PutriSariPage() {
                 value={checkIn}
                 min={todayStr}
                 onChange={(e) => setCheckIn(e.target.value)}
-                className="bg-white text-foreground"
+                className="bg-white text-stone-900 h-12 rounded-2xl text-sm"
               />
             </div>
 
             {/* Check-Out */}
             <div>
               <label className="block text-[11px] uppercase tracking-wider text-emerald-200 font-semibold mb-1.5">
-                Tanggal Check-Out
+                Tanggal Check-Out ({nights} Malam)
               </label>
               <Input
                 type="date"
                 value={checkOut}
                 min={checkIn || todayStr}
                 onChange={(e) => setCheckOut(e.target.value)}
-                className="bg-white text-foreground"
+                className="bg-white text-stone-900 h-12 rounded-2xl text-sm"
               />
             </div>
 
@@ -583,7 +709,7 @@ export default function PutriSariPage() {
               <select
                 value={selectedRoomId}
                 onChange={(e) => setSelectedRoomId(e.target.value)}
-                className="w-full h-11 rounded-2xl border border-border bg-white px-3 font-body text-xs text-foreground focus:ring-2 focus:ring-brand-lime font-medium"
+                className="w-full h-12 rounded-2xl border border-stone-200 bg-white px-3 font-body text-xs text-stone-900 font-semibold focus:ring-2 focus:ring-emerald-400"
               >
                 {stay.room_types?.map((r) => (
                   <option key={r.id} value={r.id}>
@@ -593,297 +719,256 @@ export default function PutriSariPage() {
               </select>
             </div>
 
-            {/* Jumlah Kamar & Tamu */}
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="block text-[11px] uppercase tracking-wider text-emerald-200 font-semibold mb-1.5">
-                  Jumlah Kamar
-                </label>
-                <select
-                  value={roomsCount}
-                  onChange={(e) => setRoomsCount(Number(e.target.value))}
-                  className="w-full h-11 rounded-2xl border border-border bg-white px-3 font-body text-xs text-foreground font-bold"
-                >
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
-                    <option key={n} value={n}>
-                      {n} Kamar
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-[11px] uppercase tracking-wider text-emerald-200 font-semibold mb-1.5">
-                  Tamu
-                </label>
-                <select
-                  value={guestsCount}
-                  onChange={(e) => setGuestsCount(Number(e.target.value))}
-                  className="w-full h-11 rounded-2xl border border-border bg-white px-3 font-body text-xs text-foreground font-bold"
-                >
-                  {[1, 2, 3, 4, 5, 6, 8, 10, 15].map((n) => (
-                    <option key={n} value={n}>
-                      {n} Org
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* Action Button & Total */}
+            {/* Tombol Lanjut */}
             <div className="flex flex-col justify-end">
               <Button
                 onClick={() => handleBookNow(selectedRoomId)}
-                className="w-full h-11 bg-brand-lime hover:bg-emerald-400 text-emerald-950 font-bold rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg"
+                className="w-full h-12 bg-emerald-400 hover:bg-emerald-300 text-emerald-950 font-bold rounded-2xl text-sm flex items-center justify-center gap-2 shadow-lg"
               >
-                <span>Lanjut Pesan ({formatIDR(totalPrice)})</span>
+                <span>Lanjut Checkout ({formatIDR(totalPrice)})</span>
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </div>
-          </div>
-        </div>
-      </section>
 
-      {/* 5. SEMUA PILIHAN TIPE KAMAR HOTEL PUTRI SARI */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6">
-          <div>
-            <span className="text-xs uppercase tracking-widest text-emerald-700 font-bold">
-              Katalog Lengkap
-            </span>
-            <h2 className="font-display font-bold text-2xl text-emerald-950 mt-1">
-              Semua Pilihan Tipe Kamar & Tarif Resmi
-            </h2>
           </div>
-          <p className="text-xs text-muted-foreground mt-2 sm:mt-0">
-            Kapasitas mulai dari single solo hingga rombongan keluarga 4 tamu
+
+          <p className="text-[11px] text-emerald-300/80 mt-4 text-center sm:text-left">
+            Didukung pembayaran digital resmi: QRIS (Semua Bank & E-Wallet), Virtual Account BCA/BRI/Mandiri, dan Transfer Bank.
           </p>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {stay.room_types?.map((room) => (
-            <div
-              key={room.id}
-              className="bg-white rounded-3xl border border-border shadow-xs overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow"
-            >
-              <div>
-                <div className="relative aspect-16/10 overflow-hidden bg-muted">
-                  <img src={room.image} alt={room.name} className="w-full h-full object-cover" />
-                  {room.badge && (
-                    <span className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full bg-emerald-900 text-white text-[10px] font-bold uppercase tracking-wider">
-                      {room.badge}
-                    </span>
-                  )}
-                  <span className="absolute bottom-3 right-3 px-2 py-0.5 rounded-md bg-black/60 text-white text-[10px]">
-                    {room.capacity} Tamu
-                  </span>
-                </div>
-
-                <div className="p-5 space-y-3">
-                  <h3 className="font-display font-bold text-base text-foreground">{room.name}</h3>
-                  <p className="text-xs text-emerald-800 font-semibold">{room.bed}</p>
-                  <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
-                    {room.description}
-                  </p>
-
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {room.amenities?.slice(0, 3).map((a, i) => (
-                      <span
-                        key={i}
-                        className="px-2 py-0.5 rounded-md bg-muted text-muted-foreground text-[10px] font-medium"
-                      >
-                        {a}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-5 bg-muted/20 border-t border-border flex items-center justify-between">
-                <div>
-                  {room.original_price && (
-                    <span className="text-[10px] text-muted-foreground line-through block">
-                      {formatIDR(room.original_price)}
-                    </span>
-                  )}
-                  <span className="font-display font-bold text-base text-emerald-800">
-                    {formatIDR(room.price)}
-                  </span>
-                  <span className="text-[10px] text-muted-foreground"> /malam</span>
-                </div>
-                <Button
-                  size="sm"
-                  onClick={() => handleBookNow(room.id)}
-                  className="bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold rounded-xl"
-                >
-                  Pilih Kamar
-                </Button>
-              </div>
-            </div>
-          ))}
         </div>
       </section>
 
-      {/* 6. LOKASI STRATEGIS TEPAT DI DEPAN PANTAI KUMALA */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-emerald-50 rounded-3xl p-6 sm:p-8 border border-emerald-200/80">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-            <div className="lg:col-span-7 space-y-4">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-200 text-emerald-900 text-xs font-bold tracking-wider uppercase">
-                <Waves className="w-4 h-4 text-emerald-800" />
-                Lokasi Emas Tepi Laut
-              </span>
-              <h2 className="font-display font-bold text-2xl sm:text-3xl text-emerald-950">
-                Tepat di Depan Pantai Kumala, Pelabuhan Ratu
-              </h2>
-              <p className="text-xs sm:text-sm text-emerald-900 leading-relaxed font-body">
-                Anda tidak perlu repot naik kendaraan untuk menikmati pemandangan laut. Cukup menyeberang jalan dari
-                gerbang depan hotel, Anda sudah langsung berada di bibir Pantai Kumala dengan hamparan pasir dan
-                deburan ombak khas pesisir selatan Sukabumi.
-              </p>
+      {/* 6. LOKASI STRATEGIS & AKSES PANTAI KUMALA */}
+      <section id="lokasi-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="bg-white rounded-3xl p-5 sm:p-8 border border-stone-200 shadow-2xs">
+          
+          <div className="max-w-3xl mb-6">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 text-xs font-bold tracking-wider uppercase mb-2">
+              <Waves className="w-4 h-4 text-emerald-800" />
+              Akses Tepi Laut Pelabuhan Ratu
+            </span>
+            <h2 className="font-display font-bold text-2xl sm:text-3xl text-stone-900">
+              Lokasi Tepat di Seberang Pantai Kumala
+            </h2>
+            <p className="text-xs sm:text-sm text-stone-600 mt-2 leading-relaxed">
+              Tinggal melangkah keluar dari pagar hotel dan menyeberang jalan raya, Anda sudah langsung menginjakkan kaki di Pantai Kumala. Suara deburan ombak dan angin laut sejuk terasa langsung dari area hotel.
+            </p>
+          </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                <div className="p-3 bg-white rounded-2xl border border-emerald-100 shadow-xs flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-800 shrink-0 font-bold text-xs">
-                    0m
-                  </div>
-                  <div>
-                    <span className="font-bold text-xs text-foreground block">Pantai Kumala</span>
-                    <span className="text-[11px] text-muted-foreground">Tepat di seberang gerbang hotel</span>
-                  </div>
-                </div>
-
-                <div className="p-3 bg-white rounded-2xl border border-emerald-100 shadow-xs flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-800 shrink-0 font-bold text-xs">
-                    5m
-                  </div>
-                  <div>
-                    <span className="font-bold text-xs text-foreground block">Pantai Pelabuhan Ratu</span>
-                    <span className="text-[11px] text-muted-foreground">5 menit berkendara</span>
-                  </div>
-                </div>
-
-                <div className="p-3 bg-white rounded-2xl border border-emerald-100 shadow-xs flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-800 shrink-0 font-bold text-xs">
-                    8m
-                  </div>
-                  <div>
-                    <span className="font-bold text-xs text-foreground block">Pantai Citepus</span>
-                    <span className="text-[11px] text-muted-foreground">Spot sunset & wisata kuliner ikan</span>
-                  </div>
-                </div>
-
-                <div className="p-3 bg-white rounded-2xl border border-emerald-100 shadow-xs flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-800 shrink-0 font-bold text-xs">
-                    25m
-                  </div>
-                  <div>
-                    <span className="font-bold text-xs text-foreground block">Geopark Ciletuh UNESCO</span>
-                    <span className="text-[11px] text-muted-foreground">Jalur wisata pesisir selatan</span>
-                  </div>
-                </div>
+          {/* Grid Akses Dekat */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+            <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-800 font-bold text-xs shrink-0">
+                0m
+              </div>
+              <div>
+                <span className="font-bold text-xs text-stone-900 block">Pantai Kumala</span>
+                <span className="text-[11px] text-stone-500">Tepat di seberang gerbang</span>
               </div>
             </div>
 
-            <div className="lg:col-span-5 bg-white rounded-3xl p-6 border border-emerald-200/80 shadow-sm space-y-4 text-center">
-              <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center mx-auto">
-                <MapPin className="w-7 h-7" />
+            <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-800 font-bold text-xs shrink-0">
+                5 mnt
               </div>
-              <h3 className="font-display font-bold text-lg text-emerald-950">Alamat Lengkap Hotel</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
+              <div>
+                <span className="font-bold text-xs text-stone-900 block">Dermaga Pelabuhan Ratu</span>
+                <span className="text-[11px] text-stone-500">Pusat lelang ikan segar</span>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-800 font-bold text-xs shrink-0">
+                8 mnt
+              </div>
+              <div>
+                <span className="font-bold text-xs text-stone-900 block">Pantai Citepus</span>
+                <span className="text-[11px] text-stone-500">Wisata kuliner & sunset</span>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-800 font-bold text-xs shrink-0">
+                25 mnt
+              </div>
+              <div>
+                <span className="font-bold text-xs text-stone-900 block">Geopark Ciletuh</span>
+                <span className="text-[11px] text-stone-500">Situs geopark UNESCO</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-bold text-emerald-950">Alamat Lengkap:</p>
+              <p className="text-xs text-emerald-900">
                 Jl. Raya Cisolok, Depan Pantai Kumala, Pelabuhan Ratu, Kabupaten Sukabumi, Jawa Barat 43364
               </p>
-              <div className="pt-2">
-                <a
-                  href="https://maps.google.com/?q=Hotel+Putri+Sari+Pelabuhan+Ratu"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold transition-all shadow-md"
-                >
-                  <Compass className="w-4 h-4" />
-                  <span>Buka Petunjuk Arah di Google Maps</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
-              </div>
+            </div>
+            <a
+              href="https://maps.google.com/?q=Hotel+Putri+Sari+Pelabuhan+Ratu"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-semibold shrink-0 transition-colors shadow-2xs"
+            >
+              <Compass className="w-4 h-4" />
+              <span>Buka Petunjuk Arah Google Maps</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 7. FASILITAS LENGKAP */}
+      <section id="fasilitas-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="bg-white rounded-3xl p-5 sm:p-8 border border-stone-200 shadow-2xs space-y-6">
+          <div>
+            <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-widest block">
+              KENYAMANAN MENGINAP
+            </span>
+            <h2 className="text-2xl font-display font-semibold text-stone-900">
+              Fasilitas Terawat di Hotel Putri Sari
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-body text-stone-700">
+            <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/80 space-y-2">
+              <Compass className="w-6 h-6 text-emerald-700" />
+              <h4 className="font-bold text-stone-900 text-sm">Arah Kiblat Terpasang</h4>
+              <p className="text-stone-500 text-[11px]">Setiap kamar memiliki stiker arah kiblat jelas di plafon kamar.</p>
+            </div>
+            <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/80 space-y-2">
+              <Wind className="w-6 h-6 text-emerald-700" />
+              <h4 className="font-bold text-stone-900 text-sm">AC Dingin Terawat</h4>
+              <p className="text-stone-500 text-[11px]">Pendingin ruangan dibersihkan rutin untuk udara sejuk dan segar.</p>
+            </div>
+            <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/80 space-y-2">
+              <Car className="w-6 h-6 text-emerald-700" />
+              <h4 className="font-bold text-stone-900 text-sm">Parkir Mobil Aman</h4>
+              <p className="text-stone-500 text-[11px]">Halaman dalam berpagar untuk kendaraan roda 4 maupun rombongan motor.</p>
+            </div>
+            <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/80 space-y-2">
+              <Clock className="w-6 h-6 text-emerald-700" />
+              <h4 className="font-bold text-stone-900 text-sm">Resepsionis Siap Bantu</h4>
+              <p className="text-stone-500 text-[11px]">Staf ramah siap membantu check-in dan kebutuhan menginap Anda.</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 7. LIGHTBOX GALERI FOTO LENGKAP (6 FOTO) */}
-      {isGalleryOpen && (
-        <div className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-4 backdrop-blur-sm animate-in fade-in">
-          <button
-            onClick={() => setIsGalleryOpen(false)}
-            className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
-          >
-            <X className="w-6 h-6" />
-          </button>
-
-          <div className="relative max-w-4xl w-full flex flex-col items-center">
-            {/* Foto Aktif */}
-            <div className="relative w-full aspect-16/10 rounded-2xl overflow-hidden bg-black flex items-center justify-center shadow-2xl">
-              <img
-                src={galleryPhotos[activePhotoIdx].src}
-                alt={galleryPhotos[activePhotoIdx].title}
-                className="w-full h-full object-contain"
-              />
-
-              {/* Prev / Next Arrows */}
-              <button
-                onClick={() =>
-                  setActivePhotoIdx((prev) => (prev > 0 ? prev - 1 : galleryPhotos.length - 1))
-                }
-                className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/60 text-white hover:bg-black/80 transition-all"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() =>
-                  setActivePhotoIdx((prev) => (prev < galleryPhotos.length - 1 ? prev + 1 : 0))
-                }
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/60 text-white hover:bg-black/80 transition-all"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Keterangan Foto */}
-            <div className="text-center mt-3 text-white">
-              <span className="text-xs uppercase tracking-widest text-brand-lime font-bold">
-                Foto {activePhotoIdx + 1} dari {galleryPhotos.length}
-              </span>
-              <h4 className="font-display font-bold text-lg">{galleryPhotos[activePhotoIdx].title}</h4>
-              <p className="text-xs text-white/70 max-w-lg mx-auto mt-0.5">
-                {galleryPhotos[activePhotoIdx].caption}
-              </p>
-            </div>
-
-            {/* Thumbnail Strip */}
-            <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
-              {galleryPhotos.map((photo, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setActivePhotoIdx(idx)}
-                  className={`w-14 h-14 rounded-xl overflow-hidden border-2 transition-all shrink-0 ${
-                    activePhotoIdx === idx ? 'border-brand-lime scale-105' : 'border-white/30 opacity-60'
-                  }`}
-                >
-                  <img src={photo.src} alt={photo.title} className="w-full h-full object-cover" />
-                </button>
-              ))}
+      {/* 8. MOBILE FLOATING STICKY BOOKING BAR (Layoutmobile Rule: Never covers content, compact) */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-stone-200 shadow-xl px-4 py-3 sm:hidden">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <span className="text-[10px] text-stone-500 block">Tarif Mulai</span>
+            <div className="flex items-baseline gap-1">
+              <span className="text-lg font-bold text-stone-900">{formatIDR(285000)}</span>
+              <span className="text-[10px] text-stone-500">/malam</span>
             </div>
           </div>
+
+          <div className="flex items-center gap-2">
+            <a
+              href={waReceptionUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="p-3 rounded-2xl bg-emerald-50 text-emerald-900 border border-emerald-300"
+              title="Chat Resepsionis"
+            >
+              <MessageCircle className="w-5 h-5 text-emerald-700" />
+            </a>
+
+            <Button
+              onClick={() => handleBookNow(selectedRoomId)}
+              className="h-11 px-5 rounded-2xl bg-emerald-800 text-white font-bold text-xs flex items-center gap-1.5 shadow-md"
+            >
+              <span>Pesan Kamar</span>
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* 9. LIGHTBOX GALERI FOTO LENGKAP (6 FOTO) */}
+      {isGalleryOpen && (
+        <div className="fixed inset-0 z-50 bg-black/95 flex flex-col items-center justify-between p-4 backdrop-blur-md animate-in fade-in">
+          
+          {/* Top Bar Modal */}
+          <div className="w-full max-w-4xl flex items-center justify-between text-white pb-3 border-b border-white/10">
+            <div>
+              <span className="text-[10px] uppercase font-bold tracking-widest text-emerald-400">
+                Foto {activePhotoIdx + 1} dari {galleryPhotos.length}
+              </span>
+              <h4 className="font-semibold text-sm truncate max-w-[260px] sm:max-w-md">
+                {galleryPhotos[activePhotoIdx].title}
+              </h4>
+            </div>
+
+            <button
+              onClick={() => setIsGalleryOpen(false)}
+              className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+              aria-label="Tutup Galeri"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Active Image with Mobile Touch Friendly Navigation */}
+          <div className="relative w-full max-w-4xl flex-1 flex items-center justify-center my-2">
+            <img
+              src={galleryPhotos[activePhotoIdx].src}
+              alt={galleryPhotos[activePhotoIdx].title}
+              className="max-h-[65vh] w-auto max-w-full object-contain rounded-2xl"
+            />
+
+            <button
+              onClick={() =>
+                setActivePhotoIdx((prev) => (prev > 0 ? prev - 1 : galleryPhotos.length - 1))
+              }
+              className="absolute left-2 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/60 text-white hover:bg-black/90 transition-all border border-white/20"
+              aria-label="Foto Sebelumnya"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+            <button
+              onClick={() =>
+                setActivePhotoIdx((prev) => (prev < galleryPhotos.length - 1 ? prev + 1 : 0))
+              }
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/60 text-white hover:bg-black/90 transition-all border border-white/20"
+              aria-label="Foto Selanjutnya"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+          </div>
+
+          {/* Bottom Thumbnails */}
+          <div className="w-full max-w-4xl overflow-x-auto no-scrollbar py-2 flex items-center justify-center gap-2">
+            {galleryPhotos.map((photo, idx) => (
+              <button
+                key={photo.src}
+                onClick={() => setActivePhotoIdx(idx)}
+                className={`w-14 h-14 rounded-xl overflow-hidden border-2 transition-all shrink-0 ${
+                  activePhotoIdx === idx ? 'border-emerald-400 scale-105' : 'border-white/20 opacity-50'
+                }`}
+              >
+                <img src={photo.src} alt={photo.title} className="w-full h-full object-cover" />
+              </button>
+            ))}
+          </div>
+
         </div>
       )}
 
-      {/* 8. MODAL CEK E-VOUCHER / INVOICE RESERVASI */}
+      {/* 10. MODAL CEK E-VOUCHER (MOBILE FRIENDLY) */}
       {isVoucherModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
-          <div className="bg-white rounded-3xl border border-border shadow-2xl max-w-md w-full overflow-hidden p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-border pb-3">
-              <div className="flex items-center gap-2 text-emerald-900">
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white rounded-3xl border border-stone-200 shadow-2xl max-w-md w-full overflow-hidden p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+              <div className="flex items-center gap-2 text-emerald-950">
                 <FileCheck className="w-5 h-5 text-emerald-700" />
-                <h3 className="font-display font-bold text-lg text-foreground">
+                <h3 className="font-display font-bold text-lg text-stone-900">
                   Cek E-Voucher Hotel Putri Sari
                 </h3>
               </div>
@@ -893,24 +978,25 @@ export default function PutriSariPage() {
                   setSearchedBooking(null);
                   setVoucherError('');
                 }}
-                className="p-1 rounded-full hover:bg-muted text-muted-foreground"
+                className="p-1.5 rounded-full hover:bg-stone-100 text-stone-400 hover:text-stone-700"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleCheckVoucher} className="space-y-3">
-              <label className="block text-xs font-semibold text-muted-foreground">
-                Masukkan Kode Booking (Contoh: JP-XXXXXX) atau Nomor HP:
+              <label className="block text-xs font-semibold text-stone-600">
+                Masukkan Kode Booking (Contoh: JP-XXXXXX) atau Nomor WhatsApp:
               </label>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <Input
                   value={voucherCodeInput}
                   onChange={(e) => setVoucherCodeInput(e.target.value)}
                   placeholder="Contoh: JP-982103 atau 0812xxxx"
+                  className="h-11 rounded-xl text-sm"
                   required
                 />
-                <Button type="submit" className="bg-emerald-800 hover:bg-emerald-900 text-white font-bold shrink-0">
+                <Button type="submit" className="h-11 bg-emerald-800 hover:bg-emerald-900 text-white font-bold shrink-0 rounded-xl">
                   Periksa
                 </Button>
               </div>
@@ -925,12 +1011,12 @@ export default function PutriSariPage() {
             {searchedBooking && (
               <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-2 animate-in fade-in">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="font-bold text-emerald-900">Kode: {searchedBooking.booking_code}</span>
+                  <span className="font-bold text-emerald-950">Kode: {searchedBooking.booking_code}</span>
                   <span className="px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-900 text-[10px] font-bold uppercase">
-                    {searchedBooking.payment_status === 'dibayar' ? 'Lunas ✅' : 'Dikonfirmasi'}
+                    {searchedBooking.payment_status === 'dibayar' ? 'Lunas ✓' : 'Dikonfirmasi'}
                   </span>
                 </div>
-                <div className="text-xs font-body text-emerald-950 space-y-1">
+                <div className="text-xs font-body text-stone-800 space-y-1">
                   <p><strong>Nama Tamu:</strong> {searchedBooking.guest_name}</p>
                   <p><strong>Tipe Kamar:</strong> {searchedBooking.room_type} ({searchedBooking.room_count || 1} Kamar)</p>
                   <p><strong>Jadwal:</strong> {formatDate(searchedBooking.check_in)} s/d {formatDate(searchedBooking.check_out)}</p>
@@ -939,9 +1025,9 @@ export default function PutriSariPage() {
                 <div className="pt-2">
                   <Link
                     to={`/konfirmasi/${searchedBooking.booking_code}`}
-                    className="block text-center py-2 rounded-xl bg-emerald-800 text-white text-xs font-bold hover:bg-emerald-900"
+                    className="block text-center py-2.5 rounded-xl bg-emerald-800 text-white text-xs font-bold hover:bg-emerald-900 transition-colors"
                   >
-                    Buka Faktur & E-Voucher Resmi
+                    Buka Faktur & E-Voucher Lengkap
                   </Link>
                 </div>
               </div>
@@ -949,18 +1035,6 @@ export default function PutriSariPage() {
           </div>
         </div>
       )}
-
-      {/* 9. FLOATING WHATSAPP BUTTON RESEPSIONIS */}
-      <a
-        href={waReceptionUrl}
-        target="_blank"
-        rel="noreferrer"
-        className="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-3 rounded-full bg-[#25D366] text-white font-bold text-xs sm:text-sm shadow-2xl hover:scale-105 transition-transform"
-      >
-        <MessageCircle className="w-5 h-5 fill-white text-white" />
-        <span className="hidden sm:inline">WhatsApp Resepsionis Putri Sari</span>
-        <span className="sm:hidden">Resepsionis</span>
-      </a>
 
       {/* FOOTER */}
       <SiteFooter />
