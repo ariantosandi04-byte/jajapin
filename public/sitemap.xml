@@ -11,9 +11,17 @@
   <!-- Katalog Penginapan / Stays -->
   <url>
     <loc>https://jajapin.id/stays</loc>
-    <lastmod>2026-11-07</lastmod>
+    <lastmod>2026-11-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
+  </url>
+
+  <!-- Website Landing Page Resmi Hotel Putri Sari -->
+  <url>
+    <loc>https://jajapin.id/putrisari</loc>
+    <lastmod>2026-11-08</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.95</priority>
   </url>
 
   <!-- Halaman Properti Resmi Jajapin -->

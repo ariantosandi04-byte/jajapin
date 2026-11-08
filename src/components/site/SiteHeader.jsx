@@ -20,6 +20,7 @@ export default function SiteHeader() {
 
   const navLinks = [
     { to: '/stays', label: 'Penginapan' },
+    { to: '/putrisari', label: 'Hotel Putri Sari', isFeatured: true },
     { to: '/#destinasi', label: 'Destinasi' },
     { to: '/#cara-kerja', label: 'Cara Kerja' },
   ];
@@ -39,10 +40,27 @@ export default function SiteHeader() {
         </Link>
 
         {/* Center: Nav (desktop) */}
-        <nav className="hidden lg:flex items-center gap-8">
-          {navLinks.map(link => (
-            <Link key={link.to} to={link.to} className={`text-sm font-body font-medium transition-colors ${scrolled || !isHome ? 'text-foreground hover:text-primary' : 'text-white/90 hover:text-white'}`}>
-              {link.label}
+        <nav className="hidden lg:flex items-center gap-6">
+          {navLinks.map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className={`text-sm font-body font-medium transition-colors flex items-center gap-1.5 ${
+                link.isFeatured
+                  ? scrolled || !isHome
+                    ? 'text-emerald-900 font-bold bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 shadow-2xs'
+                    : 'text-white font-bold bg-white/15 px-3 py-1 rounded-full border border-brand-lime/40 shadow-2xs'
+                  : scrolled || !isHome
+                  ? 'text-foreground hover:text-primary'
+                  : 'text-white/90 hover:text-white'
+              }`}
+            >
+              <span>{link.label}</span>
+              {link.isFeatured && (
+                <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 bg-emerald-700 text-white rounded-md font-bold">
+                  Depan Pantai
+                </span>
+              )}
             </Link>
           ))}
         </nav>

@@ -17,7 +17,14 @@ const DashboardPage = lazy(() => import('@/pages/DashboardPage'))
 const TermsPage = lazy(() => import('@/pages/TermsPage'))
 const PrivacyPage = lazy(() => import('@/pages/PrivacyPage'))
 const RefundPolicyPage = lazy(() => import('@/pages/RefundPolicyPage'))
+const PutriSariPage = lazy(() => import('@/pages/PutriSariPage'))
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
+
+// Deteksi jika domain yang diakses adalah subdomain putrisari.jajapin.id
+const isPutriSariHost =
+  typeof window !== 'undefined' &&
+  (window.location.hostname === 'putrisari.jajapin.id' ||
+    window.location.hostname.startsWith('putrisari.'));
 
 function LoadingFallback() {
   return (
@@ -35,7 +42,10 @@ export default function App() {
     <AuthProvider>
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          {/* Jika diakses lewat subdomain putrisari.jajapin.id, root langsung memuat PutriSariPage */}
+          <Route path="/" element={isPutriSariHost ? <PutriSariPage /> : <HomePage />} />
+          <Route path="/putrisari" element={<PutriSariPage />} />
+          <Route path="/putri-sari" element={<PutriSariPage />} />
           <Route path="/stays" element={<StaysPage />} />
           <Route path="/stays/:slug" element={<StayDetailPage />} />
           <Route
