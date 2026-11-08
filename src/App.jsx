@@ -44,6 +44,9 @@ export default function App() {
         <Routes>
           {/* Jika diakses lewat subdomain putrisari.jajapin.id, root langsung memuat PutriSariPage */}
           <Route path="/" element={isPutriSariHost ? <PutriSariPage /> : <HomePage />} />
+          {/* Halaman Resmi Hotel Putri Sari Pelabuhan Ratu */}
+          <Route path="/stays/jajapin-hotel-putri-sari" element={<PutriSariPage />} />
+          <Route path="/stays/putri-sari" element={<PutriSariPage />} />
           <Route path="/putrisari" element={<PutriSariPage />} />
           <Route path="/putri-sari" element={<PutriSariPage />} />
           <Route path="/stays" element={<StaysPage />} />
