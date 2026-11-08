@@ -19,7 +19,7 @@ export default function Hero() {
           {/* Direct Connection to Hotel Putri Sari / Subdomain */}
           <div className="flex flex-wrap items-center gap-2 mb-6">
             <Link
-              to="/stays/jajapin-hotel-putri-sari"
+              to="/putrisari"
               className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-900/60 backdrop-blur-md border border-brand-lime/40 text-brand-lime text-xs font-semibold hover:bg-emerald-800/80 transition-all group shadow-sm"
             >
               <span className="w-2 h-2 rounded-full bg-brand-lime animate-pulse" />
@@ -78,7 +78,7 @@ export default function Hero() {
           </a>
           <span className="text-white/30">•</span>
           <Link
-            to="/stays/jajapin-hotel-putri-sari"
+            to="/putrisari"
             className="text-xs sm:text-sm font-body text-brand-lime hover:text-white transition-colors underline underline-offset-4"
           >
             Pesan Hotel Putri Sari Pelabuhan Ratu →

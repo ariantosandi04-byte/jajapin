@@ -5,8 +5,13 @@ import { Badge } from '../ui/Badge';
 import { formatIDR } from '../../lib/format';
 
 export default function StayCard({ stay }) {
+  const stayLink =
+    stay.slug === 'jajapin-hotel-putri-sari' || stay.name?.toLowerCase().includes('putri sari')
+      ? '/putrisari'
+      : `/stays/${stay.slug}`;
+
   return (
-    <Link to={`/stays/${stay.slug}`} className="block h-full group">
+    <Link to={stayLink} className="block h-full group">
       <Card hover className="h-full flex flex-col justify-between overflow-hidden">
         <div>
           <div className="relative overflow-hidden aspect-[4/3] bg-muted">

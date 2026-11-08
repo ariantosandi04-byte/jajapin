@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from '@/contexts/AuthContext'
 import ProtectedRoute from '@/components/ProtectedRoute'
 
@@ -44,11 +44,15 @@ export default function App() {
         <Routes>
           {/* Jika diakses lewat subdomain putrisari.jajapin.id, root langsung memuat PutriSariPage */}
           <Route path="/" element={isPutriSariHost ? <PutriSariPage /> : <HomePage />} />
-          {/* Halaman Resmi Hotel Putri Sari Pelabuhan Ratu */}
-          <Route path="/stays/jajapin-hotel-putri-sari" element={<PutriSariPage />} />
-          <Route path="/stays/putri-sari" element={<PutriSariPage />} />
+          
+          {/* Rute Resmi Hotel Putri Sari - Terhubung ke HMS */}
           <Route path="/putrisari" element={<PutriSariPage />} />
           <Route path="/putri-sari" element={<PutriSariPage />} />
+
+          {/* Pengalihan otomatis jika ada yang membuka URL /stays/jajapin-hotel-putri-sari */}
+          <Route path="/stays/jajapin-hotel-putri-sari" element={<Navigate to="/putrisari" replace />} />
+          <Route path="/stays/putri-sari" element={<Navigate to="/putrisari" replace />} />
+
           <Route path="/stays" element={<StaysPage />} />
           <Route path="/stays/:slug" element={<StayDetailPage />} />
           {/* Pemesanan Tanpa Wajib Buat Akun (Guest Direct Booking) */}

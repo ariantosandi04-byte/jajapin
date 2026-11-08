@@ -114,7 +114,7 @@ export default function PutriSariShowcase() {
 
           <div className="flex items-center gap-2">
             <Link
-              to="/stays/jajapin-hotel-putri-sari"
+              to="/putrisari"
               className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold tracking-wide transition-colors inline-flex items-center gap-1.5 shadow-sm"
             >
               Buka Halaman Lengkap Putri Sari <ArrowRight className="w-3.5 h-3.5" />
@@ -376,7 +376,7 @@ export default function PutriSariShowcase() {
 
           <div className="flex items-center gap-3 shrink-0">
             <Link
-              to="/stays/jajapin-hotel-putri-sari"
+              to="/putrisari"
               className="px-5 py-2.5 rounded-xl border border-stone-300 hover:border-stone-400 text-stone-800 text-xs font-semibold transition-colors"
             >
               Lihat Halaman Hotel

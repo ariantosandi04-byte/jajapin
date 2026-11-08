@@ -20,7 +20,7 @@ export default function SiteHeader() {
 
   const navLinks = [
     { to: '/stays', label: 'Penginapan' },
-    { to: '/stays/jajapin-hotel-putri-sari', label: 'Hotel Putri Sari', isFeatured: true },
+    { to: '/putrisari', label: 'Hotel Putri Sari', isFeatured: true },
     { to: '/#destinasi', label: 'Destinasi' },
     { to: '/#cara-kerja', label: 'Cara Kerja' },
   ];
@@ -43,7 +43,7 @@ export default function SiteHeader() {
 
           <div className="hidden sm:flex items-center gap-3 shrink-0">
             <Link
-              to="/stays/jajapin-hotel-putri-sari"
+              to="/putrisari"
               className="text-emerald-300 hover:text-white font-semibold inline-flex items-center gap-1 transition-colors"
             >
               Lihat Kamar & Booking Cepat <ArrowRight className="w-3 h-3" />
@@ -176,7 +176,7 @@ export default function SiteHeader() {
                 <span className="text-xs font-semibold">Hotel Putri Sari Pelabuhan Ratu</span>
               </div>
               <Link
-                to="/stays/jajapin-hotel-putri-sari"
+                to="/putrisari"
                 onClick={() => setMenuOpen(false)}
                 className="px-3 py-1.5 rounded-lg bg-emerald-600 text-[11px] font-semibold text-white"
               >

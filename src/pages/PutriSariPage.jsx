@@ -284,10 +284,10 @@ export default function PutriSariPage() {
 
             <Link
               to="/dashboard"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold transition-colors"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-900 hover:bg-emerald-950 text-white text-xs font-semibold transition-colors shadow-2xs"
             >
-              <KeyRound className="w-3.5 h-3.5 text-stone-600" />
-              <span>Portal Mitra</span>
+              <KeyRound className="w-3.5 h-3.5 text-emerald-400" />
+              <span>HMS & Portal Mitra</span>
             </Link>
 
             <button
@@ -351,10 +351,16 @@ export default function PutriSariPage() {
         {/* Mobile Title & Badge Card */}
         <div className="bg-white rounded-3xl p-4 sm:p-6 border border-stone-200/80 shadow-2xs mb-4">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
-              Listing Terverifikasi Jajapin
-            </span>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
+                Listing Terverifikasi Jajapin
+              </span>
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] sm:text-xs font-semibold">
+                <Sparkles className="w-3 h-3 text-emerald-600" />
+                Terhubung ke HMS
+              </span>
+            </div>
 
             <div className="flex items-center gap-1 text-amber-500 font-bold text-xs">
               <Star className="w-4 h-4 fill-amber-400 text-amber-400" />

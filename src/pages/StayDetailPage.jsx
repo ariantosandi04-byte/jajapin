@@ -28,6 +28,12 @@ import { formatIDR, formatDate } from '../lib/format';
 
 export default function StayDetailPage() {
   const { slug } = useParams();
+
+  // Pengalihan resmi ke halaman khusus Hotel Putri Sari yang terhubung ke HMS
+  if (slug === 'jajapin-hotel-putri-sari' || slug === 'putri-sari') {
+    return <Navigate to="/putrisari" replace />;
+  }
+
   const stay = stays.find((s) => s.slug === slug);
 
   if (!stay) {
