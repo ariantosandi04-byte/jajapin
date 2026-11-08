@@ -1,6 +1,10 @@
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, Sparkles } from 'lucide-react';
 import SiteHeader from '../components/site/SiteHeader';
 import SiteFooter from '../components/site/SiteFooter';
 import Hero from '../components/site/Hero';
+import PutriSariShowcase from '../components/site/PutriSariShowcase';
 import DestinationStrip from '../components/site/DestinationStrip';
 import WhyJajapin from '../components/site/WhyJajapin';
 import HowItWorks from '../components/site/HowItWorks';
@@ -8,9 +12,6 @@ import NearbySearch from '../components/site/NearbySearch';
 import StayCard from '../components/site/StayCard';
 import { Skeleton } from '../components/ui/Skeleton';
 import { stays } from '../data/stays';
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
 
 export default function HomePage() {
   const [loading, setLoading] = useState(true);
@@ -24,26 +25,39 @@ export default function HomePage() {
 
   useEffect(() => {
     document.title = 'Jajapin - Platform Resmi Booking Hotel & Penginapan Murah Indonesia | jajapin.id';
-    const timer = setTimeout(() => setLoading(false), 800);
+    const timer = setTimeout(() => setLoading(false), 600);
     return () => clearTimeout(timer);
   }, []);
 
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
+      
+      {/* Hero dengan aksen natural dan tautan cepat Putri Sari */}
       <Hero />
+
+      {/* Showcase Unggulan: Hotel Putri Sari (Terhubung dengan putrisari.jajapin.id) */}
+      <PutriSariShowcase />
+
+      {/* Jalur Destinasi Jajapin Network */}
       <DestinationStrip />
 
-      {/* Pilihan Minggu Ini */}
+      {/* Pilihan Penginapan Lainnya di Jaringan Jajapin */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="flex items-end justify-between mb-10">
-          <h2 className="font-display font-light text-3xl sm:text-4xl tracking-tight text-foreground">
-            Penginapan yang layak dikunjungi
-          </h2>
-          <Link to="/stays" className="hidden sm:flex items-center gap-2 text-sm font-body font-medium text-primary hover:underline">
-            Semua penginapan <ArrowRight className="w-4 h-4" />
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.24em] font-body font-semibold text-emerald-800 mb-2">
+              Jaringan Penginapan Nusantara
+            </p>
+            <h2 className="font-display font-light text-3xl sm:text-4xl tracking-tight text-foreground">
+              Pilihan Penginapan Nyata di Seluruh Indonesia
+            </h2>
+          </div>
+          <Link to="/stays" className="hidden sm:flex items-center gap-2 text-sm font-body font-semibold text-emerald-800 hover:text-emerald-950 transition-colors">
+            Lihat semua {stays.length} penginapan <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
+
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -62,14 +76,27 @@ export default function HomePage() {
             ))}
           </div>
         )}
-        <Link to="/stays" className="sm:hidden flex items-center justify-center gap-2 mt-8 text-sm font-body font-medium text-primary hover:underline">
-          Semua penginapan <ArrowRight className="w-4 h-4" />
-        </Link>
+
+        <div className="mt-10 sm:hidden">
+          <Link
+            to="/stays"
+            className="w-full py-3 rounded-xl border border-stone-300 text-stone-800 text-sm font-semibold flex items-center justify-center gap-2"
+          >
+            Lihat semua {stays.length} penginapan <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
       </section>
 
+      {/* Nilai Utama & Transparansi Jajapin */}
       <WhyJajapin />
+
+      {/* Alur Booking Simpel */}
       <HowItWorks />
+
+      {/* Radar Lokasi Terdekat */}
       <NearbySearch />
+
+      {/* Footer Lengkap Terhubung Legal & Subdomain */}
       <SiteFooter />
     </div>
   );

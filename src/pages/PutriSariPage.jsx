@@ -163,13 +163,34 @@ export default function PutriSariPage() {
     }
   };
 
-  const waReceptionNumber = '6281234567890';
+  const waReceptionNumber = '628581415730';
   const waReceptionUrl = `https://wa.me/${waReceptionNumber}?text=${encodeURIComponent(
     'Halo Resepsionis Hotel Putri Sari Pelabuhan Ratu, saya ingin menanyakan ketersediaan kamar di depan Pantai Kumala.'
   )}`;
 
   return (
     <div className="min-h-screen bg-[#fcfbf9] text-foreground font-body">
+      {/* TOP NETWORK BAR */}
+      <div className="bg-[#0b1f14] text-white/90 text-[11px] py-1.5 px-4 border-b border-emerald-900/60 font-body">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400" />
+            <span className="text-emerald-300 font-semibold uppercase tracking-wider text-[10px]">
+              Subdomain Resmi:
+            </span>
+            <span className="font-mono text-emerald-200">putrisari.jajapin.id</span>
+            <span className="hidden sm:inline text-white/60">• Terhubung langsung dengan sistem inventori & reservasi jajapin.id</span>
+          </div>
+
+          <Link
+            to="/"
+            className="text-emerald-300 hover:text-white font-semibold inline-flex items-center gap-1 transition-colors text-[11px]"
+          >
+            ← Kembali ke Beranda jajapin.id
+          </Link>
+        </div>
+      </div>
+
       {/* 1. TOP NAVBAR KHUSUS PUTRI SARI & JAJAPIN */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-border/80 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">

@@ -31,6 +31,12 @@ export default function SiteFooter() {
           <div>
             <h4 className="text-[11px] uppercase tracking-[0.24em] font-body font-semibold text-white/40 mb-4">Jelajahi</h4>
             <nav className="flex flex-col gap-2.5">
+              <Link to="/putrisari" className="text-xs font-body text-brand-lime hover:text-white font-semibold transition-colors flex items-center gap-1">
+                ★ Hotel Putri Sari (Pelabuhan Ratu)
+              </Link>
+              <a href="https://putrisari.jajapin.id" target="_blank" rel="noreferrer" className="text-[11px] font-mono text-white/60 hover:text-white transition-colors">
+                putrisari.jajapin.id ↗
+              </a>
               <Link to="/stays" className="text-xs font-body text-white/70 hover:text-white transition-colors">Semua Penginapan</Link>
               <Link to="/bookings" className="text-xs font-body text-white/70 hover:text-white transition-colors">Booking Saya</Link>
               <Link to="/#destinasi" className="text-xs font-body text-white/70 hover:text-white transition-colors">Destinasi Populer</Link>
