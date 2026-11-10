@@ -7,8 +7,6 @@ export default defineConfig(({ mode }) => {
 
   const serverKey = env.MIDTRANS_SERVER_KEY || 'SB-Mid-server-6hwXm9~zkJrka94g-UyeO8hV';
   const isProduction = env.MIDTRANS_IS_PRODUCTION === 'true';
-  const xenditSecretKey = env.XENDIT_SECRET_KEY || 'xnd_development_SecretKeyPlaceholderJajapin123';
-  const xenditWebhookToken = env.XENDIT_WEBHOOK_VERIFICATION_TOKEN || 'jajapin_webhook_token_2026';
 
   return {
     plugins: [
@@ -121,120 +119,71 @@ export default defineConfig(({ mode }) => {
             });
           });
 
-          // Middleware pembuat invoice Xendit Dev Server
-          server.middlewares.use('/api/create-xendit-invoice', async (req, res) => {
-            if (req.method !== 'POST') {
-              res.statusCode = 405;
-              res.end(JSON.stringify({ error: 'Method Not Allowed' }));
-              return;
-            }
-
-            let body = '';
-            req.on('data', (chunk) => {
-              body += chunk;
-            });
-
-            req.on('end', async () => {
-              try {
-                const payload = JSON.parse(body || '{}');
-                const bookingCode = payload.bookingCode || `JP-${Date.now()}`;
-                const totalPrice = Math.round(payload.totalPrice || 250000);
-                const stayName = payload.stayName || 'Penginapan Jajapin';
-
-                // Jika secret key adalah placeholder atau offline, kirim response simulasi yang valid
-                if (!xenditSecretKey || xenditSecretKey.includes('Placeholder')) {
-                  res.setHeader('Content-Type', 'application/json');
-                  res.statusCode = 200;
-                  res.end(
-                    JSON.stringify({
-                      id: `inv_mock_${Date.now()}`,
-                      external_id: bookingCode,
-                      invoice_url: `https://checkout-staging.xendit.co/v2/${bookingCode}`,
-                      status: 'PENDING',
-                      amount: totalPrice,
-                      description: `Reservasi ${stayName} - ${bookingCode}`,
-                      isMock: true,
-                    })
-                  );
-                  return;
-                }
-
-                // Call Xendit API resmi
-                const authHeader = 'Basic ' + Buffer.from(xenditSecretKey + ':').toString('base64');
-                const xenditPayload = {
-                  external_id: bookingCode,
-                  amount: totalPrice,
-                  description: `Reservasi ${stayName} (${payload.nights || 1} Malam) - Kode: ${bookingCode}`,
-                  payer_email: payload.guestEmail || 'tamu@jajapin.id',
-                  customer: {
-                    given_names: payload.guestName || 'Tamu Jajapin',
-                    email: payload.guestEmail || 'tamu@jajapin.id',
-                    mobile_number: payload.guestPhone || '+628123456789',
-                  },
-                  success_redirect_url: `http://localhost:5173/konfirmasi/${bookingCode}`,
-                  failure_redirect_url: `http://localhost:5173/pesan/${bookingCode}?status=failed`,
-                  currency: 'IDR',
-                  invoice_duration: 86400,
-                };
-
-                const xres = await fetch('https://api.xendit.co/v2/invoices', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: authHeader,
-                  },
-                  body: JSON.stringify(xenditPayload),
-                });
-
-                const data = await xres.json();
-                res.setHeader('Content-Type', 'application/json');
-                res.statusCode = xres.status;
-                res.end(JSON.stringify(data));
-              } catch (err) {
-                console.error('[Xendit Dev API Error]:', err);
-                // Fallback graceful
-                res.setHeader('Content-Type', 'application/json');
-                res.statusCode = 200;
-                res.end(
-                  JSON.stringify({
-                    id: `inv_fallback_${Date.now()}`,
-                    external_id: 'JP-FALLBACK',
-                    invoice_url: 'https://checkout-staging.xendit.co/v2/demo',
-                    status: 'PENDING',
-                    isMock: true,
-                  })
-                );
-              }
-            });
-          });
-
-          // Middleware Webhook Callback Xendit
-          server.middlewares.use('/api/xendit-callback', async (req, res) => {
-            if (req.method !== 'POST') {
+          // Middleware pengecekan status Midtrans langsung (Dev Server)
+          server.middlewares.use('/api/check-midtrans-status', async (req, res) => {
+            if (req.method !== 'GET') {
               res.statusCode = 405;
               res.end('Method Not Allowed');
               return;
             }
 
-            let body = '';
-            req.on('data', (chunk) => {
-              body += chunk;
-            });
+            try {
+              const url = new URL(req.url, `http://${req.headers.host}`);
+              const orderId = url.searchParams.get('orderId') || url.searchParams.get('order_id');
 
-            req.on('end', () => {
-              try {
-                const callbackData = JSON.parse(body || '{}');
-                const callbackToken = req.headers['x-callback-token'];
-
-                console.log(`[Xendit Webhook Received] ID: ${callbackData.id} | External ID: ${callbackData.external_id} | Status: ${callbackData.status}`);
-                res.setHeader('Content-Type', 'application/json');
-                res.statusCode = 200;
-                res.end(JSON.stringify({ status: 'SUCCESS', id: callbackData.id }));
-              } catch (e) {
+              if (!orderId) {
                 res.statusCode = 400;
-                res.end(JSON.stringify({ error: 'Bad Request' }));
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify({ success: false, error: 'Parameter orderId diperlukan.' }));
+                return;
               }
-            });
+
+              const authString = Buffer.from(serverKey + ':').toString('base64');
+              const statusUrl = isProduction
+                ? `https://api.midtrans.com/v2/${orderId}/status`
+                : `https://api.sandbox.midtrans.com/v2/${orderId}/status`;
+
+              const midtransRes = await fetch(statusUrl, {
+                method: 'GET',
+                headers: {
+                  Accept: 'application/json',
+                  'Content-Type': 'application/json',
+                  Authorization: `Basic ${authString}`,
+                },
+              });
+
+              const data = await midtransRes.json();
+              const transactionStatus = data.transaction_status || 'unknown';
+              const fraudStatus = data.fraud_status;
+
+              let isPaid = false;
+              if (transactionStatus === 'capture') {
+                isPaid = fraudStatus === 'accept' || !fraudStatus;
+              } else if (transactionStatus === 'settlement') {
+                isPaid = true;
+              }
+
+              res.setHeader('Content-Type', 'application/json');
+              res.statusCode = 200;
+              res.end(
+                JSON.stringify({
+                  success: true,
+                  orderId,
+                  transactionStatus,
+                  fraudStatus,
+                  isPaid,
+                  paymentType: data.payment_type || 'midtrans',
+                  grossAmount: data.gross_amount,
+                  settlementTime: data.settlement_time || data.transaction_time,
+                  raw: data,
+                })
+              );
+            } catch (err) {
+              console.error('[Midtrans Check Status Dev Error]:', err);
+              res.statusCode = 500;
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({ success: false, error: err.message }));
+            }
           });
         },
       },

@@ -49,7 +49,7 @@ export default function PrivacyPage() {
                 <li><strong>Identitas Diri:</strong> Nama lengkap, nomor KTP/Paspor (untuk keperluan check-in hotel).</li>
                 <li><strong>Data Kontak:</strong> Alamat email dan nomor telepon / WhatsApp aktif.</li>
                 <li><strong>Rincian Transaksi:</strong> Tanggal menginap, tipe kamar, total nilai transaksi, dan preferensi menginap.</li>
-                <li><strong>Data Pembayaran:</strong> Metode pembayaran yang dipilih. Catatan: Informasi sensitif seperti nomor kartu kredit diproses langsung oleh payment gateway bersertifikasi PCI-DSS (Xendit & Midtrans) dan tidak pernah disimpan di server Jajapin.</li>
+                <li><strong>Data Pembayaran:</strong> Metode pembayaran yang dipilih. Catatan: Informasi sensitif seperti nomor kartu kredit diproses langsung oleh payment gateway bersertifikasi PCI-DSS (Midtrans) dan tidak pernah disimpan di server Jajapin.</li>
               </ul>
             </section>
 
@@ -75,7 +75,7 @@ export default function PrivacyPage() {
               </p>
               <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
                 <li><strong>Mitra Penginapan Terkait:</strong> Untuk keperluan validasi check-in dan alokasi kamar tamu.</li>
-                <li><strong>Gerbang Pembayaran Resmi (Xendit & Midtrans):</strong> Untuk verifikasi keabsahan transaksi perbankan.</li>
+                <li><strong>Gerbang Pembayaran Resmi (Midtrans):</strong> Untuk verifikasi keabsahan transaksi perbankan.</li>
                 <li><strong>Otoritas Hukum Berwenang:</strong> Apabila diwajibkan oleh peraturan perundang-undangan Republik Indonesia.</li>
               </ul>
             </section>

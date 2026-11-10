@@ -44,7 +44,7 @@ export default function SiteFooter() {
             </nav>
           </div>
 
-          {/* Legalitas & Kepatuhan (Wajib untuk Verifikasi Xendit) */}
+          {/* Legalitas & Kepatuhan */}
           <div>
             <h4 className="text-[11px] uppercase tracking-[0.24em] font-body font-semibold text-brand-lime mb-4">Kebijakan & Legal</h4>
             <nav className="flex flex-col gap-2.5">
@@ -59,7 +59,7 @@ export default function SiteFooter() {
               </Link>
               <div className="pt-2 text-[11px] text-white/50 space-y-1">
                 <p>Didukung Pembayaran Digital:</p>
-                <p className="font-semibold text-white/70">Xendit • Midtrans • QRIS • VA</p>
+                <p className="font-semibold text-white/70">Midtrans • QRIS • Virtual Account • Tunai</p>
               </div>
             </nav>
           </div>

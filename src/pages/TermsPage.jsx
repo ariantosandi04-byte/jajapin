@@ -61,7 +61,7 @@ export default function TermsPage() {
                 3. Pemesanan & Konfirmasi Reservasi
               </h2>
               <p>
-                Setiap pemesanan yang dibuat melalui Jajapin akan menghasilkan <strong>Kode Booking Resmi</strong> dan <strong>Faktur / Invoice</strong>. Konfirmasi pemesanan berlaku mengikat setelah pembayaran berhasil diverifikasi oleh payment gateway resmi kami (Xendit / Midtrans) atau setelah konfirmasi setoran dari kasir properti.
+                Setiap pemesanan yang dibuat melalui Jajapin akan menghasilkan <strong>Kode Booking Resmi</strong> dan <strong>Faktur / Invoice</strong>. Konfirmasi pemesanan berlaku mengikat setelah pembayaran berhasil diverifikasi oleh payment gateway resmi kami (Midtrans) atau setelah konfirmasi setoran dari kasir properti.
               </p>
               <p>
                 Tamu wajib menunjukkan bukti konfirmasi booking digital dan kartu identitas fisik (KTP/Paspor/SIM) saat proses check-in di resepsionis properti.
@@ -76,7 +76,7 @@ export default function TermsPage() {
                 Seluruh tarif kamar yang tercantum di situs Jajapin dinyatakan dalam mata uang <strong>Rupiah (IDR)</strong> dan telah mencakup pajak daerah (PB1) serta biaya layanan, kecuali dinyatakan lain secara tertulis.
               </p>
               <p>
-                Transaksi pembayaran digital diproses melalui mitra gerbang pembayaran berizin Bank Indonesia, yaitu <strong>Xendit</strong> dan <strong>Midtrans</strong>, yang mendukung metode:
+                Transaksi pembayaran digital diproses melalui mitra gerbang pembayaran berizin Bank Indonesia, yaitu <strong>Midtrans</strong>, yang mendukung metode:
               </p>
               <div className="p-4 rounded-2xl bg-muted/40 border border-border grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-semibold text-foreground">
                 <div>• Virtual Account Bank</div>

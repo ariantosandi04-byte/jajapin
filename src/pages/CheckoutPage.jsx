@@ -498,34 +498,8 @@ export default function CheckoutPage() {
                 </Card>
               </form>
 
-              {/* Status Banner Payment Gateway Terhubung */}
-              {gateway === 'xendit' ? (
-                <div className="p-4 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 space-y-2 font-body text-xs">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-foreground font-semibold">
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                      <span>
-                        Xendit Invoicing V2:{' '}
-                        <span className="text-emerald-700 dark:text-emerald-400">Siap & Terhubung</span>
-                      </span>
-                    </div>
-                    <Badge variant="lime" className="text-[10px]">Merchant Terverifikasi</Badge>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground">
-                    Endpoint: <code className="font-mono text-emerald-800 dark:text-emerald-300 font-semibold">/api/create-xendit-invoice.php</code> | Webhook Callback: <code className="font-mono text-emerald-800 dark:text-emerald-300">/api/xendit-callback.php</code>
-                  </p>
-                  <div className="flex flex-wrap items-center gap-3 pt-1 border-t border-emerald-200/60 text-[11px] text-muted-foreground">
-                    <span className="flex items-center gap-1 text-emerald-700 dark:text-emerald-400 font-medium">
-                      ✓ Syarat Kepatuhan ACC Lengkap
-                    </span>
-                    <Link to="/terms" className="hover:underline text-foreground">S&K</Link>
-                    <span>•</span>
-                    <Link to="/privacy" className="hover:underline text-foreground">Privasi</Link>
-                    <span>•</span>
-                    <Link to="/refund-policy" className="hover:underline text-foreground">Kebijakan Refund</Link>
-                  </div>
-                </div>
-              ) : gateway === 'midtrans' ? (
+              {/* Status Banner Payment Gateway Midtrans */}
+              {gateway === 'midtrans' ? (
                 <div className="p-4 rounded-2xl bg-primary/5 border border-primary/20 space-y-3 font-body">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-foreground text-xs">
