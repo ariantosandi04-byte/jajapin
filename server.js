@@ -120,6 +120,85 @@ app.post('/api/midtrans-notification', (req, res) => {
   });
 });
 
+/**
+ * 3. Endpoint: Cek Status Pembayaran ke Midtrans
+ * GET /api/check-midtrans-status?orderId=JP-XXXXXX
+ */
+app.get('/api/check-midtrans-status', async (req, res) => {
+  const orderId = req.query.orderId || req.query.order_id;
+
+  if (!orderId) {
+    return res.status(400).json({ success: false, error: 'Parameter orderId diperlukan.' });
+  }
+
+  const authString = Buffer.from(`${SERVER_KEY}:`).toString('base64');
+  const statusUrl = IS_PRODUCTION
+    ? `https://api.midtrans.com/v2/${orderId}/status`
+    : `https://api.sandbox.midtrans.com/v2/${orderId}/status`;
+
+  try {
+    const response = await fetch(statusUrl, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        Authorization: `Basic ${authString}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.transaction_status) {
+      const txStatus = data.transaction_status;
+      const fraudStatus = data.fraud_status || '';
+      const grossAmount = parseFloat(data.gross_amount || 0);
+
+      let isPaid = false;
+      let bookingStatus = 'menunggu';
+      let paymentStatus = 'menunggu_pembayaran';
+
+      if (txStatus === 'settlement' || (txStatus === 'capture' && fraudStatus === 'accept')) {
+        isPaid = true;
+        bookingStatus = 'dikonfirmasi';
+        paymentStatus = 'dibayar';
+      } else if (['cancel', 'deny', 'expire'].includes(txStatus)) {
+        bookingStatus = 'dibatalkan';
+        paymentStatus = txStatus === 'expire' ? 'kedaluwarsa' : 'gagal';
+      }
+
+      return res.status(200).json({
+        success: true,
+        order_id: orderId,
+        isPaid,
+        transaction_status: txStatus,
+        fraud_status: fraudStatus,
+        booking_status: bookingStatus,
+        payment_status: paymentStatus,
+        gross_amount: grossAmount,
+        payment_type: data.payment_type || '',
+        settlement_time: data.settlement_time || data.transaction_time || null,
+        raw: data,
+      });
+    }
+
+    return res.status(response.status).json({
+      success: false,
+      order_id: orderId,
+      isPaid: false,
+      error: data.status_message || 'Transaksi tidak ditemukan di Midtrans.',
+      raw: data,
+    });
+  } catch (err) {
+    console.error('Error saat cek status transaksi Midtrans:', err);
+    return res.status(500).json({
+      success: false,
+      order_id: orderId,
+      error: 'Gagal menghubungi server Midtrans',
+      details: err.message,
+    });
+  }
+});
+
 app.listen(port, () => {
   console.log(`🚀 Jajapin Midtrans API Server aktif di port ${port}`);
 });

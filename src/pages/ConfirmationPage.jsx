@@ -1,19 +1,125 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { CheckCircle2, Calendar, MapPin, Users, Phone, Mail, Clock, Download, Home, ListOrdered, FileText, BedDouble, DoorOpen } from 'lucide-react';
+import {
+  CheckCircle2,
+  Calendar,
+  MapPin,
+  Users,
+  Phone,
+  Mail,
+  Clock,
+  Download,
+  Home,
+  ListOrdered,
+  FileText,
+  BedDouble,
+  DoorOpen,
+  RefreshCw,
+  Loader2,
+  AlertCircle,
+} from 'lucide-react';
 import SiteHeader from '../components/site/SiteHeader';
 import SiteFooter from '../components/site/SiteFooter';
 import InvoiceModal from '../components/dashboard/InvoiceModal';
 import { Card, CardContent } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
-import { getBookingByCode, STATUS_LABELS, STATUS_COLORS, PAYMENT_STATUS_LABELS } from '../lib/bookingStatus';
+import {
+  getBookingByCode,
+  STATUS_LABELS,
+  STATUS_COLORS,
+  PAYMENT_STATUS_LABELS,
+  markBookingAsPaid,
+} from '../lib/bookingStatus';
 import { formatIDR, formatDateLong } from '../lib/format';
+import { checkMidtransStatus } from '../lib/midtrans';
 
 export default function ConfirmationPage() {
   const { id } = useParams();
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
-  const booking = useMemo(() => getBookingByCode(id), [id]);
+  const [booking, setBooking] = useState(() => getBookingByCode(id));
+  const [isCheckingPayment, setIsCheckingPayment] = useState(false);
+  const [statusMessage, setStatusMessage] = useState(null);
+
+  // Sinkronisasi data saat local storage berubah atau event ditembakkan
+  useEffect(() => {
+    const refreshData = () => {
+      const fresh = getBookingByCode(id);
+      if (fresh) setBooking(fresh);
+    };
+
+    window.addEventListener('jajapin_bookings_updated', refreshData);
+    window.addEventListener('storage', refreshData);
+    return () => {
+      window.removeEventListener('jajapin_bookings_updated', refreshData);
+      window.removeEventListener('storage', refreshData);
+    };
+  }, [id]);
+
+  // Otomatis cek status saat mount jika masih menunggu pembayaran
+  useEffect(() => {
+    let isMounted = true;
+    if (booking && booking.payment_status === 'menunggu_pembayaran') {
+      setIsCheckingPayment(true);
+      checkMidtransStatus(booking.booking_code)
+        .then((res) => {
+          if (!isMounted) return;
+          if (res.isPaid) {
+            const updated = markBookingAsPaid(booking.booking_code, {
+              payment_method: res.payment_type || booking.payment_method || 'midtrans_snap',
+            });
+            if (updated) setBooking(updated);
+            setStatusMessage({
+              type: 'success',
+              text: 'Pembayaran Anda telah terkonfirmasi LUNAS dari Midtrans!',
+            });
+          }
+        })
+        .catch(() => {})
+        .finally(() => {
+          if (isMounted) setIsCheckingPayment(false);
+        });
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [id, booking?.payment_status]);
+
+  const handleManualCheck = async () => {
+    if (!booking) return;
+    setIsCheckingPayment(true);
+    setStatusMessage(null);
+    try {
+      const res = await checkMidtransStatus(booking.booking_code);
+      if (res.isPaid) {
+        const updated = markBookingAsPaid(booking.booking_code, {
+          payment_method: res.payment_type || booking.payment_method || 'midtrans_snap',
+        });
+        if (updated) setBooking(updated);
+        setStatusMessage({
+          type: 'success',
+          text: 'Alhamdulillah! Pembayaran telah terverifikasi LUNAS.',
+        });
+      } else if (res.transaction_status === 'pending') {
+        setStatusMessage({
+          type: 'info',
+          text: 'Transaksi masih menunggu pembayaran di Midtrans. Jika sudah transfer di Simulator/ATM, tunggu beberapa detik lalu klik cek lagi.',
+        });
+      } else {
+        setStatusMessage({
+          type: 'warning',
+          text: res.message || `Status Midtrans: ${res.transaction_status || 'Belum dibayar'}.`,
+        });
+      }
+    } catch (err) {
+      setStatusMessage({
+        type: 'error',
+        text: 'Gagal terhubung ke gateway pembayaran untuk verifikasi.',
+      });
+    } finally {
+      setIsCheckingPayment(false);
+    }
+  };
 
   if (!booking) {
     return (
@@ -163,6 +269,36 @@ export default function ConfirmationPage() {
               </div>
 
               <hr className="border-border" />
+
+              {/* Sync Payment Notification Banner */}
+              {booking.payment_status !== 'dibayar' && (
+                <div className="p-4 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-800 text-left space-y-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 text-amber-900 dark:text-amber-200 font-semibold text-xs">
+                      <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                      <span>Sudah bayar di Simulator Midtrans atau ATM? Klik tombol untuk verifikasi instan:</span>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={handleManualCheck}
+                      disabled={isCheckingPayment}
+                      className="text-xs h-8 bg-amber-600 hover:bg-amber-700 text-white shrink-0"
+                    >
+                      {isCheckingPayment ? (
+                        <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                      ) : (
+                        <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
+                      )}
+                      {isCheckingPayment ? 'Memeriksa...' : 'Cek Status Pembayaran'}
+                    </Button>
+                  </div>
+                  {statusMessage && (
+                    <p className={`text-xs font-semibold ${statusMessage.type === 'success' ? 'text-emerald-700 dark:text-emerald-400' : 'text-amber-800 dark:text-amber-300'}`}>
+                      {statusMessage.text}
+                    </p>
+                  )}
+                </div>
+              )}
 
               {/* Payment Status and Total */}
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">

@@ -80,3 +80,50 @@ export function payWithSnap(snapToken, { onSuccess, onPending, onError, onClose 
     },
   });
 }
+
+/**
+ * Cek status pembayaran transaksi Midtrans secara langsung
+ * @param {string} orderId - Kode booking atau Order ID Midtrans
+ * @returns {Promise<{success: boolean, isPaid: boolean, transaction_status?: string, message?: string}>}
+ */
+export async function checkMidtransStatus(orderId) {
+  if (!orderId) {
+    return { success: false, isPaid: false, message: 'Kode order tidak valid' };
+  }
+
+  try {
+    let res = await fetch(`/api/check-midtrans-status?orderId=${encodeURIComponent(orderId)}`);
+
+    if (!res.ok && res.status === 404) {
+      res = await fetch(`/api/check-midtrans-status.php?orderId=${encodeURIComponent(orderId)}`);
+    }
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      return {
+        success: false,
+        isPaid: false,
+        message: errData.error || `Gagal memeriksa status (HTTP ${res.status})`,
+      };
+    }
+
+    const data = await res.json();
+    return {
+      success: true,
+      isPaid: !!data.isPaid,
+      transaction_status: data.transaction_status,
+      payment_type: data.payment_type,
+      gross_amount: data.gross_amount,
+      booking_status: data.booking_status,
+      payment_status: data.payment_status,
+      raw: data,
+    };
+  } catch (err) {
+    console.warn('Gagal menghubungi API cek status Midtrans:', err);
+    return {
+      success: false,
+      isPaid: false,
+      message: 'Koneksi ke gateway Midtrans terputus atau tidak terjangkau.',
+    };
+  }
+}

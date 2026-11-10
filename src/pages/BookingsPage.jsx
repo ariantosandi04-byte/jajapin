@@ -1,6 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, MapPin, Users as UsersIcon, ArrowRight, Ban, FileText } from 'lucide-react';
+import { Calendar, MapPin, Users as UsersIcon, ArrowRight, Ban, FileText, RefreshCw } from 'lucide-react';
 import SiteHeader from '../components/site/SiteHeader';
 import SiteFooter from '../components/site/SiteFooter';
 import InvoiceModal from '../components/dashboard/InvoiceModal';
@@ -16,6 +16,18 @@ export default function BookingsPage() {
   const [filter, setFilter] = useState('semua');
   const [refreshKey, setRefreshKey] = useState(0);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      setRefreshKey((k) => k + 1);
+    };
+    window.addEventListener('jajapin_bookings_updated', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+    return () => {
+      window.removeEventListener('jajapin_bookings_updated', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
+  }, []);
 
   const bookings = useMemo(() => {
     return getBookings(user?.email);

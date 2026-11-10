@@ -5,6 +5,7 @@
   # Forward API Midtrans ke file PHP (jika di cPanel / Apache)
   RewriteRule ^api/create-midtrans-token/?$ api/create-midtrans-token.php [L,QSA]
   RewriteRule ^api/midtrans-notification/?$ api/midtrans-notification.php [L,QSA]
+  RewriteRule ^api/check-midtrans-status/?$ api/check-midtrans-status.php [L,QSA]
 
   # Routing SPA React
   RewriteRule ^index\.html$ - [L]

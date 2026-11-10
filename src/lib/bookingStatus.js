@@ -114,9 +114,69 @@ export function getBookings(email) {
 
 export function saveBooking(booking) {
   const bookings = JSON.parse(localStorage.getItem('jajapin_bookings') || '[]');
-  bookings.push(booking);
+  const existingIndex = bookings.findIndex(b => b.booking_code === booking.booking_code);
+
+  if (existingIndex >= 0) {
+    bookings[existingIndex] = { ...bookings[existingIndex], ...booking };
+  } else {
+    bookings.push(booking);
+  }
+
   localStorage.setItem('jajapin_bookings', JSON.stringify(bookings));
-  return booking;
+
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('jajapin_bookings_updated', {
+      detail: { bookingCode: booking.booking_code, booking }
+    }));
+  }
+
+  return existingIndex >= 0 ? bookings[existingIndex] : booking;
+}
+
+export function updateBooking(bookingCode, partialData) {
+  const bookings = JSON.parse(localStorage.getItem('jajapin_bookings') || '[]');
+  const index = bookings.findIndex(b => b.booking_code === bookingCode);
+  if (index === -1) return null;
+
+  bookings[index] = { ...bookings[index], ...partialData };
+  localStorage.setItem('jajapin_bookings', JSON.stringify(bookings));
+
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('jajapin_bookings_updated', {
+      detail: { bookingCode, booking: bookings[index] }
+    }));
+  }
+
+  return bookings[index];
+}
+
+export function markBookingAsPaid(bookingCode, extra = {}) {
+  const bookings = JSON.parse(localStorage.getItem('jajapin_bookings') || '[]');
+  const index = bookings.findIndex(b => b.booking_code === bookingCode);
+  if (index === -1) return null;
+
+  const current = bookings[index];
+  const totalPrice = current.total_price || 0;
+
+  bookings[index] = {
+    ...current,
+    status: current.status === 'dibatalkan' ? current.status : 'dikonfirmasi',
+    payment_status: 'dibayar',
+    amount_paid: totalPrice,
+    paid_at: extra.paid_at || new Date().toISOString(),
+    payment_method: extra.payment_method || current.payment_method || 'midtrans_snap',
+    ...extra,
+  };
+
+  localStorage.setItem('jajapin_bookings', JSON.stringify(bookings));
+
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('jajapin_bookings_updated', {
+      detail: { bookingCode, booking: bookings[index] }
+    }));
+  }
+
+  return bookings[index];
 }
 
 export function getBookingByCode(code) {

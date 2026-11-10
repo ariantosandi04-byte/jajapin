@@ -291,6 +291,22 @@ export default function DashboardPage() {
     }
   }, [bookings.length]);
 
+  // Sync bookings from local storage or events
+  useEffect(() => {
+    const handleSync = () => {
+      const saved = JSON.parse(localStorage.getItem('jajapin_bookings') || '[]');
+      if (saved.length > 0) {
+        setBookings(saved);
+      }
+    };
+    window.addEventListener('jajapin_bookings_updated', handleSync);
+    window.addEventListener('storage', handleSync);
+    return () => {
+      window.removeEventListener('jajapin_bookings_updated', handleSync);
+      window.removeEventListener('storage', handleSync);
+    };
+  }, []);
+
   // Filter bookings for current view
   const currentPropertyBookings = useMemo(() => {
     if (isAdmin && selectedPropertyId === 0) return bookings;
