@@ -17,6 +17,7 @@ import {
   RefreshCw,
   Check,
   AlertCircle,
+  AlertTriangle,
   Loader2,
 } from 'lucide-react';
 import { Button } from '../ui/Button';
@@ -66,7 +67,7 @@ export default function InvoiceModal({ isOpen, onClose, booking }) {
             if (updated) setCurrentBooking(updated);
             setCheckFeedback({
               type: 'success',
-              message: 'Pembayaran terverifikasi LUNAS otomatis dari Midtrans!',
+              message: 'Pembayaran terverifikasi LUNAS otomatis dari Midtrans! Kamar kini resmi ter-lock 100%.',
             });
           }
         })
@@ -123,7 +124,7 @@ export default function InvoiceModal({ isOpen, onClose, booking }) {
         if (updated) setCurrentBooking(updated);
         setCheckFeedback({
           type: 'success',
-          message: `Sukses! Pembayaran ${formatIDR(totalPrice)} telah terverifikasi LUNAS dari Midtrans (${res.transaction_status || 'settlement'}).`,
+          message: `Sukses! Pembayaran ${formatIDR(totalPrice)} telah terverifikasi LUNAS dari Midtrans (${res.transaction_status || 'settlement'}). Kamar resmi ter-lock!`,
         });
       } else if (res.transaction_status === 'pending') {
         setCheckFeedback({
@@ -158,7 +159,7 @@ export default function InvoiceModal({ isOpen, onClose, booking }) {
     if (updated) setCurrentBooking(updated);
     setCheckFeedback({
       type: 'success',
-      message: 'Status invoice berhasil diubah menjadi LUNAS (Dikonfirmasi Resepsionis).',
+      message: 'Status invoice berhasil diubah menjadi LUNAS. Kamar kini telah resmi ter-lock oleh resepsionis.',
     });
   };
 
@@ -181,11 +182,14 @@ export default function InvoiceModal({ isOpen, onClose, booking }) {
       `--------------------------------\n` +
       `Total Tagihan: ${formatIDR(totalPrice)}\n` +
       `Status Bayar: ${
-        isPaid ? 'LUNAS (DIBAYAR)' : PAYMENT_STATUS_LABELS[currentBooking.payment_status] || currentBooking.payment_status
+        isPaid ? 'LUNAS (TER-LOCK)' : 'BELUM LUNAS (BELUM TER-LOCK)'
       }\n` +
       `Telah Dibayar: ${formatIDR(amountPaid)}\n` +
       `Sisa Tagihan: ${formatIDR(balanceDue)}\n` +
       `--------------------------------\n` +
+      (!isPaid
+        ? `*CATATAN:* Kamar belum ter-lock sebelum ada pembayaran lunas.\n--------------------------------\n`
+        : '') +
       `Terima kasih telah mempercayakan kenyamanan menginap Anda di Jajapin.`;
 
     const url = cleanPhone
@@ -226,14 +230,14 @@ export default function InvoiceModal({ isOpen, onClose, booking }) {
         {/* Sync & Action Bar for Receptionist & Customer */}
         <div className="bg-muted/50 border-b border-border px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3 text-xs print:hidden">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-foreground">Status Verifikasi:</span>
+            <span className="font-semibold text-foreground">Status Kamar:</span>
             {isPaid ? (
               <span className="inline-flex items-center gap-1 text-emerald-800 bg-emerald-100 dark:bg-emerald-950 dark:text-emerald-300 px-2.5 py-0.5 rounded-full border border-emerald-300 font-bold">
-                <Check className="w-3.5 h-3.5" /> LUNAS (PAID)
+                <Check className="w-3.5 h-3.5" /> LUNAS & TER-LOCK 100%
               </span>
             ) : (
               <span className="inline-flex items-center gap-1 text-rose-800 bg-rose-100 dark:bg-rose-950 dark:text-rose-300 px-2.5 py-0.5 rounded-full border border-rose-300 font-bold">
-                BELUM LUNAS ({PAYMENT_STATUS_LABELS[currentBooking.payment_status] || currentBooking.payment_status})
+                BELUM LOCK (MENUNGGU PEMBAYARAN)
               </span>
             )}
           </div>
@@ -260,10 +264,10 @@ export default function InvoiceModal({ isOpen, onClose, booking }) {
                 size="sm"
                 onClick={handleMarkAsPaidManual}
                 className="text-xs h-8 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold"
-                title="Tandai pembayaran telah diterima oleh resepsionis hotel"
+                title="Tandai pembayaran telah diterima dan kunci kamar"
               >
                 <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
-                Tandai Lunas
+                Tandai Lunas & Lock Kamar
               </Button>
             )}
           </div>
@@ -333,15 +337,15 @@ export default function InvoiceModal({ isOpen, onClose, booking }) {
               <div className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2 border">
                 {isPaid ? (
                   <span className="text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 font-bold">
-                    ✓ LUNAS (PAID)
+                    ✓ LUNAS (TER-LOCK)
                   </span>
                 ) : currentBooking.payment_status === 'dp' ? (
-                  <span className="text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
+                  <span className="text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200 font-bold">
                     ⚠ UANG MUKA / DP
                   </span>
                 ) : (
-                  <span className="text-rose-700 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200">
-                    BELUM DIBAYAR
+                  <span className="text-rose-700 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200 font-bold">
+                    BELUM DIBAYAR (BELUM LOCK)
                   </span>
                 )}
               </div>
@@ -357,6 +361,19 @@ export default function InvoiceModal({ isOpen, onClose, booking }) {
               </p>
             </div>
           </div>
+
+          {/* CATATAN PENTING DI INVOICE JIKA BELUM DIBAYAR */}
+          {!isPaid && (
+            <div className="p-3.5 rounded-2xl bg-amber-50 border-2 border-amber-300 text-xs text-amber-950 space-y-1">
+              <span className="font-bold uppercase tracking-wider text-[11px] flex items-center gap-1.5 text-amber-800">
+                <AlertTriangle className="w-4 h-4 text-amber-600" />
+                CATATAN PENTING: BOOKING BELUM DIKONFIRMASI / LOCK SEBELUM ADA PEMBAYARAN
+              </span>
+              <p className="leading-relaxed">
+                Reservasi kamar ini berstatus <strong>Menunggu Pembayaran</strong> dan <strong className="underline">BELUM MENGUNCI (LOCK) KAMAR</strong> sebelum pembayaran diterima. Ketersediaan kamar sewaktu-waktu dapat dialihkan ke tamu lain yang membayar lunas lebih dahulu.
+              </p>
+            </div>
+          )}
 
           {/* Guest & Reservation Source Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
@@ -501,7 +518,7 @@ export default function InvoiceModal({ isOpen, onClose, booking }) {
                 </div>
               ) : (
                 <div className="text-right text-xs text-emerald-700 font-bold bg-emerald-50 p-2.5 rounded-xl border border-emerald-200">
-                  ✓ Lunas Sepenuhnya ({formatIDR(totalPrice)}). Tidak ada sisa tagihan.
+                  ✓ Lunas Sepenuhnya ({formatIDR(totalPrice)}). Kamar Terkunci (Locked) 100%.
                 </div>
               )}
             </div>
@@ -523,6 +540,9 @@ export default function InvoiceModal({ isOpen, onClose, booking }) {
               </p>
               <ul className="list-disc pl-4 space-y-0.5 text-gray-600">
                 <li>Tunjukkan invoice digital ini atau KTP saat proses check-in di resepsionis.</li>
+                <li className={!isPaid ? 'text-amber-800 font-semibold' : ''}>
+                  <strong>Catatan Status Kamar:</strong> {isPaid ? 'Kamar telah resmi terkonfirmasi dan ter-lock 100%.' : 'Pemesanan BELUM DIKONFIRMASI / TER-LOCK sebelum ada pembayaran lunas. Kamar dapat dialihkan bila ada tamu lain yang membayar lunas lebih dahulu.'}
+                </li>
                 <li>Dilarang merokok di dalam kamar bebas asap rokok (*Non-smoking room*).</li>
                 <li>Kebijakan pembatalan atau perubahan tanggal mengikuti ketentuan properti.</li>
               </ul>

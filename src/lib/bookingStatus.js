@@ -1,33 +1,33 @@
 export const STATUS_LABELS = {
-  menunggu: 'Menunggu',
-  dikonfirmasi: 'Dikonfirmasi',
+  menunggu: 'Menunggu (Belum Lock)',
+  dikonfirmasi: 'Terkonfirmasi (Ter-Lock)',
   selesai: 'Selesai',
   dibatalkan: 'Dibatalkan',
 };
 
 export const STATUS_COLORS = {
-  menunggu: 'bg-yellow-100 text-yellow-800',
-  dikonfirmasi: 'bg-green-100 text-green-800',
-  selesai: 'bg-blue-100 text-blue-800',
-  dibatalkan: 'bg-red-100 text-red-800',
+  menunggu: 'bg-amber-100 text-amber-900 border-amber-300',
+  dikonfirmasi: 'bg-emerald-100 text-emerald-900 border-emerald-300',
+  selesai: 'bg-blue-100 text-blue-800 border-blue-200',
+  dibatalkan: 'bg-red-100 text-red-800 border-red-200',
 };
 
 export const PAYMENT_STATUS_LABELS = {
-  belum_bayar: 'Belum Bayar',
-  menunggu_pembayaran: 'Menunggu Pembayaran',
+  belum_bayar: 'Belum Bayar (Belum Lock)',
+  menunggu_pembayaran: 'Menunggu Pembayaran (Belum Lock)',
   dp: 'DP / Uang Muka',
-  dibayar: 'Lunas / Dibayar',
+  dibayar: 'Lunas & Ter-Lock',
   gagal: 'Gagal',
   kedaluwarsa: 'Kedaluwarsa',
 };
 
 export const PAYMENT_STATUS_COLORS = {
-  belum_bayar: 'bg-rose-100 text-rose-800',
-  menunggu_pembayaran: 'bg-amber-100 text-amber-800',
-  dp: 'bg-yellow-100 text-yellow-800',
-  dibayar: 'bg-emerald-100 text-emerald-800',
-  gagal: 'bg-gray-100 text-gray-700',
-  kedaluwarsa: 'bg-gray-100 text-gray-700',
+  belum_bayar: 'bg-rose-100 text-rose-800 border-rose-200',
+  menunggu_pembayaran: 'bg-amber-100 text-amber-900 border-amber-300',
+  dp: 'bg-yellow-100 text-yellow-800 border-yellow-300',
+  dibayar: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+  gagal: 'bg-gray-100 text-gray-700 border-gray-200',
+  kedaluwarsa: 'bg-gray-100 text-gray-700 border-gray-200',
 };
 
 export const CHANNEL_SOURCES = {
@@ -163,6 +163,7 @@ export function markBookingAsPaid(bookingCode, extra = {}) {
     status: current.status === 'dibatalkan' ? current.status : 'dikonfirmasi',
     payment_status: 'dibayar',
     amount_paid: totalPrice,
+    is_locked: true,
     paid_at: extra.paid_at || new Date().toISOString(),
     payment_method: extra.payment_method || current.payment_method || 'midtrans_snap',
     ...extra,

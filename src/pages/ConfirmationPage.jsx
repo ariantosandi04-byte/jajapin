@@ -17,6 +17,8 @@ import {
   RefreshCw,
   Loader2,
   AlertCircle,
+  AlertTriangle,
+  ShieldCheck,
 } from 'lucide-react';
 import SiteHeader from '../components/site/SiteHeader';
 import SiteFooter from '../components/site/SiteFooter';
@@ -144,25 +146,60 @@ export default function ConfirmationPage() {
     window.print();
   };
 
+  const isPaid = booking.payment_status === 'dibayar';
+
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
       <div className="pt-24 pb-20">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          {/* Success Banner */}
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4">
-            <CheckCircle2 className="w-9 h-9" />
+          {/* Status Indicator Icon */}
+          <div
+            className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${
+              isPaid
+                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
+                : 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300'
+            }`}
+          >
+            {isPaid ? <CheckCircle2 className="w-9 h-9" /> : <Clock className="w-9 h-9" />}
           </div>
 
-          <p className="text-[11px] uppercase tracking-[0.24em] font-body font-semibold text-primary mb-2">
-            Pemesanan Terkonfirmasi
+          <p
+            className={`text-[11px] uppercase tracking-[0.24em] font-body font-bold mb-2 ${
+              isPaid ? 'text-emerald-700 dark:text-emerald-400' : 'text-amber-700 dark:text-amber-400'
+            }`}
+          >
+            {isPaid ? '✓ Pemesanan Terkonfirmasi & Kamar Ter-Lock 100%' : 'Menunggu Pembayaran · Kamar Belum Ter-Lock'}
           </p>
           <h1 className="font-display font-light text-3xl sm:text-4xl tracking-tight text-foreground mb-3">
-            Terima kasih, {booking.guest_name}!
+            {isPaid ? `Selamat, ${booking.guest_name}!` : `Pemesanan Dicatat, ${booking.guest_name}`}
           </h1>
-          <p className="font-body text-muted-foreground text-sm max-w-md mx-auto mb-8">
-            Pemesanan Anda telah berhasil dicatat. Konfirmasi dan bukti reservasi juga telah disiapkan untuk Anda.
+          <p className="font-body text-muted-foreground text-sm max-w-md mx-auto mb-6">
+            {isPaid
+              ? 'Pembayaran telah lunas diterima. Kamar Anda resmi terkunci (locked) dan siap dihuni saat check-in.'
+              : 'Pemesanan Anda telah tersimpan. Mohon perhatikan catatan bahwa kamar belum dikonfirmasi / ter-lock sebelum ada pembayaran lunas.'}
           </p>
+
+          {/* CATATAN PENTING: BOOKING BELUM DIKONFIRMASI / LOCK SEBELUM ADA PEMBAYARAN */}
+          {!isPaid && (
+            <div className="bg-amber-50/90 dark:bg-amber-950/40 border-2 border-amber-400 dark:border-amber-700 rounded-3xl p-5 sm:p-6 mb-8 text-left space-y-2.5 shadow-sm">
+              <div className="flex items-center gap-2 font-bold text-amber-900 dark:text-amber-200 text-sm">
+                <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+                <span>CATATAN PENTING: BOOKING BELUM DIKONFIRMASI / TER-LOCK</span>
+              </div>
+              <p className="text-xs text-amber-950 dark:text-amber-200 leading-relaxed font-medium">
+                Kamar untuk reservasi <strong className="font-mono">{booking.booking_code}</strong> <strong className="underline">BELUM DIKONFIRMASI / TER-LOCK</strong> di sistem penginapan sebelum pembayaran diterima secara lunas.
+              </p>
+              <div className="p-3.5 rounded-2xl bg-amber-100/70 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-800 space-y-1.5 text-xs text-amber-900 dark:text-amber-200">
+                <p>
+                  • <strong>Untuk Metode Bayar di Tempat:</strong> Kamar belum terkunci secara pasti. Jika penginapan penuh, kamar sewaktu-waktu dapat dialihkan ke tamu lain yang membayar lunas lebih dahulu.
+                </p>
+                <p>
+                  • <strong>Untuk Metode Midtrans:</strong> Segera selesaikan transfer bank atau scan QRIS Anda agar kamar langsung <strong>ter-lock 100%</strong> otomatis.
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Booking Code Card */}
           <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 mb-8 shadow-[0_18px_40px_-28px_rgba(18,20,22,0.35)]">
@@ -196,8 +233,14 @@ export default function ConfirmationPage() {
                         <MapPin className="w-3.5 h-3.5" /> {booking.property_city}
                       </p>
                     </div>
-                    <Badge className={STATUS_COLORS[booking.status]}>
-                      {STATUS_LABELS[booking.status]}
+                    <Badge
+                      className={
+                        isPaid
+                          ? 'bg-emerald-100 text-emerald-800 border-emerald-300 font-semibold'
+                          : 'bg-amber-100 text-amber-900 border-amber-300 font-semibold'
+                      }
+                    >
+                      {isPaid ? 'TER-LOCK (LUNAS)' : 'BELUM LOCK (MENUNGGU)'}
                     </Badge>
                   </div>
 
@@ -276,7 +319,7 @@ export default function ConfirmationPage() {
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-2 text-amber-900 dark:text-amber-200 font-semibold text-xs">
                       <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
-                      <span>Sudah bayar di Simulator Midtrans atau ATM? Klik tombol untuk verifikasi instan:</span>
+                      <span>Sudah transfer di Simulator Midtrans atau ATM? Klik tombol untuk verifikasi instan:</span>
                     </div>
                     <Button
                       size="sm"
@@ -305,8 +348,8 @@ export default function ConfirmationPage() {
                 <div>
                   <span className="text-xs text-muted-foreground font-body block mb-1">Status Pembayaran</span>
                   <div className="flex items-center gap-2">
-                    <Badge variant={booking.payment_status === 'dibayar' ? 'lime' : 'outline'}>
-                      {PAYMENT_STATUS_LABELS[booking.payment_status] || booking.payment_status}
+                    <Badge variant={isPaid ? 'lime' : 'outline'}>
+                      {isPaid ? 'Lunas / Terkunci (Locked)' : PAYMENT_STATUS_LABELS[booking.payment_status] || booking.payment_status}
                     </Badge>
                     <span className="text-xs text-muted-foreground font-body">Metode: {booking.payment_method?.toUpperCase()}</span>
                   </div>
@@ -320,12 +363,14 @@ export default function ConfirmationPage() {
               {/* Check-in Instructions */}
               <div className="bg-brand-sand/50 rounded-2xl p-5 border border-brand-sand font-body text-sm space-y-2">
                 <h3 className="font-semibold text-foreground flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-primary" /> Panduan Kedatangan & Check-in:
+                  <Clock className="w-4 h-4 text-primary" /> Panduan Kedatangan & Ketentuan Reservasi:
                 </h3>
                 <ul className="text-muted-foreground text-xs space-y-1.5 list-disc pl-5">
-                  <li>Tunjukkan bukti pesanan ini atau sebutkan kode booking <strong>{booking.booking_code}</strong> saat tiba.</li>
+                  <li>Tunjukkan bukti pesanan ini atau sebutkan kode booking <strong>{booking.booking_code}</strong> saat tiba di resepsionis.</li>
+                  <li>
+                    <strong>Catatan Status:</strong> {isPaid ? 'Kamar Anda telah resmi terkonfirmasi dan ter-lock 100%.' : 'Kamar belum ter-lock sampai ada pembayaran lunas. Harap hubungi properti untuk konfirmasi jam kedatangan.'}
+                  </li>
                   <li>Siapkan kartu identitas (KTP/Paspor) yang masih berlaku untuk verifikasi resepsionis.</li>
-                  <li>Apabila Anda berencana tiba di luar jam operasional check-in normal, harap hubungi pihak penginapan sebelumnya.</li>
                 </ul>
               </div>
             </CardContent>

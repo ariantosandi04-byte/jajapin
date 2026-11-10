@@ -17,6 +17,7 @@ import {
   DoorOpen,
   Plus,
   Minus,
+  AlertTriangle,
 } from 'lucide-react';
 import SiteHeader from '../components/site/SiteHeader';
 import SiteFooter from '../components/site/SiteFooter';
@@ -30,7 +31,6 @@ import { stays } from '../data/stays';
 import { formatIDR, calculateNights, generateBookingCode } from '../lib/format';
 import { saveBooking } from '../lib/bookingStatus';
 import { loadMidtransSnap, payWithSnap, getClientKey } from '../lib/midtrans';
-import { createXenditInvoice } from '../lib/xendit';
 
 export default function CheckoutPage() {
   const { slug } = useParams();
@@ -77,8 +77,8 @@ export default function CheckoutPage() {
   const [checkIn, setCheckIn] = useState(searchParams.get('checkIn') || '');
   const [checkOut, setCheckOut] = useState(searchParams.get('checkOut') || '');
   const [guests, setGuests] = useState(Number(searchParams.get('guests')) || 2);
-  const [gateway, setGateway] = useState('xendit');
-  const [paymentMethod, setPaymentMethod] = useState('xendit_qris');
+  const [gateway, setGateway] = useState('midtrans');
+  const [paymentMethod, setPaymentMethod] = useState('midtrans_snap');
 
   const [form, setForm] = useState({
     name: user?.name || '',
@@ -93,7 +93,6 @@ export default function CheckoutPage() {
   const [clientKeyInput, setClientKeyInput] = useState(getClientKey() || '');
   const [showKeyInput, setShowKeyInput] = useState(false);
   const [mockSnapData, setMockSnapData] = useState(null);
-  const [mockXenditData, setMockXenditData] = useState(null);
 
   // Selected room object
   const selectedRoom = useMemo(() => {
@@ -198,66 +197,20 @@ export default function CheckoutPage() {
       created_at: new Date().toISOString(),
     };
 
-    // 1. JIKA BAYAR DI HOTEL (CASH/WALK-IN)
+    // 1. JIKA BAYAR DI TEMPAT (CASH / RESEPSIONIS PROPERTI)
     if (gateway === 'hotel' || paymentMethod === 'hotel') {
       baseBooking.payment_status = 'menunggu_pembayaran';
-      baseBooking.status = 'dikonfirmasi';
+      baseBooking.status = 'menunggu'; // TIDAK DIKONFIRMASI / BELUM LOCK SEBELUM ADA PEMBAYARAN!
+      baseBooking.is_locked = false;
+      const noteWarning = 'CATATAN PENTING: Booking belum dikonfirmasi / ter-lock sebelum ada pembayaran lunas.';
+      baseBooking.notes = form.notes ? `${form.notes} [${noteWarning}]` : noteWarning;
+      baseBooking.payment_method = 'Bayar di Tempat (di Properti)';
       saveBooking(baseBooking);
       setTimeout(() => navigate(`/konfirmasi/${bookingCode}`), 400);
       return;
     }
 
-    // 2. JIKA GATEWAY XENDIT (INVOICE V2 - REKOMENDASI UTAMA)
-    if (gateway === 'xendit') {
-      try {
-        const xenditRes = await createXenditInvoice({
-          bookingCode,
-          totalPrice,
-          stayName: `${stay.name} (${roomsCount}x ${selectedRoom.name})`,
-          guestName: form.name,
-          guestEmail: form.email,
-          guestPhone: form.phone,
-          roomType: `${roomsCount} Kamar - ${selectedRoom.name}`,
-          nights,
-        });
-
-        if (xenditRes && xenditRes.isMock) {
-          // Mode simulasi sandbox offline
-          setSubmitting(false);
-          setMockXenditData({
-            baseBooking,
-            bookingCode,
-            totalPrice,
-            invoiceUrl: xenditRes.invoice_url,
-            invoiceId: xenditRes.invoice_id || xenditRes.id,
-          });
-          return;
-        }
-
-        if (xenditRes && xenditRes.invoice_url) {
-          baseBooking.xendit_invoice_id = xenditRes.id || xenditRes.invoice_id;
-          baseBooking.xendit_invoice_url = xenditRes.invoice_url;
-          saveBooking(baseBooking);
-          window.location.href = xenditRes.invoice_url;
-          return;
-        }
-      } catch (err) {
-        console.warn('Kendala Xendit:', err);
-      }
-
-      // Fallback dialog
-      setSubmitting(false);
-      setMockXenditData({
-        baseBooking,
-        bookingCode,
-        totalPrice,
-        invoiceUrl: `https://checkout-staging.xendit.co/v2/${bookingCode}`,
-        invoiceId: `XND-${Date.now()}`,
-      });
-      return;
-    }
-
-    // 3. JIKA GATEWAY MIDTRANS SNAP
+    // 2. JIKA GATEWAY MIDTRANS SNAP (ONLINE)
     try {
       let response = await fetch('/api/create-midtrans-token', {
         method: 'POST',
@@ -293,16 +246,21 @@ export default function CheckoutPage() {
         if (window.snap && typeof window.snap.pay === 'function') {
           payWithSnap(data.token, {
             onSuccess: (result) => {
-              baseBooking.status = 'dikonfirmasi';
+              baseBooking.status = 'dikonfirmasi'; // RESMI TERKONFIRMASI & TER-LOCK 100% KARENA SUDAH LUNAS!
               baseBooking.payment_status = 'dibayar';
               baseBooking.paid_at = new Date().toISOString();
+              baseBooking.is_locked = true;
               baseBooking.midtrans_order_id = result.order_id || baseBooking.midtrans_order_id;
               saveBooking(baseBooking);
               navigate(`/konfirmasi/${bookingCode}`);
             },
-            onPending: () => {
-              baseBooking.status = 'menunggu';
+            onPending: (result) => {
+              baseBooking.status = 'menunggu'; // BELUM DIKONFIRMASI / BELUM LOCK KARENA MASIH MENUNGGU PEMBAYARAN!
               baseBooking.payment_status = 'menunggu_pembayaran';
+              baseBooking.is_locked = false;
+              baseBooking.midtrans_order_id = result?.order_id || baseBooking.midtrans_order_id;
+              const noteWarning = 'CATATAN PENTING: Booking belum dikonfirmasi / ter-lock sebelum ada pembayaran lunas.';
+              baseBooking.notes = form.notes ? `${form.notes} [${noteWarning}]` : noteWarning;
               saveBooking(baseBooking);
               navigate(`/konfirmasi/${bookingCode}`);
             },
@@ -333,23 +291,15 @@ export default function CheckoutPage() {
     });
   };
 
-  const handleCompleteMockPayment = (isXendit = false) => {
-    if (isXendit && mockXenditData) {
-      const { baseBooking, bookingCode } = mockXenditData;
-      baseBooking.status = 'dikonfirmasi';
-      baseBooking.payment_status = 'dibayar';
-      baseBooking.paid_at = new Date().toISOString();
-      saveBooking(baseBooking);
-      navigate(`/konfirmasi/${bookingCode}`);
-      return;
-    }
-
+  const handleCompleteMockPayment = () => {
     if (mockSnapData) {
       const { baseBooking, bookingCode } = mockSnapData;
       baseBooking.status = 'dikonfirmasi';
       baseBooking.payment_status = 'dibayar';
       baseBooking.paid_at = new Date().toISOString();
+      baseBooking.is_locked = true;
       saveBooking(baseBooking);
+      setMockSnapData(null);
       navigate(`/konfirmasi/${bookingCode}`);
     }
   };
@@ -627,7 +577,7 @@ export default function CheckoutPage() {
                 </div>
               ) : null}
 
-              {/* Payment Methods Panel */}
+              {/* Payment Methods Panel (Hanya Midtrans dan Bayar di Tempat) */}
               <PaymentPanel
                 gateway={gateway}
                 onGatewayChange={setGateway}
@@ -635,21 +585,48 @@ export default function CheckoutPage() {
                 onSelectMethod={setPaymentMethod}
               />
 
-              <Button
-                type="submit"
-                form="checkout-form"
-                size="lg"
-                className={`w-full text-base ${
-                  gateway === 'xendit' ? 'bg-emerald-700 hover:bg-emerald-800 text-white' : ''
-                }`}
-                disabled={submitting}
-              >
-                {submitting
-                  ? gateway === 'xendit'
-                    ? 'Menghubungi Xendit Invoicing...'
-                    : 'Memproses Gateway...'
-                  : `Bayar Sekarang (${roomsCount} Kamar) · ${formatIDR(totalPrice)}`}
-              </Button>
+              <div className="space-y-3">
+                <Button
+                  type="submit"
+                  form="checkout-form"
+                  size="lg"
+                  className={`w-full text-base font-semibold ${
+                    gateway === 'midtrans'
+                      ? 'bg-emerald-700 hover:bg-emerald-800 text-white'
+                      : 'bg-amber-600 hover:bg-amber-700 text-white'
+                  }`}
+                  disabled={submitting}
+                >
+                  {submitting
+                    ? 'Menghubungi Gateway Midtrans...'
+                    : gateway === 'midtrans'
+                    ? `Bayar Online via Midtrans (${roomsCount} Kamar) · ${formatIDR(totalPrice)}`
+                    : `Lanjutkan Booking (Bayar di Tempat) · ${formatIDR(totalPrice)}`}
+                </Button>
+
+                {/* Status Lock Warning / Disclaimer */}
+                {gateway === 'hotel' ? (
+                  <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border-2 border-amber-400 dark:border-amber-700 text-amber-950 dark:text-amber-200 text-xs flex items-start gap-2.5">
+                    <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                    <div className="space-y-1">
+                      <span className="font-bold text-amber-900 dark:text-amber-100 block">
+                        CATATAN PENTING: BOOKING BELUM DIKONFIRMASI / LOCK
+                      </span>
+                      <p className="leading-relaxed">
+                        Pemesanan dengan metode Bayar di Tempat <strong>BELUM TERKONFIRMASI DAN BELUM MENGUNCI (LOCK) KAMAR</strong> sebelum ada pembayaran diterima oleh hotel. Kamar berisiko dialihkan kepada tamu lain yang membayar lunas lebih dahulu jika kuota kamar penuh.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 text-xs flex items-start gap-2.5">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-bold block">JAMINAN INSTAN: KAMAR LANGSUNG TER-LOCK 100%</span>
+                      <span>Pembayaran via Midtrans otomatis mengunci kamar dan menerbitkan konfirmasi instan secara resmi.</span>
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* Compliance & Security Assurance */}
               <div className="space-y-2 text-center text-xs text-muted-foreground font-body">
@@ -779,91 +756,6 @@ export default function CheckoutPage() {
           </div>
         </div>
       </div>
-
-      {/* MODAL SIMULASI XENDIT INVOICE (Sandbox / Dev Mode) */}
-      {mockXenditData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-card w-full max-w-lg rounded-3xl border border-border shadow-2xl overflow-hidden font-body">
-            <div className="bg-slate-900 p-6 text-white flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-500 flex items-center justify-center text-slate-900 font-black text-xl">
-                  X
-                </div>
-                <div>
-                  <span className="text-[10px] uppercase tracking-widest text-emerald-400 font-bold block">
-                    Xendit Payment Simulator
-                  </span>
-                  <h3 className="font-display font-semibold text-lg text-white">
-                    Halaman Tagihan Xendit
-                  </h3>
-                </div>
-              </div>
-              <button
-                onClick={() => setMockXenditData(null)}
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-sm"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="p-6 space-y-5">
-              <div className="flex justify-between items-baseline p-4 rounded-2xl bg-emerald-50/50 border border-emerald-200">
-                <div>
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground block">
-                    Kode Reservasi
-                  </span>
-                  <span className="font-mono font-bold text-sm text-foreground">
-                    {mockXenditData.bookingCode}
-                  </span>
-                  <span className="text-xs text-muted-foreground block mt-1">
-                    {mockXenditData.baseBooking?.room_count || 1} Kamar ({mockXenditData.baseBooking?.room_type})
-                  </span>
-                </div>
-                <div className="text-right">
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground block">
-                    Total Tagihan
-                  </span>
-                  <span className="font-display font-bold text-lg text-emerald-700">
-                    {formatIDR(mockXenditData.totalPrice)}
-                  </span>
-                </div>
-              </div>
-
-              <div className="space-y-2 text-xs">
-                <p className="font-semibold text-foreground flex items-center gap-1.5">
-                  <Sparkles className="w-4 h-4 text-emerald-600" /> Integrasi Xendit Invoicing V2:
-                </p>
-                <div className="p-3.5 rounded-xl bg-muted/50 border border-border space-y-1.5 text-[11px] text-muted-foreground leading-relaxed">
-                  <p>
-                    ✓ Endpoint backend PHP telah aktif di{' '}
-                    <code className="font-mono text-foreground font-bold">public/api/create-xendit-invoice.php</code>
-                  </p>
-                  <p>
-                    ✓ Listener Webhook Callback siap di{' '}
-                    <code className="font-mono text-foreground font-bold">public/api/xendit-callback.php</code>
-                  </p>
-                  <p>
-                    ✓ Mendukung reservasi multi-kamar dan multi-tipe kamar secara otomatis.
-                  </p>
-                </div>
-              </div>
-
-              <div className="pt-2 flex flex-col gap-2">
-                <Button
-                  size="lg"
-                  className="w-full bg-emerald-700 hover:bg-emerald-800 text-white"
-                  onClick={() => handleCompleteMockPayment(true)}
-                >
-                  Bayar Sekarang (Simulasikan Lunas) →
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => setMockXenditData(null)}>
-                  Tutup Simulator
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* MODAL SIMULASI MIDTRANS SNAP */}
       {mockSnapData && (
