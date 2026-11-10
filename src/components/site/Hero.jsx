@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Sparkles, ShieldCheck, MapPin } from 'lucide-react';
+import { ArrowRight, Sparkles, ShieldCheck } from 'lucide-react';
 import { siteMedia } from '../../data/siteMedia';
 import SearchBar from './SearchBar';
 
@@ -15,26 +15,10 @@ export default function Hero() {
       {/* Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16 w-full">
         <div className="max-w-3xl">
-          
-          {/* Direct Connection to Hotel Putri Sari / Subdomain */}
-          <div className="flex flex-wrap items-center gap-2 mb-6">
-            <Link
-              to="/putrisari"
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-900/60 backdrop-blur-md border border-brand-lime/40 text-brand-lime text-xs font-semibold hover:bg-emerald-800/80 transition-all group shadow-sm"
-            >
-              <span className="w-2 h-2 rounded-full bg-brand-lime animate-pulse" />
-              <span>Properti Unggulan: Hotel Putri Sari (Depan Pantai Kumala)</span>
-              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-            </Link>
-
-            <a
-              href="https://putrisari.jajapin.id"
-              target="_blank"
-              rel="noreferrer"
-              className="hidden sm:inline-flex items-center gap-1.5 text-xs text-white/70 hover:text-white underline underline-offset-4 font-mono transition-colors"
-            >
-              putrisari.jajapin.id
-            </a>
+          {/* Neutral Brand Badge */}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-brand-lime text-xs font-semibold mb-6 shadow-sm">
+            <Sparkles className="w-3.5 h-3.5 text-brand-lime" />
+            <span>Platform Resmi Booking Hotel & Penginapan Nusantara</span>
           </div>
 
           <p className="text-[10px] uppercase tracking-[0.28em] font-body font-semibold text-brand-lime/90 mb-3">
@@ -66,25 +50,24 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Search Bar */}
+        {/* Kolom Pencarian Netral */}
         <SearchBar />
 
-        <div className="flex items-center gap-6 mt-6">
+        <div className="flex flex-wrap items-center gap-4 sm:gap-6 mt-6">
           <a
             href="#destinasi"
-            className="text-xs sm:text-sm font-body text-white/70 hover:text-white transition-colors underline underline-offset-4"
+            className="text-xs sm:text-sm font-body text-white/80 hover:text-white transition-colors underline underline-offset-4"
           >
-            Lihat semua destinasi populer →
+            Jelajahi destinasi populer →
           </a>
-          <span className="text-white/30">•</span>
+          <span className="text-white/30 hidden sm:inline">•</span>
           <Link
-            to="/putrisari"
+            to="/stays"
             className="text-xs sm:text-sm font-body text-brand-lime hover:text-white transition-colors underline underline-offset-4"
           >
-            Pesan Hotel Putri Sari Pelabuhan Ratu →
+            Lihat semua pilihan penginapan nusantara →
           </Link>
         </div>
-
       </div>
     </section>
   );
