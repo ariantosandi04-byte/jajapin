@@ -56,7 +56,12 @@ export const stays = [
         badge_image: 'Kamar Deluxe King',
         description:
           'Kamar Deluxe terluas dan termewah dengan ranjang King Size, fasilitas AC dingin, water heater, TV, sofa santai, meja rias, dan lemari pakaian luas.',
-        image: '/assets/putri-sari/3.jpg',
+        image: '/assets/putri-sari/deluxe-1.jpg',
+        gallery: [
+          '/assets/putri-sari/deluxe-1.jpg',
+          '/assets/putri-sari/deluxe-2.jpg',
+          '/assets/putri-sari/deluxe-3.jpg',
+        ],
         amenities: [
           'AC Dingin',
           'Water Heater',
@@ -81,8 +86,8 @@ export const stays = [
         badge: 'Kenyamanan AC (5 Unit)',
         badge_image: 'Kamar Standard AC',
         description:
-          'Kamar Standard sejuk ber-AC dengan ranjang Queen Size empuk, kamar mandi private dengan toilet duduk (western style), dan WiFi cepat.',
-        image: '/assets/putri-sari/2.jpg',
+          'Kamar Standard sejuk ber-AC dengan ranjang Queen Size empuk, kamar mandi private dengan toilet duduk (western style), balkon pemandangan asri, dan WiFi cepat.',
+        image: '/assets/putri-sari/standard-ac.jpg',
         amenities: [
           'AC Dingin',
           'Ranjang Queen Size',

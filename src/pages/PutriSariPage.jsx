@@ -54,7 +54,15 @@ export default function PutriSariPage() {
           s.slug === 'jajapin-hotel-putri-sari' ||
           s.name?.toLowerCase().includes('putri sari')
       );
-      if (fromStorage) return fromStorage;
+      // Validasi: pastikan data storage sudah memiliki 3 tipe kamar terbaru (deluxe, standard_ac, fan_room)
+      if (
+        fromStorage &&
+        fromStorage.room_types?.length === 3 &&
+        fromStorage.room_types?.some((r) => r.id === 'deluxe') &&
+        fromStorage.room_types?.some((r) => r.id === 'standard_ac')
+      ) {
+        return fromStorage;
+      }
     } catch (e) {
       // fallback
     }
@@ -574,7 +582,7 @@ export default function PutriSariPage() {
               {/* Foto Kamar */}
               <div className="md:col-span-5 relative aspect-[4/3] md:aspect-auto overflow-hidden bg-stone-900">
                 <img
-                  src="/assets/putri-sari/2.jpg"
+                  src="/assets/putri-sari/standard-ac.jpg"
                   alt="Standard AC (Queen Bed)"
                   className="w-full h-full object-cover"
                 />

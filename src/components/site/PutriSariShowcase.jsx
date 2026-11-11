@@ -60,7 +60,7 @@ export default function PutriSariShowcase() {
     {
       id: 'deluxe',
       name: 'Deluxe Room',
-      image: '/assets/putri-sari/3.jpg',
+      image: '/assets/putri-sari/deluxe-1.jpg',
       price: 350000,
       otaPrice: 420000,
       bed: '1 Ranjang King Size',
@@ -78,7 +78,7 @@ export default function PutriSariShowcase() {
     {
       id: 'standard_ac',
       name: 'Standard AC',
-      image: '/assets/putri-sari/2.jpg',
+      image: '/assets/putri-sari/standard-ac.jpg',
       price: 250000,
       otaPrice: 300000,
       bed: '1 Ranjang Queen Size',

@@ -96,14 +96,24 @@ export default function DashboardPage() {
     if (!saved) return initialStays;
     try {
       const parsed = JSON.parse(saved);
-      const existingIds = new Set(parsed.map((p) => p.id));
-      const missing = initialStays.filter((s) => !existingIds.has(s.id));
-      if (missing.length > 0) {
-        const merged = [...parsed, ...missing];
-        localStorage.setItem('jajapin_properties', JSON.stringify(merged));
-        return merged;
+      const ps = parsed.find((p) => p.id === 1 || p.slug === 'jajapin-hotel-putri-sari');
+      let updatedList = parsed;
+      // Auto-sync Hotel Putri Sari jika versi lama (< 3 kamar atau tipe kamar belum deluxe & standard_ac)
+      if (
+        !ps ||
+        ps.room_types?.length !== 3 ||
+        !ps.room_types?.some((r) => r.id === 'deluxe') ||
+        !ps.room_types?.some((r) => r.id === 'standard_ac')
+      ) {
+        updatedList = parsed.map((p) =>
+          p.id === 1 || p.slug === 'jajapin-hotel-putri-sari' ? initialStays[0] : p
+        );
       }
-      return parsed;
+      const existingIds = new Set(updatedList.map((p) => p.id));
+      const missing = initialStays.filter((s) => !existingIds.has(s.id));
+      const merged = missing.length > 0 ? [...updatedList, ...missing] : updatedList;
+      localStorage.setItem('jajapin_properties', JSON.stringify(merged));
+      return merged;
     } catch {
       return initialStays;
     }
