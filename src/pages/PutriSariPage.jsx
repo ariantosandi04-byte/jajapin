@@ -66,7 +66,7 @@ export default function PutriSariPage() {
   const tomorrowStr = new Date(Date.now() + 86400000).toISOString().split('T')[0];
   const [checkIn, setCheckIn] = useState(searchParams.get('checkIn') || todayStr);
   const [checkOut, setCheckOut] = useState(searchParams.get('checkOut') || tomorrowStr);
-  const [selectedRoomId, setSelectedRoomId] = useState(stay.room_types?.[0]?.id || 'deluxe_king_hijau');
+  const [selectedRoomId, setSelectedRoomId] = useState(stay.room_types?.[0]?.id || 'deluxe');
   const [roomsCount, setRoomsCount] = useState(1);
   const [guestsCount, setGuestsCount] = useState(2);
 
@@ -471,18 +471,18 @@ export default function PutriSariPage() {
         {/* List Kamar Berjejer Mobile-First */}
         <div className="space-y-4">
           
-          {/* KAMAR 1: Deluxe King Suite (Kasur Hijau) */}
+          {/* KAMAR 1: Deluxe Room */}
           <div className="bg-white rounded-3xl border border-stone-200 overflow-hidden shadow-xs hover:border-emerald-300 transition-all">
             <div className="grid grid-cols-1 md:grid-cols-12 items-stretch">
               {/* Foto Kamar */}
               <div className="md:col-span-5 relative aspect-[4/3] md:aspect-auto overflow-hidden bg-stone-900">
                 <img
                   src="/assets/putri-sari/3.jpg"
-                  alt="Deluxe King Suite (Kasur Hijau)"
+                  alt="Deluxe Room (King Size & Sofa)"
                   className="w-full h-full object-cover"
                 />
                 <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-emerald-900/90 text-white text-[10px] font-bold uppercase tracking-wider backdrop-blur-xs">
-                  Kamar Kasur Hijau • Terfavorit
+                  Deluxe • Tersedia 5 Unit
                 </span>
                 <span className="absolute bottom-3 left-3 px-2 py-0.5 rounded-md bg-black/60 text-white text-[10px]">
                   1 King Bed • 2 Tamu
@@ -495,23 +495,23 @@ export default function PutriSariPage() {
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <h3 className="font-display font-bold text-lg sm:text-xl text-stone-900">
-                        Deluxe King Suite (Kasur Hijau)
+                        Deluxe Room (King Size & Sofa)
                       </h3>
                       <p className="text-xs text-emerald-800 font-semibold mt-0.5">
-                        1 King Bed Ekstra Luas • AC Dingin • Lemari Geser 3 Pintu
+                        Ranjang King Size • AC Dingin • Water Heater • TV • Meja Rias • Lemari • Sofa
                       </p>
                     </div>
                     <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-900 text-[10px] font-bold uppercase tracking-wider shrink-0">
-                      Diskon Langsung
+                      5 Unit Kamar
                     </span>
                   </div>
 
                   <p className="text-xs sm:text-sm text-stone-600 mt-2.5 leading-relaxed font-body">
-                    Kamar lapang dengan kasur King Size bersprei hijau elegan, dipan empuk berkepala kulit modern, lemari pakaian 3 pintu motif kayu, AC sejuk, meja rias, dan kamar mandi dalam yang bersih.
+                    Kamar Deluxe terluas dan terlengkap dengan kasur King Size empuk, penyejuk AC dingin, kamar mandi dengan water heater, TV, sofa santai, meja rias, serta lemari pakaian.
                   </p>
 
                   <div className="flex flex-wrap gap-1.5 mt-3">
-                    {['Kasur King Luas', 'AC Dingin', 'Arah Kiblat Plafon', 'Kamar Mandi Dalam', 'Parkir Aman'].map((amen) => (
+                    {['AC Dingin', 'Water Heater', 'Ranjang King Size', 'TV', 'Meja Rias', 'Lemari', 'Sofa', 'Kamar Mandi Dalam', 'WiFi Gratis'].map((amen) => (
                       <span key={amen} className="inline-flex items-center gap-1 text-[11px] bg-stone-50 border border-stone-200/80 px-2.5 py-1 rounded-lg text-stone-700">
                         <Check className="w-3 h-3 text-emerald-700" />
                         {amen}
@@ -531,7 +531,7 @@ export default function PutriSariPage() {
 
                   <div className="flex items-center gap-2">
                     <Button
-                      onClick={() => handleBookNow('deluxe_king_hijau')}
+                      onClick={() => handleBookNow('deluxe')}
                       className="w-full sm:w-auto h-12 sm:h-11 px-6 rounded-2xl bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs sm:text-sm shadow-sm"
                     >
                       Pesan Kamar Ini (Tanpa Akun)
@@ -542,22 +542,22 @@ export default function PutriSariPage() {
             </div>
           </div>
 
-          {/* KAMAR 2: Standard Room Balkon (Kasur Oranye) */}
+          {/* KAMAR 2: Standard AC */}
           <div className="bg-white rounded-3xl border border-stone-200 overflow-hidden shadow-xs hover:border-emerald-300 transition-all">
             <div className="grid grid-cols-1 md:grid-cols-12 items-stretch">
               {/* Foto Kamar */}
               <div className="md:col-span-5 relative aspect-[4/3] md:aspect-auto overflow-hidden bg-stone-900">
                 <img
                   src="/assets/putri-sari/2.jpg"
-                  alt="Standard Room dengan Balkon & Arah Kiblat (Kasur Oranye)"
+                  alt="Standard AC (Queen Bed)"
                   className="w-full h-full object-cover"
                 />
-                <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-amber-700/90 text-white text-[10px] font-bold uppercase tracking-wider backdrop-blur-xs">
-                  Kamar Kasur Oranye + Balkon
+                <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-emerald-800/90 text-white text-[10px] font-bold uppercase tracking-wider backdrop-blur-xs">
+                  Standard AC • Tersedia 5 Unit
                 </span>
                 <span className="absolute bottom-3 left-3 px-2 py-0.5 rounded-md bg-black/60 text-white text-[10px] flex items-center gap-1">
-                  <Compass className="w-3 h-3 text-emerald-400" />
-                  Penunjuk Arah Kiblat
+                  <Bath className="w-3 h-3 text-emerald-400" />
+                  Toilet Duduk (Western)
                 </span>
               </div>
 
@@ -567,23 +567,23 @@ export default function PutriSariPage() {
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <h3 className="font-display font-bold text-lg sm:text-xl text-stone-900">
-                        Standard Room dengan Balkon (Kasur Oranye)
+                        Standard AC
                       </h3>
                       <p className="text-xs text-emerald-800 font-semibold mt-0.5">
-                        1 Queen Bed • Pintu Balkon Menghadap Pepohonan • Penunjuk Kiblat
+                        Ranjang Queen • Kamar Mandi Private Toilet Duduk (Western) • AC Dingin
                       </p>
                     </div>
-                    <span className="px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 text-[10px] font-bold uppercase tracking-wider shrink-0">
-                      Balkon Asri
+                    <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-900 text-[10px] font-bold uppercase tracking-wider shrink-0">
+                      5 Unit Kamar
                     </span>
                   </div>
 
                   <p className="text-xs sm:text-sm text-stone-600 mt-2.5 leading-relaxed font-body">
-                    Kamar sejuk dengan pintu balkon yang menghadap pepohonan hijau rindang, dipan podium modern berwarna putih, sprei oranye segar, stiker penunjuk arah kiblat di plafon, dan atmosfer hening untuk istirahat optimal.
+                    Kamar berpendingin AC sejuk dengan ranjang Queen Size yang nyaman, dilengkapi kamar mandi private dengan toilet duduk (western style) serta kebersihan terjaga.
                   </p>
 
                   <div className="flex flex-wrap gap-1.5 mt-3">
-                    {['Balkon Asri', '1 Queen Bed', 'Arah Kiblat Plafon', 'AC Dingin', 'Parkir Aman'].map((amen) => (
+                    {['AC Dingin', 'Ranjang Queen', 'Kamar Mandi Private', 'Toilet Duduk (Western)', 'WiFi Cepat', 'Parkir Aman'].map((amen) => (
                       <span key={amen} className="inline-flex items-center gap-1 text-[11px] bg-stone-50 border border-stone-200/80 px-2.5 py-1 rounded-lg text-stone-700">
                         <Check className="w-3 h-3 text-emerald-700" />
                         {amen}
@@ -594,16 +594,16 @@ export default function PutriSariPage() {
 
                 <div className="pt-4 border-t border-stone-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <span className="text-[10px] text-stone-400 line-through block">Harga OTA: Rp 350.000</span>
+                    <span className="text-[10px] text-stone-400 line-through block">Harga OTA: Rp 300.000</span>
                     <div className="flex items-baseline gap-1.5">
-                      <span className="text-2xl font-bold text-stone-900">{formatIDR(285000)}</span>
+                      <span className="text-2xl font-bold text-stone-900">{formatIDR(250000)}</span>
                       <span className="text-xs text-stone-500 font-body">/ malam (Nett)</span>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2">
                     <Button
-                      onClick={() => handleBookNow('standard_queen_oranye')}
+                      onClick={() => handleBookNow('standard_ac')}
                       className="w-full sm:w-auto h-12 sm:h-11 px-6 rounded-2xl bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs sm:text-sm shadow-sm"
                     >
                       Pesan Kamar Ini (Tanpa Akun)
@@ -614,38 +614,60 @@ export default function PutriSariPage() {
             </div>
           </div>
 
-          {/* KAMAR 3: Double Bed Standard AC */}
+          {/* KAMAR 3: Fan Room / Kipas */}
           <div className="bg-white rounded-3xl border border-stone-200 overflow-hidden shadow-xs hover:border-emerald-300 transition-all">
             <div className="grid grid-cols-1 md:grid-cols-12 items-stretch">
               <div className="md:col-span-5 relative aspect-[4/3] md:aspect-auto overflow-hidden bg-stone-900">
                 <img
-                  src="/assets/putri-sari/4.jpg"
-                  alt="Double Bed Standard AC"
+                  src="/assets/putri-sari/1.jpg"
+                  alt="Fan Room / Kipas"
                   className="w-full h-full object-cover"
                 />
                 <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-stone-800/90 text-white text-[10px] font-bold uppercase tracking-wider backdrop-blur-xs">
-                  Double Bed AC
+                  Fan Room • Tersedia 5 Unit
+                </span>
+                <span className="absolute bottom-3 left-3 px-2 py-0.5 rounded-md bg-black/60 text-white text-[10px] flex items-center gap-1">
+                  <Wind className="w-3 h-3 text-emerald-400" />
+                  Kipas Angin & Toilet Jongkok
                 </span>
               </div>
               <div className="md:col-span-7 p-5 sm:p-6 flex flex-col justify-between space-y-4">
                 <div>
-                  <h3 className="font-display font-bold text-lg sm:text-xl text-stone-900">
-                    Double Bed Standard AC
-                  </h3>
-                  <p className="text-xs text-emerald-800 font-semibold mt-0.5">
-                    1 Double Bed • AC Dingin • Kamar Mandi Dalam
-                  </p>
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <h3 className="font-display font-bold text-lg sm:text-xl text-stone-900">
+                        Fan Room / Kipas
+                      </h3>
+                      <p className="text-xs text-emerald-800 font-semibold mt-0.5">
+                        Ranjang Queen • Kamar Mandi Private Indian • Toilet Jongkok • Kipas Angin
+                      </p>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 text-[10px] font-bold uppercase tracking-wider shrink-0">
+                      5 Unit Kamar
+                    </span>
+                  </div>
                   <p className="text-xs sm:text-sm text-stone-600 mt-2.5 leading-relaxed font-body">
-                    Pilihan hemat dan nyaman dengan tempat tidur ganda bersih, AC dingin terawat, serta lokasi strategis selangkah ke bibir pantai.
+                    Pilihan hemat dengan ranjang Queen Size empuk, sirkulasi udara alami ditambah kipas angin, serta kamar mandi private bergaya Indian dengan toilet jongkok yang bersih.
                   </p>
+                  <div className="flex flex-wrap gap-1.5 mt-3">
+                    {['Kipas Angin (Fan)', 'Ranjang Queen Size', 'Kamar Mandi Private', 'Toilet Jongkok (Indian)', 'WiFi Cepat', 'Parkir Luas'].map((amen) => (
+                      <span key={amen} className="inline-flex items-center gap-1 text-[11px] bg-stone-50 border border-stone-200/80 px-2.5 py-1 rounded-lg text-stone-700">
+                        <Check className="w-3 h-3 text-emerald-700" />
+                        {amen}
+                      </span>
+                    ))}
+                  </div>
                 </div>
                 <div className="pt-4 border-t border-stone-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <span className="text-2xl font-bold text-stone-900">{formatIDR(250000)}</span>
-                    <span className="text-xs text-stone-500 font-body">/ malam</span>
+                    <span className="text-[10px] text-stone-400 line-through block">Harga OTA: Rp 180.000</span>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-2xl font-bold text-stone-900">{formatIDR(150000)}</span>
+                      <span className="text-xs text-stone-500 font-body">/ malam</span>
+                    </div>
                   </div>
                   <Button
-                    onClick={() => handleBookNow('double_bed_standard')}
+                    onClick={() => handleBookNow('fan_room')}
                     className="w-full sm:w-auto h-12 sm:h-11 px-6 rounded-2xl bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs sm:text-sm shadow-sm"
                   >
                     Pesan Kamar Ini

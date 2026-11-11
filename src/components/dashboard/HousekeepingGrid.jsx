@@ -6,15 +6,26 @@ import { Button } from '../ui/Button';
 
 export default function HousekeepingGrid() {
   const [rooms, setRooms] = useState([
+    // Lantai 1: 5 Unit Deluxe Room (King Size, AC, Water Heater, TV, Meja Rias, Lemari, Sofa)
     { number: '101', type: 'Deluxe', status: 'Bersih', housekeeper: 'Siti R.' },
-    { number: '102', type: 'Deluxe', status: 'Kotor', housekeeper: 'Asep M.' },
-    { number: '103', type: 'Deluxe Twin', status: 'Bersih', housekeeper: 'Siti R.' },
-    { number: '104', type: 'Family Suite', status: 'Bersih', housekeeper: 'Budi W.' },
-    { number: '105', type: 'Standard AC', status: 'Bersih', housekeeper: 'Budi W.' },
-    { number: '106', type: 'Standard Non-AC', status: 'Kotor', housekeeper: 'Asep M.' },
-    { number: '107', type: 'Standard AC', status: 'Bersih', housekeeper: 'Siti R.' },
-    { number: '108', type: 'Standard AC', status: 'Bersih', housekeeper: 'Siti R.' },
-    { number: '109', type: 'Deluxe', status: 'Bersih', housekeeper: 'Asep M.' },
+    { number: '102', type: 'Deluxe', status: 'Bersih', housekeeper: 'Asep M.' },
+    { number: '103', type: 'Deluxe', status: 'Bersih', housekeeper: 'Siti R.' },
+    { number: '104', type: 'Deluxe', status: 'Diperiksa', housekeeper: 'Budi W.' },
+    { number: '105', type: 'Deluxe', status: 'Bersih', housekeeper: 'Budi W.' },
+
+    // Lantai 2: 5 Unit Standard AC (Queen Bed, Toilet Duduk Western, AC)
+    { number: '201', type: 'Standard AC', status: 'Bersih', housekeeper: 'Asep M.' },
+    { number: '202', type: 'Standard AC', status: 'Kotor', housekeeper: 'Asep M.' },
+    { number: '203', type: 'Standard AC', status: 'Bersih', housekeeper: 'Siti R.' },
+    { number: '204', type: 'Standard AC', status: 'Bersih', housekeeper: 'Siti R.' },
+    { number: '205', type: 'Standard AC', status: 'Bersih', housekeeper: 'Budi W.' },
+
+    // Lantai 3: 5 Unit Fan Room / Kipas (Queen Bed, Toilet Jongkok Indian)
+    { number: '301', type: 'Fan / Kipas', status: 'Bersih', housekeeper: 'Budi W.' },
+    { number: '302', type: 'Fan / Kipas', status: 'Bersih', housekeeper: 'Siti R.' },
+    { number: '303', type: 'Fan / Kipas', status: 'Kotor', housekeeper: 'Asep M.' },
+    { number: '304', type: 'Fan / Kipas', status: 'Bersih', housekeeper: 'Asep M.' },
+    { number: '305', type: 'Fan / Kipas', status: 'Bersih', housekeeper: 'Siti R.' },
   ]);
 
   const counts = {

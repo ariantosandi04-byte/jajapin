@@ -23,7 +23,7 @@ import { stays } from '../../data/stays';
 
 export default function PutriSariShowcase() {
   const [activePhotoIdx, setActivePhotoIdx] = useState(null);
-  const [selectedRoom, setSelectedRoom] = useState('deluxe_king_hijau');
+  const [selectedRoom, setSelectedRoom] = useState('deluxe');
 
   // Ambil data Hotel Putri Sari dari database stays
   const stay = stays.find((s) => s.id === 1 || s.slug === 'jajapin-hotel-putri-sari') || stays[0];
@@ -58,26 +58,56 @@ export default function PutriSariShowcase() {
 
   const rooms = [
     {
-      id: 'deluxe_king_hijau',
-      name: 'Deluxe King Suite (Kasur Hijau)',
+      id: 'deluxe',
+      name: 'Deluxe Room',
       image: '/assets/putri-sari/3.jpg',
       price: 350000,
       otaPrice: 420000,
-      bed: '1 King Bed Ekstra Luas',
+      bed: '1 Ranjang King Size',
       capacity: '2 Tamu',
-      badge: 'Paling Diminati Tamu',
-      features: ['Kasur King Bersprei Hijau', 'AC Dingin & Terawat', 'Lemari Geser 3 Pintu', 'Kamar Mandi Dalam', 'Arah Kiblat Plafon'],
+      badge: 'Fasilitas Terlengkap (5 Unit)',
+      features: [
+        'AC Dingin',
+        'Water Heater',
+        'Ranjang King Size',
+        'TV & Sofa Santai',
+        'Meja Rias & Lemari',
+        'Kamar Mandi Dalam',
+      ],
     },
     {
-      id: 'standard_queen_oranye',
-      name: 'Standard Room Balkon (Kasur Oranye)',
+      id: 'standard_ac',
+      name: 'Standard AC',
       image: '/assets/putri-sari/2.jpg',
-      price: 285000,
-      otaPrice: 350000,
-      bed: '1 Queen Bed + Balkon',
+      price: 250000,
+      otaPrice: 300000,
+      bed: '1 Ranjang Queen Size',
       capacity: '2 Tamu',
-      badge: 'Balkon Asri & Segar',
-      features: ['Balkon Pemandangan Pohon Rindang', 'Kasur Queen Bersih', 'AC Dingin', 'Penunjuk Arah Kiblat', 'Parkir Mobil Aman'],
+      badge: 'Standard AC Nyaman (5 Unit)',
+      features: [
+        'AC Dingin',
+        'Ranjang Queen Size',
+        'Kamar Mandi Private',
+        'Toilet Duduk (Western)',
+        'WiFi Cepat',
+      ],
+    },
+    {
+      id: 'fan_room',
+      name: 'Fan Room / Kipas',
+      image: '/assets/putri-sari/1.jpg',
+      price: 150000,
+      otaPrice: 180000,
+      bed: '1 Ranjang Queen Size',
+      capacity: '2 Tamu',
+      badge: 'Paling Hemat & Asri (5 Unit)',
+      features: [
+        'Kipas Angin (Fan)',
+        'Ranjang Queen Size',
+        'Kamar Mandi Private (Indian Style)',
+        'Toilet Jongkok',
+        'WiFi Cepat',
+      ],
     },
   ];
 
