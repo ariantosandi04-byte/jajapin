@@ -44,13 +44,13 @@ export default async function handler(req, res) {
         id: bookingCode,
         price: Math.round(totalPrice),
         quantity: 1,
-        name: stayName.slice(0, 50),
+        name: (stayName || 'Penginapan Jajapin').slice(0, 50),
       },
     ],
     customer_details: {
-      first_name: guestName,
-      email: guestEmail,
-      phone: guestPhone,
+      first_name: guestName || 'Tamu Jajapin',
+      email: guestEmail || 'tamu@jajapin.id',
+      phone: guestPhone || '08123456789',
     },
     credit_card: {
       secure: true,
