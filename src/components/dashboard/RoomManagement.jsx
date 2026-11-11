@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   BedDouble,
   Plus,
@@ -13,12 +13,23 @@ import {
   DollarSign,
   Users,
   Eye,
+  Upload,
+  Camera,
+  Sparkles,
 } from 'lucide-react';
 import { Card, CardContent } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { Input } from '../ui/Input';
 import { formatIDR } from '../../lib/format';
+
+const HOTEL_PRESET_PHOTOS = [
+  { label: 'Gerbang Depan', path: '/assets/putri-sari/cover.jpg' },
+  { label: 'Deluxe (Kasur Hijau)', path: '/assets/putri-sari/3.jpg' },
+  { label: 'Standard (Kasur Oranye)', path: '/assets/putri-sari/2.jpg' },
+  { label: 'Standard AC Double', path: '/assets/putri-sari/4.jpg' },
+  { label: 'Fan Room / Single', path: '/assets/putri-sari/1.jpg' },
+];
 
 export default function RoomManagement({
   property,
@@ -31,6 +42,29 @@ export default function RoomManagement({
   const [editingIndex, setEditingIndex] = useState(null);
   const [editFormData, setEditFormData] = useState({});
   const [isAdding, setIsAdding] = useState(false);
+  const coverFileInputRef = useRef(null);
+  const newRoomFileInputRef = useRef(null);
+  const editRoomFileInputRef = useRef(null);
+
+  const handleFileUpload = (e, callback) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Ukuran file foto maksimal 5 MB!');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target?.result;
+      if (typeof result === 'string') {
+        callback(result);
+      }
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
   const [newRoom, setNewRoom] = useState({
     id: '',
     name: '',
@@ -194,7 +228,7 @@ export default function RoomManagement({
 
           <form onSubmit={handleSaveCoverImage} className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
             <div className="sm:col-span-3">
-              <div className="relative aspect-4/3 rounded-2xl overflow-hidden bg-muted border border-border">
+              <div className="relative aspect-4/3 rounded-2xl overflow-hidden bg-muted border border-border shadow-xs">
                 <img
                   src={coverImage || '/assets/putri-sari/cover.jpg'}
                   alt={propertyName}
@@ -214,13 +248,47 @@ export default function RoomManagement({
                 placeholder="Contoh: /assets/putri-sari/cover.jpg atau https://..."
                 required
               />
-              <div className="flex items-center gap-2">
+
+              <div className="flex flex-wrap items-center gap-2">
+                <input
+                  type="file"
+                  ref={coverFileInputRef}
+                  className="hidden"
+                  accept="image/*"
+                  onChange={(e) => handleFileUpload(e, (dataUrl) => setCoverImage(dataUrl))}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => coverFileInputRef.current?.click()}
+                  className="text-xs font-semibold gap-1.5"
+                >
+                  <Upload className="w-3.5 h-3.5 text-emerald-700" />
+                  Unggah dari HP / Komputer
+                </Button>
                 <Button type="submit" size="sm" className="bg-emerald-800 hover:bg-emerald-900 text-white font-semibold">
                   <Save className="w-4 h-4 mr-1.5" /> Simpan Foto Cover
                 </Button>
-                <span className="text-[11px] text-muted-foreground">
-                  Gunakan foto gerbang depan atau tampak depan hotel beresolusi jelas.
-                </span>
+              </div>
+
+              {/* Koleksi Preset Bawaan Hotel */}
+              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                <span className="text-[11px] font-semibold text-muted-foreground mr-1">Koleksi Bawaan:</span>
+                {HOTEL_PRESET_PHOTOS.map((opt) => (
+                  <button
+                    key={opt.path}
+                    type="button"
+                    onClick={() => setCoverImage(opt.path)}
+                    className={`px-2 py-0.5 rounded-lg text-[10px] font-medium border transition-all ${
+                      coverImage === opt.path
+                        ? 'bg-emerald-100 text-emerald-900 border-emerald-400 font-bold'
+                        : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
               </div>
             </div>
           </form>
@@ -292,12 +360,71 @@ export default function RoomManagement({
                   onChange={(e) => setNewRoom({ ...newRoom, available_units: Number(e.target.value) })}
                   required
                 />
-                <Input
-                  label="URL / Path Foto Kamar"
-                  value={newRoom.image}
-                  onChange={(e) => setNewRoom({ ...newRoom, image: e.target.value })}
-                  placeholder="/assets/putri-sari/3.jpg"
-                />
+              </div>
+
+              {/* Foto Tipe Kamar Baru */}
+              <div className="p-3.5 rounded-2xl bg-background border border-border space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground">
+                    Foto Tipe Kamar
+                  </span>
+                  <input
+                    type="file"
+                    ref={newRoomFileInputRef}
+                    className="hidden"
+                    accept="image/*"
+                    onChange={(e) => handleFileUpload(e, (dataUrl) => setNewRoom({ ...newRoom, image: dataUrl }))}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => newRoomFileInputRef.current?.click()}
+                    className="text-[11px] h-7 gap-1"
+                  >
+                    <Upload className="w-3 h-3 text-emerald-700" />
+                    Unggah dari HP / Komputer
+                  </Button>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="w-16 h-12 rounded-xl overflow-hidden bg-muted border border-border shrink-0 shadow-2xs">
+                    <img
+                      src={newRoom.image || '/assets/putri-sari/3.jpg'}
+                      alt="Preview Foto"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.src = '/assets/putri-sari/3.jpg';
+                      }}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <Input
+                      value={newRoom.image}
+                      onChange={(e) => setNewRoom({ ...newRoom, image: e.target.value })}
+                      placeholder="/assets/putri-sari/3.jpg atau tempel link URL online"
+                      className="h-9 text-xs"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                  <span className="text-[10px] text-muted-foreground mr-1">Preset Foto Cepat:</span>
+                  {HOTEL_PRESET_PHOTOS.map((opt) => (
+                    <button
+                      key={opt.path}
+                      type="button"
+                      onClick={() => setNewRoom({ ...newRoom, image: opt.path })}
+                      className={`px-2 py-0.5 rounded text-[10px] border transition-all ${
+                        newRoom.image === opt.path
+                          ? 'bg-emerald-100 text-emerald-900 border-emerald-400 font-bold'
+                          : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <Input
@@ -379,14 +506,69 @@ export default function RoomManagement({
                                 onChange={(e) => setEditFormData({ ...editFormData, capacity: e.target.value })}
                                 required
                               />
-                              <div className="sm:col-span-3">
-                                <Input
-                                  label="URL / Path Foto Kamar"
-                                  value={editFormData.image || ''}
-                                  onChange={(e) => setEditFormData({ ...editFormData, image: e.target.value })}
-                                  placeholder="/assets/putri-sari/3.jpg"
-                                  required
-                                />
+                              <div className="sm:col-span-3 p-3.5 rounded-2xl bg-background border border-border space-y-2.5">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground">
+                                    Ganti Foto Kamar
+                                  </span>
+                                  <input
+                                    type="file"
+                                    ref={editRoomFileInputRef}
+                                    className="hidden"
+                                    accept="image/*"
+                                    onChange={(e) => handleFileUpload(e, (dataUrl) => setEditFormData({ ...editFormData, image: dataUrl }))}
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => editRoomFileInputRef.current?.click()}
+                                    className="text-[11px] h-7 gap-1"
+                                  >
+                                    <Upload className="w-3 h-3 text-emerald-700" />
+                                    Unggah Foto dari HP / Komputer
+                                  </Button>
+                                </div>
+
+                                <div className="flex items-center gap-3">
+                                  <div className="w-16 h-12 rounded-xl overflow-hidden bg-muted border border-border shrink-0 shadow-2xs">
+                                    <img
+                                      src={editFormData.image || '/assets/putri-sari/3.jpg'}
+                                      alt="Preview Foto"
+                                      className="w-full h-full object-cover"
+                                      onError={(e) => {
+                                        e.target.src = '/assets/putri-sari/3.jpg';
+                                      }}
+                                    />
+                                  </div>
+                                  <div className="flex-1">
+                                    <Input
+                                      value={editFormData.image || ''}
+                                      onChange={(e) => setEditFormData({ ...editFormData, image: e.target.value })}
+                                      placeholder="/assets/putri-sari/3.jpg atau tempel URL online"
+                                      className="h-9 text-xs"
+                                      required
+                                    />
+                                  </div>
+                                </div>
+
+                                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                                  <span className="text-[10px] text-muted-foreground mr-1">Preset Foto Cepat:</span>
+                                  {HOTEL_PRESET_PHOTOS.map((opt) => (
+                                    <button
+                                      key={opt.path}
+                                      type="button"
+                                      onClick={() => setEditFormData({ ...editFormData, image: opt.path })}
+                                      className={`px-2 py-0.5 rounded text-[10px] border transition-all ${
+                                        editFormData.image === opt.path
+                                          ? 'bg-emerald-100 text-emerald-900 border-emerald-400 font-bold'
+                                          : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted'
+                                      }`}
+                                    >
+                                      {opt.label}
+                                    </button>
+                                  ))}
+                                </div>
                               </div>
                             </div>
 

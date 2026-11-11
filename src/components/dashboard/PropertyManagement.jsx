@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {
   Building,
   Plus,
@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   Sparkles,
   Link2,
+  Upload,
 } from 'lucide-react';
 import { Card, CardContent } from '../ui/Card';
 import { Button } from '../ui/Button';
@@ -29,6 +30,27 @@ export default function PropertyManagement({
 }) {
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({});
+  const propFileInputRef = useRef(null);
+
+  const handleFileUpload = (e, callback) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Ukuran file foto maksimal 5 MB!');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target?.result;
+      if (typeof result === 'string') {
+        callback(result);
+      }
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
   const [isAddingNew, setIsAddingNew] = useState(false);
 
   // New property form state
@@ -324,6 +346,77 @@ export default function PropertyManagement({
                         rows={3}
                         className="w-full rounded-2xl border border-border bg-card px-4 py-2 font-body text-xs text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
                       />
+                    </div>
+
+                    {/* Ganti Foto Cover Properti */}
+                    <div className="p-3.5 rounded-2xl bg-card border border-border space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground font-body">
+                          Foto Utama / Cover Properti
+                        </span>
+                        <input
+                          type="file"
+                          ref={propFileInputRef}
+                          className="hidden"
+                          accept="image/*"
+                          onChange={(e) => handleFileUpload(e, (dataUrl) => setFormData({ ...formData, image: dataUrl }))}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => propFileInputRef.current?.click()}
+                          className="text-[11px] h-7 gap-1"
+                        >
+                          <Upload className="w-3 h-3 text-emerald-700" />
+                          Unggah dari HP / Komputer
+                        </Button>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <div className="w-16 h-12 rounded-xl overflow-hidden bg-muted border border-border shrink-0 shadow-2xs">
+                          <img
+                            src={formData.image || '/assets/putri-sari/cover.jpg'}
+                            alt="Preview Foto"
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.src = '/assets/putri-sari/cover.jpg';
+                            }}
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <Input
+                            value={formData.image || ''}
+                            onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                            placeholder="/assets/putri-sari/cover.jpg atau tautan URL online"
+                            className="h-9 text-xs"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                        <span className="text-[10px] text-muted-foreground mr-1">Preset Foto Cepat:</span>
+                        {[
+                          { label: 'Gerbang Depan', path: '/assets/putri-sari/cover.jpg' },
+                          { label: 'Deluxe (Kasur Hijau)', path: '/assets/putri-sari/3.jpg' },
+                          { label: 'Standard (Kasur Oranye)', path: '/assets/putri-sari/2.jpg' },
+                          { label: 'Standard AC Double', path: '/assets/putri-sari/4.jpg' },
+                          { label: 'Fan Room / Single', path: '/assets/putri-sari/1.jpg' },
+                        ].map((opt) => (
+                          <button
+                            key={opt.path}
+                            type="button"
+                            onClick={() => setFormData({ ...formData, image: opt.path })}
+                            className={`px-2 py-0.5 rounded text-[10px] border transition-all ${
+                              formData.image === opt.path
+                                ? 'bg-emerald-100 text-emerald-900 border-emerald-400 font-bold'
+                                : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted'
+                            }`}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                     <div className="flex justify-end gap-2">
                       <Button type="button" variant="outline" size="sm" onClick={() => setEditingId(null)}>
