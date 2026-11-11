@@ -25,11 +25,12 @@ export const stays = [
     image: '/assets/putri-sari/cover.jpg',
     gallery: [
       '/assets/putri-sari/cover.jpg',
-      '/assets/putri-sari/3.jpg',
+      '/assets/putri-sari/deluxe-1.jpg',
+      '/assets/putri-sari/deluxe-2.jpg',
+      '/assets/putri-sari/deluxe-3.jpg',
       '/assets/putri-sari/2.jpg',
       '/assets/putri-sari/4.jpg',
       '/assets/putri-sari/1.jpg',
-      '/assets/destinasi-bandung.png',
     ],
     amenities: [
       'Arah Kiblat Plafon',

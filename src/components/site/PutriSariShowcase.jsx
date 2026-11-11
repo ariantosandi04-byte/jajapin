@@ -35,24 +35,24 @@ export default function PutriSariShowcase() {
       caption: 'Papan nama kayu Hotel Putri Sari dan gerbang masuk berpagar hijau di pinggir jalan raya pantai.',
     },
     {
-      src: '/assets/putri-sari/3.jpg',
-      label: 'Deluxe King (Kasur Hijau)',
-      caption: 'Kamar luas dengan kasur King Size bersprei hijau, AC dingin, dan lemari pakaian geser 3 pintu.',
+      src: '/assets/putri-sari/deluxe-1.jpg',
+      label: 'Deluxe Room (Kasur Hijau & Sofa)',
+      caption: 'Kamar luas dengan kasur King Size bersprei hijau elegan, AC dingin, lemari pakaian 3 pintu, dan sofa santai.',
+    },
+    {
+      src: '/assets/putri-sari/deluxe-2.jpg',
+      label: 'Deluxe Room (Meja Rias & TV)',
+      caption: 'Fasilitas meja rias lengkap dengan tempat tidur King Size empuk dan TV kabel.',
     },
     {
       src: '/assets/putri-sari/2.jpg',
-      label: 'Standard Balkon (Kasur Oranye)',
-      caption: 'Kamar berpintu balkon menghadap pepohonan asri dengan stiker penunjuk arah kiblat di plafon.',
-    },
-    {
-      src: '/assets/putri-sari/4.jpg',
-      label: 'Double Bed Standard AC',
-      caption: 'Tempat tidur ganda higienis berpendingin AC yang cocok untuk 2 orang tamu.',
+      label: 'Standard AC (Queen Bed)',
+      caption: 'Kamar ber-AC sejuk dengan ranjang Queen dan kamar mandi private toilet duduk.',
     },
     {
       src: '/assets/putri-sari/1.jpg',
-      label: 'Single Bed Standard',
-      caption: 'Kamar tenang dan nyaman untuk solo traveler atau pelancong santai.',
+      label: 'Fan Room / Kipas',
+      caption: 'Kamar tenang dan nyaman untuk pelancong hemat dengan sirkulasi alami dan toilet jongkok.',
     },
   ];
 

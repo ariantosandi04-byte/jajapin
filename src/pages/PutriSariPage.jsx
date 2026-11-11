@@ -70,6 +70,8 @@ export default function PutriSariPage() {
   const [roomsCount, setRoomsCount] = useState(1);
   const [guestsCount, setGuestsCount] = useState(2);
 
+  const [deluxeActivePhoto, setDeluxeActivePhoto] = useState('/assets/putri-sari/deluxe-1.jpg');
+
   // Active section tab for mobile navigation
   const [activeTab, setActiveTab] = useState('kamar');
 
@@ -107,7 +109,7 @@ export default function PutriSariPage() {
     window.scrollTo(0, 0);
   }, []);
 
-  // 6 Foto Galeri Lengkap
+  // Foto Galeri Lengkap Hotel Putri Sari
   const galleryPhotos = [
     {
       src: '/assets/putri-sari/cover.jpg',
@@ -115,29 +117,29 @@ export default function PutriSariPage() {
       caption: 'Papan nama kayu Hotel Putri Sari dan gerbang masuk berpagar hijau di pinggir jalan raya pantai.',
     },
     {
-      src: '/assets/putri-sari/3.jpg',
-      title: 'Deluxe King Suite (Kasur Hijau)',
-      caption: 'Kamar luas dengan kasur King Size bersprei hijau elegan, dipan kepala kulit, lemari 3 pintu, dan AC sejuk.',
+      src: '/assets/putri-sari/deluxe-1.jpg',
+      title: 'Deluxe Room (Kasur King Hijau & Sofa)',
+      caption: 'Kamar Deluxe luas dengan kasur King Size bersprei hijau elegan, AC dingin, lemari 3 pintu, dan sofa santai.',
+    },
+    {
+      src: '/assets/putri-sari/deluxe-2.jpg',
+      title: 'Deluxe Room (Meja Rias & Ranjang King)',
+      caption: 'Sudut meja rias lengkap dengan cermin rias dan tempat tidur King Size empuk bersih.',
+    },
+    {
+      src: '/assets/putri-sari/deluxe-3.jpg',
+      title: 'Deluxe Room (Sudut Ranjang King & Lemari)',
+      caption: 'Kasur King berbalut bedcover hijau nyaman dengan lemari pakaian geser 3 pintu motif kayu modern.',
     },
     {
       src: '/assets/putri-sari/2.jpg',
-      title: 'Standard Room Balkon & Arah Kiblat (Kasur Oranye)',
-      caption: 'Kamar berpintu balkon dengan pemandangan pepohonan rindang dan stiker arah kiblat di plafon.',
-    },
-    {
-      src: '/assets/putri-sari/4.jpg',
-      title: 'Double Bed Standard AC',
-      caption: 'Tempat tidur ganda higienis berpendingin AC yang cocok untuk 2 orang tamu.',
+      title: 'Standard AC (Queen Bed)',
+      caption: 'Kamar berpendingin AC sejuk dengan ranjang Queen dan kamar mandi private toilet duduk.',
     },
     {
       src: '/assets/putri-sari/1.jpg',
-      title: 'Single Bed Standard',
-      caption: 'Kamar hemat yang higienis, tenang, dan cocok untuk pelancong santai maupun solo traveler.',
-    },
-    {
-      src: '/assets/destinasi-bandung.png',
-      title: 'Kawasan & Akses Pantai Kumala',
-      caption: 'Suasana asri dan sejuk tepat di seberang Pantai Kumala, Pelabuhan Ratu.',
+      title: 'Fan Room / Kipas',
+      caption: 'Kamar hemat yang higienis dengan sirkulasi alami, kipas angin, dan toilet jongkok.',
     },
   ];
 
@@ -474,19 +476,43 @@ export default function PutriSariPage() {
           {/* KAMAR 1: Deluxe Room */}
           <div className="bg-white rounded-3xl border border-stone-200 overflow-hidden shadow-xs hover:border-emerald-300 transition-all">
             <div className="grid grid-cols-1 md:grid-cols-12 items-stretch">
-              {/* Foto Kamar */}
-              <div className="md:col-span-5 relative aspect-[4/3] md:aspect-auto overflow-hidden bg-stone-900">
-                <img
-                  src="/assets/putri-sari/3.jpg"
-                  alt="Deluxe Room (King Size & Sofa)"
-                  className="w-full h-full object-cover"
-                />
-                <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-emerald-900/90 text-white text-[10px] font-bold uppercase tracking-wider backdrop-blur-xs">
-                  Deluxe • Tersedia 5 Unit
-                </span>
-                <span className="absolute bottom-3 left-3 px-2 py-0.5 rounded-md bg-black/60 text-white text-[10px]">
-                  1 King Bed • 2 Tamu
-                </span>
+              {/* Foto Kamar dengan Mini Switcher */}
+              <div className="md:col-span-5 relative flex flex-col justify-between overflow-hidden bg-stone-900">
+                <div className="relative aspect-[4/3] md:aspect-auto md:h-full overflow-hidden">
+                  <img
+                    src={deluxeActivePhoto || '/assets/putri-sari/deluxe-1.jpg'}
+                    alt="Deluxe Room (King Size & Sofa)"
+                    className="w-full h-full object-cover transition-all duration-300"
+                  />
+                  <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-emerald-900/90 text-white text-[10px] font-bold uppercase tracking-wider backdrop-blur-xs">
+                    Deluxe • Tersedia 5 Unit
+                  </span>
+                  <span className="absolute bottom-3 left-3 px-2 py-0.5 rounded-md bg-black/60 text-white text-[10px]">
+                    1 King Bed • 2 Tamu
+                  </span>
+                </div>
+                {/* 3 Thumbnail Pilihan Foto Deluxe */}
+                <div className="p-2 bg-stone-950/90 flex items-center gap-2 border-t border-white/10">
+                  {[
+                    { src: '/assets/putri-sari/deluxe-1.jpg', label: 'Kasur Hijau & Sofa' },
+                    { src: '/assets/putri-sari/deluxe-2.jpg', label: 'Meja Rias' },
+                    { src: '/assets/putri-sari/deluxe-3.jpg', label: 'Ranjang King' },
+                  ].map((photo, pIdx) => (
+                    <button
+                      key={pIdx}
+                      type="button"
+                      onClick={() => setDeluxeActivePhoto(photo.src)}
+                      className={`w-12 h-9 rounded-lg overflow-hidden border-2 transition-all ${
+                        (deluxeActivePhoto || '/assets/putri-sari/deluxe-1.jpg') === photo.src
+                          ? 'border-emerald-400 scale-105 shadow-sm'
+                          : 'border-transparent opacity-60 hover:opacity-100'
+                      }`}
+                    >
+                      <img src={photo.src} alt={photo.label} className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                  <span className="text-[10px] text-stone-300 ml-auto font-medium">3 Sudut Foto</span>
+                </div>
               </div>
 
               {/* Detail Kamar & Aksi */}
