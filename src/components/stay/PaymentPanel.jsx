@@ -69,7 +69,7 @@ export default function PaymentPanel({
               }`}
             >
               <Zap className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Midtrans (Online)</span>
+              <span>Pembayaran Online</span>
             </button>
 
             <button
@@ -100,7 +100,7 @@ export default function PaymentPanel({
                 <span>KAMAR LANGSUNG TER-LOCK 100% SETELAH PEMBAYARAN</span>
               </div>
               <p className="leading-relaxed text-emerald-900/90 dark:text-emerald-300/90">
-                Pembayaran via <strong>Midtrans</strong> langsung mengonfirmasi dan mengunci (lock) kamar Anda di sistem hotel, bebas dari risiko kamar diambil atau dibatalkan sepihak.
+                Pembayaran online otomatis mengonfirmasi dan mengunci (lock) kamar Anda di sistem hotel, bebas dari risiko kamar diambil atau dibatalkan sepihak.
               </p>
             </div>
 
@@ -111,15 +111,15 @@ export default function PaymentPanel({
             >
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
                     <Zap className="w-5 h-5" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-sm text-foreground">
-                      Midtrans Payment Gateway (Otomatis & Terverifikasi)
+                      Pembayaran Online Otomatis (Instan Terverifikasi)
                     </h4>
                     <p className="text-xs text-muted-foreground">
-                      Pilihan lengkap: QRIS, Virtual Account semua bank, GoPay, ShopeePay, dan Kartu Kredit.
+                      Pilihan lengkap: QRIS, Virtual Account semua bank (BCA/BRI/Mandiri/BNI), GoPay, ShopeePay, dan Kartu Kredit.
                     </p>
                   </div>
                 </div>

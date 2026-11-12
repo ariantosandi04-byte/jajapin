@@ -8,7 +8,6 @@ import {
   ArrowLeft,
   CreditCard,
   Sparkles,
-  Key,
   CheckCircle2,
   ExternalLink,
   Zap,
@@ -18,6 +17,8 @@ import {
   Plus,
   Minus,
   AlertTriangle,
+  Lock,
+  Clock,
 } from 'lucide-react';
 import SiteHeader from '../components/site/SiteHeader';
 import SiteFooter from '../components/site/SiteFooter';
@@ -41,12 +42,12 @@ export default function CheckoutPage() {
   const stay = useMemo(() => {
     try {
       const saved = JSON.parse(localStorage.getItem('jajapin_properties') || '[]');
-      const found = saved.find((s) => s.slug === slug);
+      const found = saved.find((s) => s.slug === slug || s.id === 1);
       if (found) return found;
     } catch (e) {
       // fallback
     }
-    return stays.find((s) => s.slug === slug);
+    return stays.find((s) => s.slug === slug) || stays[0];
   }, [slug]);
 
   const roomTypes = useMemo(() => {
@@ -63,19 +64,70 @@ export default function CheckoutPage() {
     ];
   }, [stay]);
 
-  const queryRoomType = searchParams.get('roomType');
+  const queryRoomType = searchParams.get('roomType') || searchParams.get('room');
   const queryRoomsCount = Number(searchParams.get('rooms')) || 1;
 
   const [selectedRoomId, setSelectedRoomId] = useState(() => {
     if (queryRoomType && roomTypes.some((r) => r.id === queryRoomType)) {
       return queryRoomType;
     }
-    return roomTypes[0]?.id || 'standard';
+    const byName = roomTypes.find((r) => r.name.toLowerCase() === queryRoomType?.toLowerCase());
+    if (byName) return byName.id;
+    return roomTypes[0]?.id || 'deluxe';
   });
 
   const [roomsCount, setRoomsCount] = useState(Math.max(1, Math.min(10, queryRoomsCount)));
-  const [checkIn, setCheckIn] = useState(searchParams.get('checkIn') || '');
-  const [checkOut, setCheckOut] = useState(searchParams.get('checkOut') || '');
+
+  // Setup Tanggal Menginap: Default 1 Malam (Hari ini -> Besok)
+  const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
+  const tomorrowStr = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().split('T')[0];
+  }, []);
+
+  const [checkIn, setCheckIn] = useState(() => searchParams.get('checkIn') || todayStr);
+  const [checkOut, setCheckOut] = useState(() => {
+    const qOut = searchParams.get('checkOut');
+    if (qOut) return qOut;
+    const base = searchParams.get('checkIn') ? new Date(searchParams.get('checkIn')) : new Date();
+    base.setDate(base.getDate() + 1);
+    return base.toISOString().split('T')[0];
+  });
+
+  const minCheckOut = useMemo(() => {
+    if (!checkIn) return todayStr;
+    const d = new Date(checkIn);
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().split('T')[0];
+  }, [checkIn, todayStr]);
+
+  const handleCheckInChange = (newIn) => {
+    setCheckIn(newIn);
+    if (!checkOut || new Date(newIn) >= new Date(checkOut)) {
+      const nextDay = new Date(newIn);
+      nextDay.setDate(nextDay.getDate() + 1);
+      setCheckOut(nextDay.toISOString().split('T')[0]);
+    }
+  };
+
+  const handleCheckOutChange = (newOut) => {
+    if (!newOut || new Date(newOut) <= new Date(checkIn)) {
+      const nextDay = new Date(checkIn);
+      nextDay.setDate(nextDay.getDate() + 1);
+      setCheckOut(nextDay.toISOString().split('T')[0]);
+    } else {
+      setCheckOut(newOut);
+    }
+  };
+
+  const setDurationNights = (numNights) => {
+    const baseIn = checkIn ? new Date(checkIn) : new Date();
+    const outDate = new Date(baseIn);
+    outDate.setDate(outDate.getDate() + numNights);
+    setCheckOut(outDate.toISOString().split('T')[0]);
+  };
+
   const [guests, setGuests] = useState(Number(searchParams.get('guests')) || 2);
   const [gateway, setGateway] = useState('midtrans');
   const [paymentMethod, setPaymentMethod] = useState('midtrans_snap');
@@ -90,8 +142,6 @@ export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [midtransLoaded, setMidtransLoaded] = useState(false);
-  const [clientKeyInput, setClientKeyInput] = useState(getClientKey() || '');
-  const [showKeyInput, setShowKeyInput] = useState(false);
   const [mockSnapData, setMockSnapData] = useState(null);
 
   // Selected room object
@@ -99,41 +149,16 @@ export default function CheckoutPage() {
     return roomTypes.find((r) => r.id === selectedRoomId) || roomTypes[0];
   }, [roomTypes, selectedRoomId]);
 
-  // Initialize Midtrans Snap script (if needed)
+  // Silently initialize Midtrans Snap script (if needed)
   useEffect(() => {
     const key = getClientKey();
     const isProduction = import.meta.env.VITE_MIDTRANS_IS_PRODUCTION === 'true';
     if (key) {
       loadMidtransSnap(key, isProduction)
         .then(() => setMidtransLoaded(true))
-        .catch(() => console.log('Midtrans Snap siap dengan mode fallback.'));
+        .catch(() => {});
     }
   }, []);
-
-  const handleSaveClientKey = () => {
-    if (clientKeyInput.trim()) {
-      localStorage.setItem('midtrans_client_key', clientKeyInput.trim());
-      loadMidtransSnap(clientKeyInput.trim(), false)
-        .then(() => {
-          setMidtransLoaded(true);
-          setShowKeyInput(false);
-        })
-        .catch(() => setError('Gagal memuat Snap dengan Client Key tersebut.'));
-    }
-  };
-
-  // Default dates if missing
-  useEffect(() => {
-    if (!checkIn) {
-      const today = new Date();
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const dayAfter = new Date(today);
-      dayAfter.setDate(dayAfter.getDate() + 3);
-      setCheckIn(tomorrow.toISOString().split('T')[0]);
-      setCheckOut(dayAfter.toISOString().split('T')[0]);
-    }
-  }, [checkIn]);
 
   if (!stay) {
     return (
@@ -332,6 +357,82 @@ export default function CheckoutPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             {/* Left Column: Form, Room Selection & Payment */}
             <div className="lg:col-span-7 space-y-6">
+              {/* CARD JADWAL & DURASI MENGINAP */}
+              <Card className="border-border">
+                <CardContent className="p-6 space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-border">
+                    <div>
+                      <h2 className="font-display font-semibold text-lg text-foreground flex items-center gap-2">
+                        <Calendar className="w-5 h-5 text-emerald-600" /> Jadwal & Durasi Menginap
+                      </h2>
+                      <p className="text-xs text-muted-foreground font-body">
+                        Tentukan tanggal check-in, check-out, atau pilih durasi menginap Anda
+                      </p>
+                    </div>
+                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-body self-start sm:self-auto flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-emerald-700" />
+                      {nights} Malam Menginap
+                    </span>
+                  </div>
+
+                  {/* Input Tanggal Check-in & Check-out */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[11px] uppercase tracking-wider font-semibold text-muted-foreground font-body mb-1.5">
+                        Tanggal Check-in
+                      </label>
+                      <input
+                        type="date"
+                        min={todayStr}
+                        value={checkIn}
+                        onChange={(e) => handleCheckInChange(e.target.value)}
+                        className="w-full h-11 px-3.5 rounded-2xl border border-border bg-card text-foreground font-body text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all cursor-pointer"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] uppercase tracking-wider font-semibold text-muted-foreground font-body mb-1.5">
+                        Tanggal Check-out
+                      </label>
+                      <input
+                        type="date"
+                        min={minCheckOut}
+                        value={checkOut}
+                        onChange={(e) => handleCheckOutChange(e.target.value)}
+                        className="w-full h-11 px-3.5 rounded-2xl border border-border bg-card text-foreground font-body text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all cursor-pointer"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {/* Tombol Pilihan Cepat Durasi */}
+                  <div className="pt-2">
+                    <label className="block text-[11px] uppercase tracking-wider font-semibold text-muted-foreground font-body mb-2">
+                      Pilihan Cepat Durasi:
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {[1, 2, 3, 5, 7].map((num) => {
+                        const isActive = nights === num;
+                        return (
+                          <button
+                            key={num}
+                            type="button"
+                            onClick={() => setDurationNights(num)}
+                            className={`px-3.5 py-1.5 rounded-xl text-xs font-medium font-body transition-all ${
+                              isActive
+                                ? 'bg-emerald-600 text-white shadow-xs font-semibold ring-2 ring-emerald-500 ring-offset-1'
+                                : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground border border-border/60'
+                            }`}
+                          >
+                            {num} Malam
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* CARD PILIHAN TIPE KAMAR & JUMLAH KAMAR */}
               <Card className="border-border">
                 <CardContent className="p-6 space-y-4">
@@ -498,60 +599,7 @@ export default function CheckoutPage() {
                 </Card>
               </form>
 
-              {/* Status Banner Payment Gateway Midtrans */}
-              {gateway === 'midtrans' ? (
-                <div className="p-4 rounded-2xl bg-primary/5 border border-primary/20 space-y-3 font-body">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-foreground text-xs">
-                      <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
-                      <span>Midtrans Gateway: <strong className="text-primary font-semibold">Sandbox Terhubung</strong></span>
-                    </div>
-                    <Badge variant="lime" className="text-[10px]">Merchant: G587072361</Badge>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-1 border-t border-primary/10 text-xs text-muted-foreground">
-                    <div className="flex items-center gap-1.5">
-                      {midtransLoaded ? (
-                        <span className="text-green-700 flex items-center gap-1">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> Pop-up Snap SDK Siap
-                        </span>
-                      ) : (
-                        <span>Mode Redirect / Pop-up Midtrans</span>
-                      )}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setShowKeyInput(!showKeyInput)}
-                      className="text-primary hover:underline font-semibold flex items-center gap-1 text-[11px]"
-                    >
-                      <Key className="w-3 h-3" />
-                      {getClientKey() ? 'Ubah Client Key' : 'Tempel Client Key Sandbox'}
-                    </button>
-                  </div>
-
-                  {showKeyInput && (
-                    <div className="pt-2 space-y-2 border-t border-primary/10">
-                      <p className="text-[11px] text-muted-foreground">
-                        Masukkan Client Key dari Dashboard Midtrans:
-                      </p>
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={clientKeyInput}
-                          onChange={(e) => setClientKeyInput(e.target.value)}
-                          placeholder="SB-Mid-client-xxxxxxxx"
-                          className="flex-1 h-9 px-3 rounded-xl border border-border bg-card text-xs font-mono"
-                        />
-                        <Button size="sm" onClick={handleSaveClientKey} type="button">
-                          Terapkan
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : null}
-
-              {/* Payment Methods Panel (Hanya Midtrans dan Bayar di Tempat) */}
+              {/* Payment Methods Panel */}
               <PaymentPanel
                 gateway={gateway}
                 onGatewayChange={setGateway}
@@ -564,18 +612,23 @@ export default function CheckoutPage() {
                   type="submit"
                   form="checkout-form"
                   size="lg"
-                  className={`w-full text-base font-semibold ${
+                  className={`w-full text-base font-semibold py-6 rounded-2xl shadow-md transition-all ${
                     gateway === 'midtrans'
-                      ? 'bg-emerald-700 hover:bg-emerald-800 text-white'
+                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20'
                       : 'bg-amber-600 hover:bg-amber-700 text-white'
                   }`}
                   disabled={submitting}
                 >
-                  {submitting
-                    ? 'Menghubungi Gateway Midtrans...'
-                    : gateway === 'midtrans'
-                    ? `Bayar Online via Midtrans (${roomsCount} Kamar) · ${formatIDR(totalPrice)}`
-                    : `Lanjutkan Booking (Bayar di Tempat) · ${formatIDR(totalPrice)}`}
+                  {submitting ? (
+                    'Memproses Pembayaran...'
+                  ) : gateway === 'midtrans' ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <Lock className="w-5 h-5 text-emerald-200" />
+                      Bayar Sekarang Online ({roomsCount} Kamar, {nights} Malam) · {formatIDR(totalPrice)}
+                    </span>
+                  ) : (
+                    <span>Lanjutkan Booking (Bayar di Tempat) · {formatIDR(totalPrice)}</span>
+                  )}
                 </Button>
 
                 {/* Status Lock Warning / Disclaimer */}
@@ -596,7 +649,7 @@ export default function CheckoutPage() {
                     <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                     <div>
                       <span className="font-bold block">JAMINAN INSTAN: KAMAR LANGSUNG TER-LOCK 100%</span>
-                      <span>Pembayaran via Midtrans otomatis mengunci kamar dan menerbitkan konfirmasi instan secara resmi.</span>
+                      <span>Pembayaran online otomatis mengonfirmasi pesanan dan mengunci kamar Anda secara resmi tanpa risiko dibatalkan sepihak.</span>
                     </div>
                   </div>
                 )}
