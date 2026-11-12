@@ -1,16 +1,52 @@
 User-agent: *
 Allow: /
+Allow: /stays
+Allow: /stays/*
+Allow: /putrisari
+Allow: /terms
+Allow: /privacy
+Allow: /refund-policy
+Allow: /assets/*
+
+# Disallow halaman privat, transaksi dan sistem internal
 Disallow: /dashboard
-Disallow: /checkout
+Disallow: /bookings
 Disallow: /pesan/
+Disallow: /konfirmasi/
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
 Disallow: /api/
+
+# Disallow URL lama yang dialihkan 301 agar tidak menguras crawl budget
+Disallow: /stays/jajapin-hotel-putri-sari
+Disallow: /stays/putri-sari
+Disallow: /putri-sari
+Disallow: /syarat-ketentuan
+Disallow: /kebijakan-privasi
+Disallow: /kebijakan-pengembalian
 
 # Googlebot spesifik
 User-agent: Googlebot
 Allow: /
 Allow: /stays
-Allow: /stay/*
+Allow: /stays/*
+Allow: /putrisari
+Allow: /terms
+Allow: /privacy
+Allow: /refund-policy
 Allow: /assets/*
+
+Disallow: /dashboard
+Disallow: /bookings
+Disallow: /pesan/
+Disallow: /konfirmasi/
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /api/
 
 Sitemap: https://jajapin.id/sitemap.xml
 Host: https://jajapin.id

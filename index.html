@@ -17,7 +17,38 @@
     <meta name="author" content="Jajapin Indonesia" />
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
     <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
-    <link rel="canonical" href="https://jajapin.id/" />
+
+    <!-- Tag Kanonis Dinamis: Menyesuaikan tag kanonis segera saat halaman dimuat -->
+    <link rel="canonical" id="jajapin-canonical" href="https://jajapin.id/" />
+    <script>
+      (function() {
+        try {
+          var p = window.location.pathname;
+          var h = window.location.hostname;
+          var base = 'https://jajapin.id';
+          var target = base + '/';
+          if (h === 'putrisari.jajapin.id' || h.indexOf('putrisari.') === 0) {
+            target = base + '/putrisari';
+          } else if (p === '/stays/jajapin-hotel-putri-sari' || p === '/putri-sari' || p === '/stays/putri-sari') {
+            target = base + '/putrisari';
+          } else if (p === '/syarat-ketentuan') {
+            target = base + '/terms';
+          } else if (p === '/kebijakan-privasi') {
+            target = base + '/privacy';
+          } else if (p === '/kebijakan-pengembalian') {
+            target = base + '/refund-policy';
+          } else if (p && p !== '/') {
+            target = base + p.replace(/\/+$/, '');
+          }
+          var link = document.getElementById('jajapin-canonical');
+          if (link) link.setAttribute('href', target);
+          var og = document.querySelector('meta[property="og:url"]');
+          if (og) og.setAttribute('content', target);
+          var tw = document.querySelector('meta[name="twitter:url"]');
+          if (tw) tw.setAttribute('content', target);
+        } catch (e) {}
+      })();
+    </script>
     
     <!-- Geo Target Indonesia -->
     <meta name="geo.region" content="ID" />

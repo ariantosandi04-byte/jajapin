@@ -2,6 +2,22 @@
   RewriteEngine On
   RewriteBase /
 
+  # 1. Paksa HTTPS (Mencegah duplikasi http vs https di Google Search Console)
+  RewriteCond %{HTTPS} off
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # 2. Redirect www.jajapin.id ke jajapin.id (Tetap izinkan subdomain seperti putrisari.jajapin.id)
+  RewriteCond %{HTTP_HOST} ^www\.jajapin\.id$ [NC]
+  RewriteRule ^(.*)$ https://jajapin.id/$1 [L,R=301]
+
+  # 3. 301 Permanent Redirect URL lama & alias ke URL Kanonis Resmi
+  RewriteRule ^stays/jajapin-hotel-putri-sari/?$ https://jajapin.id/putrisari [L,R=301]
+  RewriteRule ^stays/putri-sari/?$ https://jajapin.id/putrisari [L,R=301]
+  RewriteRule ^putri-sari/?$ https://jajapin.id/putrisari [L,R=301]
+  RewriteRule ^syarat-ketentuan/?$ https://jajapin.id/terms [L,R=301]
+  RewriteRule ^kebijakan-privasi/?$ https://jajapin.id/privacy [L,R=301]
+  RewriteRule ^kebijakan-pengembalian/?$ https://jajapin.id/refund-policy [L,R=301]
+
   # Forward API Midtrans ke file PHP (jika di cPanel / Apache)
   RewriteRule ^api/create-midtrans-token/?$ api/create-midtrans-token.php [L,QSA]
   RewriteRule ^api/midtrans-notification/?$ api/midtrans-notification.php [L,QSA]

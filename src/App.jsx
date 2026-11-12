@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from '@/contexts/AuthContext'
 import ProtectedRoute from '@/components/ProtectedRoute'
+import SEOHead from '@/components/SEOHead'
 
 const HomePage = lazy(() => import('@/pages/HomePage'))
 const StaysPage = lazy(() => import('@/pages/StaysPage'))
@@ -40,6 +41,8 @@ function LoadingFallback() {
 export default function App() {
   return (
     <AuthProvider>
+      {/* Pengelola SEO & Tag Kanonis Otomatis Sesuai URL */}
+      <SEOHead />
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           {/* Jika diakses lewat subdomain putrisari.jajapin.id, root langsung memuat PutriSariPage */}
