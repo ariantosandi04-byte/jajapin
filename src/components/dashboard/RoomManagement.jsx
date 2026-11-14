@@ -170,7 +170,7 @@ export default function RoomManagement({
     const roomPayload = {
       ...newRoom,
       id: id || `room_${Date.now()}`,
-      price: Number(newRoom.price) || 150000,
+      price: Number(newRoom.price) || 200000,
       capacity: Number(newRoom.capacity) || 2,
       available_units: Number(newRoom.available_units) || 5,
     };

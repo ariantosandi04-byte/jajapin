@@ -277,7 +277,7 @@ export default function PutriSariShowcase() {
               </div>
               <div className="text-left sm:text-right">
                 <span className="text-[10px] text-stone-400 block line-through">Harga di OTA: Rp 350.000 - Rp 420.000</span>
-                <span className="text-sm font-semibold text-emerald-700">Mulai {formatIDR(285000)} / malam</span>
+                <span className="text-sm font-semibold text-emerald-700">Mulai {formatIDR(200000)} / malam</span>
               </div>
             </div>
 

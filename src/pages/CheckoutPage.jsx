@@ -58,7 +58,7 @@ export default function CheckoutPage() {
         name: 'Kamar Standar',
         bed: `${stay?.beds || 1} Ranjang`,
         capacity: stay?.guests || 2,
-        price: stay?.price || 150000,
+        price: stay?.price || 200000,
         description: 'Kamar standar nyaman dengan fasilitas lengkap.',
       },
     ];
