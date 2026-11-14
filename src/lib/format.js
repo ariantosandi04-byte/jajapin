@@ -27,3 +27,19 @@ export function calculateNights(checkIn, checkOut) {
   const diff = end - start;
   return Math.max(1, Math.ceil(diff / (1000 * 60 * 60 * 24)));
 }
+
+/**
+ * Konversi link Google Drive shared menjadi URL gambar langsung (Direct CDN)
+ * Mendukung format:
+ * - https://drive.google.com/file/d/FILE_ID/view...
+ * - https://drive.google.com/open?id=FILE_ID
+ */
+export function formatImageUrl(url) {
+  if (!url || typeof url !== 'string') return url || '';
+  const driveRegex = /(?:drive\.google\.com\/(?:file\/d\/|open\?id=)|docs\.google\.com\/file\/d\/)([a-zA-Z0-9_-]+)/;
+  const match = url.match(driveRegex);
+  if (match && match[1]) {
+    return `https://lh3.googleusercontent.com/d/${match[1]}`;
+  }
+  return url;
+}

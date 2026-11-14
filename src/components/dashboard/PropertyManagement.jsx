@@ -20,7 +20,7 @@ import { Card, CardContent } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { Input } from '../ui/Input';
-import { formatIDR } from '../../lib/format';
+import { formatIDR, formatImageUrl } from '../../lib/format';
 
 export default function PropertyManagement({
   properties = [],
@@ -387,7 +387,7 @@ export default function PropertyManagement({
                         <div className="flex-1">
                           <Input
                             value={formData.image || ''}
-                            onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                            onChange={(e) => setFormData({ ...formData, image: formatImageUrl(e.target.value) })}
                             placeholder="/assets/putri-sari/cover.jpg atau tautan URL online"
                             className="h-9 text-xs"
                           />

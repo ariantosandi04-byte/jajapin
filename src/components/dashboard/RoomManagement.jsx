@@ -21,7 +21,7 @@ import { Card, CardContent } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { Input } from '../ui/Input';
-import { formatIDR } from '../../lib/format';
+import { formatIDR, formatImageUrl } from '../../lib/format';
 
 const HOTEL_PRESET_PHOTOS = [
   { label: 'Gerbang Depan', path: '/assets/putri-sari/cover.jpg' },
@@ -245,7 +245,7 @@ export default function RoomManagement({
               <Input
                 label="Path / URL Gambar Cover Utama"
                 value={coverImage}
-                onChange={(e) => setCoverImage(e.target.value)}
+                onChange={(e) => setCoverImage(formatImageUrl(e.target.value))}
                 placeholder="Contoh: /assets/putri-sari/cover.jpg atau https://..."
                 required
               />
@@ -402,7 +402,7 @@ export default function RoomManagement({
                   <div className="flex-1">
                     <Input
                       value={newRoom.image}
-                      onChange={(e) => setNewRoom({ ...newRoom, image: e.target.value })}
+                      onChange={(e) => setNewRoom({ ...newRoom, image: formatImageUrl(e.target.value) })}
                       placeholder="/assets/putri-sari/3.jpg atau tempel link URL online"
                       className="h-9 text-xs"
                     />
@@ -545,7 +545,7 @@ export default function RoomManagement({
                                   <div className="flex-1">
                                     <Input
                                       value={editFormData.image || ''}
-                                      onChange={(e) => setEditFormData({ ...editFormData, image: e.target.value })}
+                                      onChange={(e) => setEditFormData({ ...editFormData, image: formatImageUrl(e.target.value) })}
                                       placeholder="/assets/putri-sari/3.jpg atau tempel URL online"
                                       className="h-9 text-xs"
                                       required
