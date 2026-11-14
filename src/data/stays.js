@@ -15,7 +15,7 @@ export const stays = [
     tagline: 'Penginapan pilihan utama tepat di depan Pantai Kumala, Pelabuhan Ratu.',
     description:
       'Hotel Putri Sari adalah pilihan penginapan favorit berstandar JAJAPIN yang menyajikan atmosfer sejuk, tenang, dan keramahan khas Indonesia. Berada tepat di depan Pantai Kumala, Pelabuhan Ratu, Sukabumi. Dilengkapi kamar bersih berpendingin AC, penunjuk arah kiblat di plafon kamar, balkon asri menghadap pepohonan hijau rindang, kasur King & Queen yang empuk, serta area parkir mobil yang aman dan luas. Sangat ideal untuk liburan keluarga, pasangan, maupun rombongan wisata Pantai Selatan Jawa dan Geopark Ciletuh.',
-    price: 285000,
+    price: 200000,
     rating: 4.9,
     review_count: 128,
     guests: 2,
@@ -30,7 +30,7 @@ export const stays = [
       '/assets/putri-sari/deluxe-3.jpg',
       '/assets/putri-sari/2.jpg',
       '/assets/putri-sari/4.jpg',
-      '/assets/putri-sari/1.jpg',
+      '/assets/putri-sari/fan-room.jpg',
     ],
     amenities: [
       'Arah Kiblat Plafon',
@@ -102,14 +102,14 @@ export const stays = [
         name: 'Fan Room / Kipas',
         bed: '1 Ranjang Queen Size',
         capacity: 2,
-        price: 150000,
-        original_price: 180000,
+        price: 200000,
+        original_price: 240000,
         available_units: 5,
         badge: 'Paling Hemat & Asri (5 Unit)',
         badge_image: 'Kamar Fan / Kipas',
         description:
-          'Pilihan kamar hemat berangin sejuk alami dengan kipas angin, ranjang Queen Size nyaman, dan kamar mandi private dengan toilet jongkok (Indian style).',
-        image: '/assets/putri-sari/1.jpg',
+          'Pilihan kamar hemat berangin sejuk alami dengan kipas angin, kasur Queen Size bersprei oranye dengan balkon pemandangan asri, penunjuk arah kiblat di plafon, dan kamar mandi private.',
+        image: '/assets/putri-sari/fan-room.jpg',
         amenities: [
           'Kipas Angin (Fan)',
           'Ranjang Queen Size',

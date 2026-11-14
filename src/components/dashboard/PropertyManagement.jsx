@@ -401,6 +401,7 @@ export default function PropertyManagement({
                           { label: 'Deluxe (Kasur Hijau)', path: '/assets/putri-sari/3.jpg' },
                           { label: 'Standard (Kasur Oranye)', path: '/assets/putri-sari/2.jpg' },
                           { label: 'Standard AC Double', path: '/assets/putri-sari/4.jpg' },
+                          { label: 'Fan Room (Kipas & Balkon)', path: '/assets/putri-sari/fan-room.jpg' },
                           { label: 'Fan Room / Single', path: '/assets/putri-sari/1.jpg' },
                         ].map((opt) => (
                           <button

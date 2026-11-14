@@ -59,7 +59,8 @@ export default function PutriSariPage() {
         fromStorage &&
         fromStorage.room_types?.length === 3 &&
         fromStorage.room_types?.some((r) => r.id === 'deluxe') &&
-        fromStorage.room_types?.some((r) => r.id === 'standard_ac')
+        fromStorage.room_types?.some((r) => r.id === 'standard_ac') &&
+        fromStorage.room_types?.some((r) => r.id === 'fan_room' && r.price === 200000)
       ) {
         return fromStorage;
       }
@@ -145,7 +146,7 @@ export default function PutriSariPage() {
       caption: 'Kamar berpendingin AC sejuk dengan ranjang Queen dan kamar mandi private toilet duduk.',
     },
     {
-      src: '/assets/putri-sari/1.jpg',
+      src: '/assets/putri-sari/fan-room.jpg',
       title: 'Fan Room / Kipas',
       caption: 'Kamar hemat yang higienis dengan sirkulasi alami, kipas angin, dan toilet jongkok.',
     },
@@ -653,8 +654,8 @@ export default function PutriSariPage() {
             <div className="grid grid-cols-1 md:grid-cols-12 items-stretch">
               <div className="md:col-span-5 relative aspect-[4/3] md:aspect-auto overflow-hidden bg-stone-900">
                 <img
-                  src="/assets/putri-sari/1.jpg"
-                  alt="Fan Room / Kipas"
+                  src="/assets/putri-sari/fan-room.jpg"
+                  alt="Fan Room / Kipas (Balkon)"
                   className="w-full h-full object-cover"
                 />
                 <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-stone-800/90 text-white text-[10px] font-bold uppercase tracking-wider backdrop-blur-xs">
@@ -662,7 +663,7 @@ export default function PutriSariPage() {
                 </span>
                 <span className="absolute bottom-3 left-3 px-2 py-0.5 rounded-md bg-black/60 text-white text-[10px] flex items-center gap-1">
                   <Wind className="w-3 h-3 text-emerald-400" />
-                  Kipas Angin & Toilet Jongkok
+                  Kipas Angin & Balkon Asri
                 </span>
               </div>
               <div className="md:col-span-7 p-5 sm:p-6 flex flex-col justify-between space-y-4">
@@ -673,7 +674,7 @@ export default function PutriSariPage() {
                         Fan Room / Kipas
                       </h3>
                       <p className="text-xs text-emerald-800 font-semibold mt-0.5">
-                        Ranjang Queen • Kamar Mandi Private Indian • Toilet Jongkok • Kipas Angin
+                        Ranjang Queen (Sprei Oranye) • Balkon Asri • Arah Kiblat Plafon • Kipas Angin
                       </p>
                     </div>
                     <span className="px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 text-[10px] font-bold uppercase tracking-wider shrink-0">
@@ -681,10 +682,10 @@ export default function PutriSariPage() {
                     </span>
                   </div>
                   <p className="text-xs sm:text-sm text-stone-600 mt-2.5 leading-relaxed font-body">
-                    Pilihan hemat dengan ranjang Queen Size empuk, sirkulasi udara alami ditambah kipas angin, serta kamar mandi private bergaya Indian dengan toilet jongkok yang bersih.
+                    Pilihan hemat dengan ranjang Queen Size empuk bersprei oranye, balkon pemandangan asri dengan sirkulasi udara alami dan kipas angin, penunjuk arah kiblat di plafon, serta kamar mandi private.
                   </p>
                   <div className="flex flex-wrap gap-1.5 mt-3">
-                    {['Kipas Angin (Fan)', 'Ranjang Queen Size', 'Kamar Mandi Private', 'Toilet Jongkok (Indian)', 'WiFi Cepat', 'Parkir Luas'].map((amen) => (
+                    {['Kipas Angin (Fan)', 'Ranjang Queen (Sprei Oranye)', 'Balkon Asri', 'Arah Kiblat Plafon', 'Kamar Mandi Private', 'WiFi Cepat', 'Parkir Luas'].map((amen) => (
                       <span key={amen} className="inline-flex items-center gap-1 text-[11px] bg-stone-50 border border-stone-200/80 px-2.5 py-1 rounded-lg text-stone-700">
                         <Check className="w-3 h-3 text-emerald-700" />
                         {amen}
@@ -694,17 +695,17 @@ export default function PutriSariPage() {
                 </div>
                 <div className="pt-4 border-t border-stone-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <span className="text-[10px] text-stone-400 line-through block">Harga OTA: Rp 180.000</span>
+                    <span className="text-[10px] text-stone-400 line-through block">Harga OTA: Rp 240.000</span>
                     <div className="flex items-baseline gap-1.5">
-                      <span className="text-2xl font-bold text-stone-900">{formatIDR(150000)}</span>
-                      <span className="text-xs text-stone-500 font-body">/ malam</span>
+                      <span className="text-2xl font-bold text-stone-900">{formatIDR(200000)}</span>
+                      <span className="text-xs text-stone-500 font-body">/ malam (Nett)</span>
                     </div>
                   </div>
                   <Button
                     onClick={() => handleBookNow('fan_room')}
                     className="w-full sm:w-auto h-12 sm:h-11 px-6 rounded-2xl bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs sm:text-sm shadow-sm"
                   >
-                    Pesan Kamar Ini
+                    Pesan Kamar Ini (Tanpa Akun)
                   </Button>
                 </div>
               </div>
