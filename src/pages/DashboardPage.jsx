@@ -109,6 +109,14 @@ export default function DashboardPage() {
           p.id === 1 || p.slug === 'jajapin-hotel-putri-sari' ? initialStays[0] : p
         );
       }
+      // Auto-sync Jajapin Wangsaloka jika versi lama masih memakai placeholder image
+      const ws = updatedList.find((p) => p.id === 2 || p.slug === 'jajapin-wangsaloka-glamping');
+      if (!ws || ws.image?.includes('destinasi-')) {
+        const wangsalokaInitial = initialStays.find((s) => s.id === 2 || s.slug === 'jajapin-wangsaloka-glamping') || initialStays[1];
+        updatedList = updatedList.map((p) =>
+          p.id === 2 || p.slug === 'jajapin-wangsaloka-glamping' ? wangsalokaInitial : p
+        );
+      }
       const existingIds = new Set(updatedList.map((p) => p.id));
       const missing = initialStays.filter((s) => !existingIds.has(s.id));
       const merged = missing.length > 0 ? [...updatedList, ...missing] : updatedList;
