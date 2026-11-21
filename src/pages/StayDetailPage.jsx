@@ -125,9 +125,21 @@ export default function StayDetailPage() {
                   {stay.name}
                 </h1>
                 <div className="flex items-center gap-4 text-sm font-body text-muted-foreground mb-3">
-                  <span className="flex items-center gap-1">
-                    <MapPin className="w-4 h-4 text-primary" /> {stay.address}
-                  </span>
+                  {stay.google_maps_url ? (
+                    <a
+                      href={stay.google_maps_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 hover:text-primary transition-colors hover:underline text-emerald-800 font-medium"
+                      title="Buka lokasi di Google Maps"
+                    >
+                      <MapPin className="w-4 h-4 text-primary shrink-0" /> {stay.address}
+                    </a>
+                  ) : (
+                    <span className="flex items-center gap-1">
+                      <MapPin className="w-4 h-4 text-primary shrink-0" /> {stay.address}
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <Star className="w-5 h-5 fill-brand-lime text-brand-lime" />

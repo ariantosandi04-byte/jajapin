@@ -141,6 +141,16 @@ export default function DashboardPage() {
           p.id === 7 || p.slug === 'jajapin-pondok-wisata-karapyak' ? karapyakInitial : p
         );
       }
+      // Auto-sync Jajapin Vila Aida Batu Malang
+      const va = updatedList.find((p) => p.id === 16 || p.slug === 'jajapin-vila-aida-batu-malang');
+      if (va && (!va.image || va.image.includes('destinasi-'))) {
+        const aidaInitial = initialStays.find((s) => s.id === 16 || s.slug === 'jajapin-vila-aida-batu-malang');
+        if (aidaInitial) {
+          updatedList = updatedList.map((p) =>
+            p.id === 16 || p.slug === 'jajapin-vila-aida-batu-malang' ? aidaInitial : p
+          );
+        }
+      }
       const existingIds = new Set(updatedList.map((p) => p.id));
       const missing = initialStays.filter((s) => !existingIds.has(s.id));
       const merged = missing.length > 0 ? [...updatedList, ...missing] : updatedList;

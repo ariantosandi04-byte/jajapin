@@ -10,10 +10,10 @@ export const destinations = [
   {
     name: 'Pangandaran',
     province: 'Jawa Barat',
-    image: '/assets/destinasi-lombok.png',
+    image: '/assets/karapyak/cover.jpg',
     slug: 'Pangandaran',
-    propertyCount: '3 Properti',
-    tag: 'Wisata Seafood',
+    propertyCount: '2 Properti Resmi',
+    tag: 'Wisata Seafood & Pantai',
   },
   {
     name: 'Bandung',
@@ -26,7 +26,7 @@ export const destinations = [
   {
     name: 'Tasikmalaya',
     province: 'Jawa Barat',
-    image: '/assets/destinasi-bandung.png',
+    image: '/assets/wangsaloka/cover.jpg',
     slug: 'Cisayong, Tasikmalaya',
     propertyCount: '1 Glamping',
     tag: 'Glamping Galunggung',
@@ -34,7 +34,7 @@ export const destinations = [
   {
     name: 'Bukittinggi',
     province: 'Sumatera Barat',
-    image: '/assets/destinasi-yogyakarta.png',
+    image: '/assets/zenn-homestay/cover.jpg',
     slug: 'Bukittinggi',
     propertyCount: '1 Homestay',
     tag: 'Jam Gadang & Budaya',

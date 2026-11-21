@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { destinations } from '../../data/destinations';
+import { stays } from '../../data/stays';
 import { MapPin } from 'lucide-react';
 
 export default function DestinationStrip() {
@@ -18,7 +19,7 @@ export default function DestinationStrip() {
           to="/stays"
           className="text-xs font-body font-semibold text-primary hover:underline flex items-center gap-1"
         >
-          Lihat Semua 15 Penginapan →
+          Lihat Semua {stays.length} Penginapan →
         </Link>
       </div>
 
