@@ -117,6 +117,14 @@ export default function DashboardPage() {
           p.id === 2 || p.slug === 'jajapin-wangsaloka-glamping' ? wangsalokaInitial : p
         );
       }
+      // Auto-sync Jajapin Zenn Homestay jika versi lama masih memakai placeholder image
+      const zh = updatedList.find((p) => p.id === 4 || p.slug === 'jajapin-zenn-homestay-syariah');
+      if (!zh || zh.image?.includes('destinasi-')) {
+        const zennInitial = initialStays.find((s) => s.id === 4 || s.slug === 'jajapin-zenn-homestay-syariah') || initialStays[3];
+        updatedList = updatedList.map((p) =>
+          p.id === 4 || p.slug === 'jajapin-zenn-homestay-syariah' ? zennInitial : p
+        );
+      }
       const existingIds = new Set(updatedList.map((p) => p.id));
       const missing = initialStays.filter((s) => !existingIds.has(s.id));
       const merged = missing.length > 0 ? [...updatedList, ...missing] : updatedList;
