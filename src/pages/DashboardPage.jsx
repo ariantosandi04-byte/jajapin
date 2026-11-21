@@ -125,6 +125,22 @@ export default function DashboardPage() {
           p.id === 4 || p.slug === 'jajapin-zenn-homestay-syariah' ? zennInitial : p
         );
       }
+      // Auto-sync Jajapin Suka Indah jika versi lama masih memakai placeholder image
+      const si = updatedList.find((p) => p.id === 6 || p.slug === 'jajapin-suka-indah-hotel');
+      if (!si || si.image?.includes('destinasi-')) {
+        const sukaIndahInitial = initialStays.find((s) => s.id === 6 || s.slug === 'jajapin-suka-indah-hotel') || initialStays[5];
+        updatedList = updatedList.map((p) =>
+          p.id === 6 || p.slug === 'jajapin-suka-indah-hotel' ? sukaIndahInitial : p
+        );
+      }
+      // Auto-sync Jajapin Karapyak jika versi lama masih memakai placeholder image
+      const kp = updatedList.find((p) => p.id === 7 || p.slug === 'jajapin-pondok-wisata-karapyak');
+      if (!kp || kp.image?.includes('destinasi-')) {
+        const karapyakInitial = initialStays.find((s) => s.id === 7 || s.slug === 'jajapin-pondok-wisata-karapyak') || initialStays[6];
+        updatedList = updatedList.map((p) =>
+          p.id === 7 || p.slug === 'jajapin-pondok-wisata-karapyak' ? karapyakInitial : p
+        );
+      }
       const existingIds = new Set(updatedList.map((p) => p.id));
       const missing = initialStays.filter((s) => !existingIds.has(s.id));
       const merged = missing.length > 0 ? [...updatedList, ...missing] : updatedList;
