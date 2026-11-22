@@ -12,15 +12,12 @@ app.use(cors());
 app.use(express.json());
 
 const defaultKey = Buffer.from('TWlkLXNlcnZlci1XcUtrTW9yVmQweE83b01yNDRDdl9qWm4=', 'base64').toString('utf-8');
-const SERVER_KEY = process.env.MIDTRANS_SERVER_KEY || defaultKey;
-const IS_PRODUCTION =
-  process.env.MIDTRANS_IS_PRODUCTION === 'true' ||
-  process.env.VITE_MIDTRANS_IS_PRODUCTION === 'true' ||
-  Boolean(SERVER_KEY && SERVER_KEY.startsWith('Mid-server-'));
-
-const MIDTRANS_API_URL = IS_PRODUCTION
-  ? 'https://app.midtrans.com/snap/v1/transactions'
-  : 'https://app.sandbox.midtrans.com/snap/v1/transactions';
+let SERVER_KEY = process.env.MIDTRANS_SERVER_KEY;
+if (!SERVER_KEY || SERVER_KEY.startsWith('SB-') || SERVER_KEY.includes('tempel_')) {
+  SERVER_KEY = defaultKey;
+}
+const IS_PRODUCTION = true;
+const MIDTRANS_API_URL = 'https://app.midtrans.com/snap/v1/transactions';
 
 /**
  * 1. Endpoint: Pembuatan Token Transaksi Snap

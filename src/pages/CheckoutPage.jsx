@@ -31,7 +31,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { stays } from '../data/stays';
 import { formatIDR, calculateNights, generateBookingCode } from '../lib/format';
 import { saveBooking } from '../lib/bookingStatus';
-import { loadMidtransSnap, payWithSnap, getClientKey } from '../lib/midtrans';
+import { loadMidtransSnap, payWithSnap, getClientKey, getIsProduction } from '../lib/midtrans';
 
 export default function CheckoutPage() {
   const { slug } = useParams();
@@ -152,7 +152,7 @@ export default function CheckoutPage() {
   // Silently initialize Midtrans Snap script (if needed)
   useEffect(() => {
     const key = getClientKey();
-    const isProduction = import.meta.env.VITE_MIDTRANS_IS_PRODUCTION === 'true';
+    const isProduction = getIsProduction();
     if (key) {
       loadMidtransSnap(key, isProduction)
         .then(() => setMidtransLoaded(true))

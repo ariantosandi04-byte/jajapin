@@ -18,17 +18,15 @@ export default async function handler(req, res) {
     return res.status(400).json({ success: false, error: 'Parameter orderId diperlukan.' });
   }
 
-  const defaultKey = Buffer.from('TWlkLXNlcnZlci1XcUtrTW9yVmQweE83b01yNDRDdl9qWm4=', 'base64').toString('utf-8');
-  const serverKey = process.env.MIDTRANS_SERVER_KEY || defaultKey;
-  const isProduction =
-    process.env.VITE_MIDTRANS_IS_PRODUCTION === 'true' ||
-    process.env.MIDTRANS_IS_PRODUCTION === 'true' ||
-    Boolean(serverKey && serverKey.startsWith('Mid-server-'));
+  const prodServerKey = Buffer.from('TWlkLXNlcnZlci1XcUtrTW9yVmQweE83b01yNDRDdl9qWm4=', 'base64').toString('utf-8');
+  let serverKey = process.env.MIDTRANS_SERVER_KEY;
+  if (!serverKey || serverKey.startsWith('SB-') || serverKey.includes('tempel_')) {
+    serverKey = prodServerKey;
+  }
+  const isProduction = true;
 
   const authString = Buffer.from(`${serverKey}:`).toString('base64');
-  const statusUrl = isProduction
-    ? `https://api.midtrans.com/v2/${orderId}/status`
-    : `https://api.sandbox.midtrans.com/v2/${orderId}/status`;
+  const statusUrl = `https://api.midtrans.com/v2/${orderId}/status`;
 
   try {
     const response = await fetch(statusUrl, {

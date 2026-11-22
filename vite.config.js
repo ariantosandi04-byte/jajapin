@@ -6,11 +6,11 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
   const defaultKey = Buffer.from('TWlkLXNlcnZlci1XcUtrTW9yVmQweE83b01yNDRDdl9qWm4=', 'base64').toString('utf-8');
-  const serverKey = env.MIDTRANS_SERVER_KEY || defaultKey;
-  const isProduction =
-    env.MIDTRANS_IS_PRODUCTION === 'true' ||
-    env.VITE_MIDTRANS_IS_PRODUCTION === 'true' ||
-    Boolean(serverKey && serverKey.startsWith('Mid-server-'));
+  let serverKey = env.MIDTRANS_SERVER_KEY;
+  if (!serverKey || serverKey.startsWith('SB-') || serverKey.includes('tempel_')) {
+    serverKey = defaultKey;
+  }
+  const isProduction = true;
 
   return {
     plugins: [

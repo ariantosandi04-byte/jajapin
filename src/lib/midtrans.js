@@ -7,11 +7,11 @@ const SNAP_PRODUCTION_URL = 'https://app.midtrans.com/snap/snap.js';
 
 export function getClientKey() {
   const localKey = localStorage.getItem('midtrans_client_key');
-  if (localKey && localKey.startsWith('SB-')) {
+  if (localKey && (localKey.startsWith('SB-') || localKey.includes('tempel_'))) {
     localStorage.removeItem('midtrans_client_key');
   }
   const validLocal = localStorage.getItem('midtrans_client_key');
-  if (validLocal && validLocal.trim()) return validLocal.trim();
+  if (validLocal && validLocal.trim() && !validLocal.startsWith('SB-')) return validLocal.trim();
   const envKey = import.meta.env.VITE_MIDTRANS_CLIENT_KEY;
   if (envKey && envKey !== 'tempel_kode_SB-Mid-client_kamu_di_sini' && !envKey.startsWith('SB-')) return envKey.trim();
   return 'Mid-client-CqC142X4x0wSTe5q';
@@ -19,8 +19,8 @@ export function getClientKey() {
 
 export function getIsProduction() {
   const key = getClientKey();
-  if (key && key.startsWith('Mid-client-')) return true;
-  return import.meta.env.VITE_MIDTRANS_IS_PRODUCTION === 'true' || import.meta.env.MIDTRANS_IS_PRODUCTION === 'true';
+  if (key && key.startsWith('SB-')) return false;
+  return true;
 }
 
 /**
@@ -31,10 +31,12 @@ export function loadMidtransSnap(clientKey, isProduction) {
     const key = clientKey || getClientKey();
     const isProd = isProduction !== undefined ? isProduction : getIsProduction();
 
-    // Hapus script lama jika ada perubahan key
+    // Hapus script lama jika ada perubahan key atau jika script lama mengarah ke sandbox padahal kita prod
     const existingScript = document.getElementById('midtrans-snap-script');
     if (existingScript) {
-      if (existingScript.getAttribute('data-client-key') === key && window.snap) {
+      const src = existingScript.getAttribute('src') || '';
+      const isSrcProd = src.includes('app.midtrans.com') && !src.includes('sandbox');
+      if (existingScript.getAttribute('data-client-key') === key && isSrcProd === isProd && window.snap) {
         resolve(window.snap);
         return;
       }
@@ -45,7 +47,7 @@ export function loadMidtransSnap(clientKey, isProduction) {
     const script = document.createElement('script');
     script.id = 'midtrans-snap-script';
     script.src = scriptUrl;
-    script.setAttribute('data-client-key', key || 'SB-Mid-client-sample');
+    script.setAttribute('data-client-key', key || 'Mid-client-CqC142X4x0wSTe5q');
     script.async = true;
 
     script.onload = () => {

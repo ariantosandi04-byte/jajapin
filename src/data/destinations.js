@@ -2,7 +2,7 @@ export const destinations = [
   {
     name: 'Pelabuhan Ratu',
     province: 'Jawa Barat',
-    image: '/assets/putri-sari/cover.jpg',
+    image: '/assets/destinasi/pelabuhan-ratu.jpg',
     slug: 'Pelabuhan Ratu',
     propertyCount: '2 Properti',
     tag: 'Pantai & Pesisir',
@@ -10,7 +10,7 @@ export const destinations = [
   {
     name: 'Pangandaran',
     province: 'Jawa Barat',
-    image: '/assets/karapyak/cover.jpg',
+    image: '/assets/destinasi/pangandaran.jpg',
     slug: 'Pangandaran',
     propertyCount: '2 Properti Resmi',
     tag: 'Wisata Seafood & Pantai',
@@ -18,7 +18,7 @@ export const destinations = [
   {
     name: 'Bandung',
     province: 'Jawa Barat',
-    image: '/assets/destinasi-bandung.png',
+    image: '/assets/destinasi/bandung.jpg',
     slug: 'Bandung',
     propertyCount: '2 Properti',
     tag: 'Kota & Kuliner',
@@ -26,15 +26,15 @@ export const destinations = [
   {
     name: 'Tasikmalaya',
     province: 'Jawa Barat',
-    image: '/assets/wangsaloka/cover.jpg',
+    image: '/assets/destinasi/tasikmalaya.jpg',
     slug: 'Cisayong, Tasikmalaya',
     propertyCount: '1 Glamping',
-    tag: 'Glamping Galunggung',
+    tag: 'Kawah Galunggung & Wisata Alam',
   },
   {
     name: 'Bukittinggi',
     province: 'Sumatera Barat',
-    image: '/assets/zenn-homestay/cover.jpg',
+    image: '/assets/destinasi/bukittinggi.jpg',
     slug: 'Bukittinggi',
     propertyCount: '1 Homestay',
     tag: 'Jam Gadang & Budaya',
@@ -42,9 +42,9 @@ export const destinations = [
   {
     name: 'Ubud & Bali',
     province: 'Bali',
-    image: '/assets/destinasi-ubud.png',
+    image: '/assets/destinasi/ubud-bali.jpg',
     slug: 'Ubud',
     propertyCount: 'Mitra Pilihan',
-    tag: 'Sawah & Villa',
+    tag: 'Pura & Terasering Ubud',
   },
 ];

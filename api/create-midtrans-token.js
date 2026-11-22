@@ -17,24 +17,14 @@ export default async function handler(req, res) {
     guestPhone,
   } = req.body;
 
-  const defaultKey = Buffer.from('TWlkLXNlcnZlci1XcUtrTW9yVmQweE83b01yNDRDdl9qWm4=', 'base64').toString('utf-8');
-  const serverKey = process.env.MIDTRANS_SERVER_KEY || defaultKey;
-  const isProduction =
-    process.env.VITE_MIDTRANS_IS_PRODUCTION === 'true' ||
-    process.env.MIDTRANS_IS_PRODUCTION === 'true' ||
-    Boolean(serverKey && serverKey.startsWith('Mid-server-'));
-
-  if (!serverKey) {
-    return res.status(400).json({
-      error: 'MIDTRANS_SERVER_KEY belum diisi di Environment Variables.',
-      isMock: true,
-      message: 'Silakan isi MIDTRANS_SERVER_KEY di pengaturan Vercel atau .env',
-    });
+  const prodServerKey = Buffer.from('TWlkLXNlcnZlci1XcUtrTW9yVmQweE83b01yNDRDdl9qWm4=', 'base64').toString('utf-8');
+  let serverKey = process.env.MIDTRANS_SERVER_KEY;
+  // Jika serverKey kosong atau berisi key sandbox / default dummy, gunakan kunci produksi resmi
+  if (!serverKey || serverKey.startsWith('SB-') || serverKey.includes('tempel_')) {
+    serverKey = prodServerKey;
   }
-
-  const apiUrl = isProduction
-    ? 'https://app.midtrans.com/snap/v1/transactions'
-    : 'https://app.sandbox.midtrans.com/snap/v1/transactions';
+  const isProduction = true;
+  const apiUrl = 'https://app.midtrans.com/snap/v1/transactions';
 
   const authString = Buffer.from(serverKey + ':').toString('base64');
 
