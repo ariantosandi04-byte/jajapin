@@ -13,12 +13,19 @@ export function getClientKey() {
   return '';
 }
 
+export function getIsProduction() {
+  const envProd = import.meta.env.VITE_MIDTRANS_IS_PRODUCTION === 'true' || import.meta.env.MIDTRANS_IS_PRODUCTION === 'true';
+  const key = getClientKey();
+  return envProd || (key && key.startsWith('Mid-client-'));
+}
+
 /**
  * Memuat skrip Midtrans Snap secara dinamis ke halaman web
  */
-export function loadMidtransSnap(clientKey, isProduction = false) {
+export function loadMidtransSnap(clientKey, isProduction) {
   return new Promise((resolve, reject) => {
     const key = clientKey || getClientKey();
+    const isProd = isProduction !== undefined ? isProduction : getIsProduction();
 
     // Hapus script lama jika ada perubahan key
     const existingScript = document.getElementById('midtrans-snap-script');
@@ -30,7 +37,7 @@ export function loadMidtransSnap(clientKey, isProduction = false) {
       existingScript.remove();
     }
 
-    const scriptUrl = isProduction ? SNAP_PRODUCTION_URL : SNAP_SANDBOX_URL;
+    const scriptUrl = isProd ? SNAP_PRODUCTION_URL : SNAP_SANDBOX_URL;
     const script = document.createElement('script');
     script.id = 'midtrans-snap-script';
     script.src = scriptUrl;

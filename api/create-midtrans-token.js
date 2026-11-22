@@ -18,7 +18,10 @@ export default async function handler(req, res) {
   } = req.body;
 
   const serverKey = process.env.MIDTRANS_SERVER_KEY;
-  const isProduction = process.env.VITE_MIDTRANS_IS_PRODUCTION === 'true';
+  const isProduction =
+    process.env.VITE_MIDTRANS_IS_PRODUCTION === 'true' ||
+    process.env.MIDTRANS_IS_PRODUCTION === 'true' ||
+    Boolean(serverKey && serverKey.startsWith('Mid-server-'));
 
   if (!serverKey) {
     return res.status(400).json({

@@ -11,8 +11,11 @@ const port = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-const SERVER_KEY = process.env.MIDTRANS_SERVER_KEY || 'SB-Mid-server-6hwXm9~zkJrka94g-UyeO8hV';
-const IS_PRODUCTION = process.env.MIDTRANS_IS_PRODUCTION === 'true';
+const SERVER_KEY = process.env.MIDTRANS_SERVER_KEY;
+const IS_PRODUCTION =
+  process.env.MIDTRANS_IS_PRODUCTION === 'true' ||
+  process.env.VITE_MIDTRANS_IS_PRODUCTION === 'true' ||
+  Boolean(SERVER_KEY && SERVER_KEY.startsWith('Mid-server-'));
 
 const MIDTRANS_API_URL = IS_PRODUCTION
   ? 'https://app.midtrans.com/snap/v1/transactions'

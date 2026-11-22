@@ -5,8 +5,11 @@ import crypto from 'crypto';
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
-  const serverKey = env.MIDTRANS_SERVER_KEY || 'SB-Mid-server-6hwXm9~zkJrka94g-UyeO8hV';
-  const isProduction = env.MIDTRANS_IS_PRODUCTION === 'true';
+  const serverKey = env.MIDTRANS_SERVER_KEY;
+  const isProduction =
+    env.MIDTRANS_IS_PRODUCTION === 'true' ||
+    env.VITE_MIDTRANS_IS_PRODUCTION === 'true' ||
+    Boolean(serverKey && serverKey.startsWith('Mid-server-'));
 
   return {
     plugins: [

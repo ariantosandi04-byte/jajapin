@@ -18,8 +18,11 @@ export default async function handler(req, res) {
     return res.status(400).json({ success: false, error: 'Parameter orderId diperlukan.' });
   }
 
-  const serverKey = process.env.MIDTRANS_SERVER_KEY || 'SB-Mid-server-6hwXm9~zkJrka94g-UyeO8hV';
-  const isProduction = process.env.VITE_MIDTRANS_IS_PRODUCTION === 'true';
+  const serverKey = process.env.MIDTRANS_SERVER_KEY;
+  const isProduction =
+    process.env.VITE_MIDTRANS_IS_PRODUCTION === 'true' ||
+    process.env.MIDTRANS_IS_PRODUCTION === 'true' ||
+    Boolean(serverKey && serverKey.startsWith('Mid-server-'));
 
   const authString = Buffer.from(`${serverKey}:`).toString('base64');
   const statusUrl = isProduction
