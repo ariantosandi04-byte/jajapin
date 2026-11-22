@@ -10,7 +10,7 @@ export function getClientKey() {
   const localKey = localStorage.getItem('midtrans_client_key');
   if (localKey && localKey.trim()) return localKey.trim();
   if (envKey && envKey !== 'tempel_kode_SB-Mid-client_kamu_di_sini') return envKey.trim();
-  return '';
+  return 'Mid-client-CqC142X4x0wSTe5q';
 }
 
 export function getIsProduction() {
