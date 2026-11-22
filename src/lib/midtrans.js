@@ -6,17 +6,21 @@ const SNAP_SANDBOX_URL = 'https://app.sandbox.midtrans.com/snap/snap.js';
 const SNAP_PRODUCTION_URL = 'https://app.midtrans.com/snap/snap.js';
 
 export function getClientKey() {
-  const envKey = import.meta.env.VITE_MIDTRANS_CLIENT_KEY;
   const localKey = localStorage.getItem('midtrans_client_key');
-  if (localKey && localKey.trim()) return localKey.trim();
-  if (envKey && envKey !== 'tempel_kode_SB-Mid-client_kamu_di_sini') return envKey.trim();
+  if (localKey && localKey.startsWith('SB-')) {
+    localStorage.removeItem('midtrans_client_key');
+  }
+  const validLocal = localStorage.getItem('midtrans_client_key');
+  if (validLocal && validLocal.trim()) return validLocal.trim();
+  const envKey = import.meta.env.VITE_MIDTRANS_CLIENT_KEY;
+  if (envKey && envKey !== 'tempel_kode_SB-Mid-client_kamu_di_sini' && !envKey.startsWith('SB-')) return envKey.trim();
   return 'Mid-client-CqC142X4x0wSTe5q';
 }
 
 export function getIsProduction() {
-  const envProd = import.meta.env.VITE_MIDTRANS_IS_PRODUCTION === 'true' || import.meta.env.MIDTRANS_IS_PRODUCTION === 'true';
   const key = getClientKey();
-  return envProd || (key && key.startsWith('Mid-client-'));
+  if (key && key.startsWith('Mid-client-')) return true;
+  return import.meta.env.VITE_MIDTRANS_IS_PRODUCTION === 'true' || import.meta.env.MIDTRANS_IS_PRODUCTION === 'true';
 }
 
 /**
