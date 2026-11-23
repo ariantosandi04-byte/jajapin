@@ -34,6 +34,7 @@ import { stays } from '../data/stays';
 import { formatIDR, calculateNights, generateBookingCode } from '../lib/format';
 import { saveBooking } from '../lib/bookingStatus';
 import { loadMidtransSnap, payWithSnap, getClientKey, getIsProduction } from '../lib/midtrans';
+import SurfingIllustration from '../components/illustrations/SurfingIllustration';
 
 export default function CheckoutPage() {
   const { slug } = useParams();
@@ -298,6 +299,16 @@ export default function CheckoutPage() {
       const data = await response.json();
 
       if (response.ok && data.token) {
+        // Simpan booking status awal
+        saveBooking(baseBooking);
+
+        // Pastikan SDK Snap siap dan terhubung ke environment yang sesuai (Production)
+        try {
+          await loadMidtransSnap(getClientKey(), getIsProduction());
+        } catch (e) {
+          console.warn('Gagal memuat snap script secara dinamis:', e);
+        }
+
         if (window.snap && typeof window.snap.pay === 'function') {
           payWithSnap(data.token, {
             onSuccess: (result) => {
@@ -319,7 +330,13 @@ export default function CheckoutPage() {
               saveBooking(baseBooking);
               navigate(`/konfirmasi/${bookingCode}`);
             },
-            onError: () => {
+            onError: (err) => {
+              console.error('Snap error:', err);
+              // Jika pop-up di browser error/mismatch token karena cache lokal, alihkan langsung ke URL snap resmi
+              if (data.redirect_url) {
+                window.location.href = data.redirect_url;
+                return;
+              }
               setError('Pembayaran dibatalkan atau terjadi kendala pada gateway Midtrans.');
               setSubmitting(false);
             },
@@ -329,7 +346,6 @@ export default function CheckoutPage() {
           });
           return;
         } else if (data.redirect_url) {
-          saveBooking(baseBooking);
           window.location.href = data.redirect_url;
           return;
         }
@@ -649,6 +665,17 @@ export default function CheckoutPage() {
                         <p className="text-xs text-muted-foreground mt-0.5">
                           Tepat di depan hotel (Pantai Kumala). Bisa dibayar sekaligus bersama kamar.
                         </p>
+                      </div>
+                    </div>
+
+                    {/* Ilustrasi Visual Surfing Pelabuhan Ratu */}
+                    <div className="rounded-2xl overflow-hidden border border-emerald-300 dark:border-emerald-800 bg-emerald-950 shadow-xs relative">
+                      <SurfingIllustration className="w-full h-36 sm:h-44 object-cover" />
+                      <div className="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-emerald-300 border border-white/15 text-[10px] font-bold">
+                        🏄 Spot Pantai Depan Putri Sari
+                      </div>
+                      <div className="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-md text-white text-[10px] font-medium border border-white/10">
+                        📸 Foto / Video Drone Ready
                       </div>
                     </div>
 

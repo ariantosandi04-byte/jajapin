@@ -31,16 +31,24 @@ export function loadMidtransSnap(clientKey, isProduction) {
     const key = clientKey || getClientKey();
     const isProd = isProduction !== undefined ? isProduction : getIsProduction();
 
-    // Hapus script lama jika ada perubahan key atau jika script lama mengarah ke sandbox padahal kita prod
-    const existingScript = document.getElementById('midtrans-snap-script');
-    if (existingScript) {
-      const src = existingScript.getAttribute('src') || '';
+    // Hapus script atau iframe sandbox lama jika ada di DOM
+    const allMidScripts = document.querySelectorAll('script[src*="midtrans"]');
+    allMidScripts.forEach((s) => {
+      const src = s.getAttribute('src') || '';
       const isSrcProd = src.includes('app.midtrans.com') && !src.includes('sandbox');
-      if (existingScript.getAttribute('data-client-key') === key && isSrcProd === isProd && window.snap) {
-        resolve(window.snap);
-        return;
+      if (isSrcProd !== isProd || s.getAttribute('data-client-key') !== key) {
+        s.remove();
+        try {
+          delete window.snap;
+          document.querySelectorAll('iframe[src*="midtrans"], #snap-midtrans, .snap-container, .snap-popup').forEach((el) => el.remove());
+        } catch (e) {}
       }
-      existingScript.remove();
+    });
+
+    const existingScript = document.getElementById('midtrans-snap-script');
+    if (existingScript && window.snap) {
+      resolve(window.snap);
+      return;
     }
 
     const scriptUrl = isProd ? SNAP_PRODUCTION_URL : SNAP_SANDBOX_URL;

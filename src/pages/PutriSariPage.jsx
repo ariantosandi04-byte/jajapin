@@ -39,6 +39,7 @@ import { formatIDR, formatDate } from '../lib/format';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import SiteFooter from '../components/site/SiteFooter';
+import SurfingIllustration from '../components/illustrations/SurfingIllustration';
 
 export default function PutriSariPage() {
   const navigate = useNavigate();
@@ -189,6 +190,7 @@ export default function PutriSariPage() {
 
   // State & konfigurasi Paket Surfing Pantai Pelabuhan Ratu
   const [surfingDroneIncluded, setSurfingDroneIncluded] = useState(false);
+  const [surfingVisualTab, setSurfingVisualTab] = useState('illustration'); // 'illustration' | 'photo'
   const surfingBasePrice = 350000;
   const surfingDronePrice = 100000;
   const totalSurfingPrice = surfingBasePrice + (surfingDroneIncluded ? surfingDronePrice : 0);
@@ -940,16 +942,52 @@ export default function PutriSariPage() {
             
             {/* Visual Card (Kiri - 5 cols) */}
             <div className="lg:col-span-5 rounded-2xl overflow-hidden border border-white/15 bg-black/30 shadow-lg relative group">
-              <div className="relative aspect-[4/3] sm:aspect-[16/10] lg:aspect-[4/3] w-full overflow-hidden">
-                <img
-                  src="/assets/putri-sari/surfing-pelabuhan-ratu.jpg"
-                  alt="Aksi Surfing di Pantai Pelabuhan Ratu"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+              
+              {/* Switcher Tab Foto vs Ilustrasi */}
+              <div className="p-3 bg-black/40 border-b border-white/10 flex items-center justify-between gap-2">
+                <span className="text-[11px] font-bold text-stone-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <Waves className="w-3.5 h-3.5 text-emerald-400" />
+                  Visual Surfing
+                </span>
+                <div className="flex items-center gap-1 bg-white/10 p-0.5 rounded-lg border border-white/10 text-[11px]">
+                  <button
+                    type="button"
+                    onClick={() => setSurfingVisualTab('illustration')}
+                    className={`px-2.5 py-1 rounded-md font-semibold transition-all ${
+                      surfingVisualTab === 'illustration'
+                        ? 'bg-emerald-600 text-white shadow-xs'
+                        : 'text-stone-300 hover:text-white'
+                    }`}
+                  >
+                    🎨 Ilustrasi Vektor
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSurfingVisualTab('photo')}
+                    className={`px-2.5 py-1 rounded-md font-semibold transition-all ${
+                      surfingVisualTab === 'photo'
+                        ? 'bg-emerald-600 text-white shadow-xs'
+                        : 'text-stone-300 hover:text-white'
+                    }`}
+                  >
+                    📷 Foto Riil
+                  </button>
+                </div>
+              </div>
+
+              <div className="relative aspect-[4/3] sm:aspect-[16/10] lg:aspect-[4/3] w-full overflow-hidden bg-emerald-950/80">
+                {surfingVisualTab === 'illustration' ? (
+                  <SurfingIllustration className="w-full h-full object-cover" />
+                ) : (
+                  <img
+                    src="/assets/putri-sari/surfing-pelabuhan-ratu.jpg"
+                    alt="Aksi Surfing di Pantai Pelabuhan Ratu"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                )}
                 
-                <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
-                  <span className="px-2.5 py-1 rounded-lg bg-emerald-600/90 backdrop-blur-md text-white text-[11px] font-bold">
+                <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 pointer-events-none">
+                  <span className="px-2.5 py-1 rounded-lg bg-emerald-600/90 backdrop-blur-md text-white text-[11px] font-bold shadow-xs">
                     ⏱️ 2 Jam / Sesi Penuh
                   </span>
                   <span className="px-2.5 py-1 rounded-lg bg-black/60 backdrop-blur-md text-white text-[11px] font-semibold border border-white/20">
@@ -957,9 +995,11 @@ export default function PutriSariPage() {
                   </span>
                 </div>
 
-                <div className="absolute bottom-3 left-3 right-3 text-white">
-                  <p className="text-xs font-bold text-emerald-300">Spot Ombak Ramah Pemula</p>
-                  <p className="text-[11px] text-stone-300">Dasar pasir aman, ombak konsisten sepanjang tahun</p>
+                <div className="absolute bottom-3 left-3 right-3 text-white pointer-events-none">
+                  <div className="bg-black/60 backdrop-blur-md px-3 py-2 rounded-xl border border-white/10">
+                    <p className="text-xs font-bold text-emerald-300">Spot Ombak Ramah Pemula & Menengah</p>
+                    <p className="text-[11px] text-stone-300">Dasar pasir aman, ombak konsisten sepanjang tahun</p>
+                  </div>
                 </div>
               </div>
 
@@ -1111,6 +1151,60 @@ export default function PutriSariPage() {
                 </div>
               </div>
 
+            </div>
+          </div>
+
+          {/* 4 Langkah Sesi Surfing Terpadu */}
+          <div className="pt-8 border-t border-white/10">
+            <div className="text-center max-w-xl mx-auto mb-6">
+              <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-widest block">
+                PENGALAMAN 2 JAM PENUH
+              </span>
+              <h3 className="text-lg sm:text-xl font-display font-semibold text-white mt-1">
+                Alur Seru Belajar Surfing di Depan Hotel Putri Sari
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-300 flex items-center justify-center font-bold text-xs border border-emerald-500/30">
+                  01
+                </div>
+                <h4 className="font-bold text-white text-sm">Fitting Papan & Safety</h4>
+                <p className="text-stone-300 text-xs leading-relaxed">
+                  Pemilihan jenis papan busa soft-top yang stabil & aman untuk pemula, dipasangkan leash tali pengaman kaki.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-300 flex items-center justify-center font-bold text-xs border border-emerald-500/30">
+                  02
+                </div>
+                <h4 className="font-bold text-white text-sm">Teori Paddling & Pop-Up</h4>
+                <p className="text-stone-300 text-xs leading-relaxed">
+                  Latihan teknik dayung air, keseimbangan dada di atas papan, serta gerakan berdiri kilat (pop-up) di pasir pantai.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-300 flex items-center justify-center font-bold text-xs border border-emerald-500/30">
+                  03
+                </div>
+                <h4 className="font-bold text-white text-sm">Praktik Ombak 90 Menit</h4>
+                <p className="text-stone-300 text-xs leading-relaxed">
+                  Didampingi coach langsung di gulungan ombak, coach membantu mendorong ombak dan mengarahkan waktu berdiri yang tepat.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-300 flex items-center justify-center font-bold text-xs border border-emerald-500/30">
+                  04
+                </div>
+                <h4 className="font-bold text-white text-sm">Dokumentasi & Bilas</h4>
+                <p className="text-stone-300 text-xs leading-relaxed">
+                  Pengambilan foto/video aksi (opsional drone aerial 4K), lalu langsung jalan kaki 10 langkah ke kamar untuk bilas air tawar.
+                </p>
+              </div>
             </div>
           </div>
 
