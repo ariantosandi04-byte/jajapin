@@ -12,7 +12,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
-$serverKey = 'SB-Mid-server-6hwXm9~zkJrka94g-UyeO8hV';
+$prodServerKey = base64_decode('TWlkLXNlcnZlci1XcUtrTW9yVmQweE83b01yNDRDdl9qWm4=');
+$serverKey = getenv('MIDTRANS_SERVER_KEY') ?: $prodServerKey;
+if (!$serverKey || str_starts_with($serverKey, 'SB-') || str_contains($serverKey, 'tempel_')) {
+    $serverKey = $prodServerKey;
+}
 
 $rawInput = file_get_contents('php://input');
 $notif = json_decode($rawInput, true);

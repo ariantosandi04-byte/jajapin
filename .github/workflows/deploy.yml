@@ -29,8 +29,10 @@ jobs:
       - name: 🔨 Build Vite production
         run: npm run build
         env:
-          VITE_MIDTRANS_IS_PRODUCTION: false
-          VITE_MIDTRANS_CLIENT_KEY: ${{ secrets.VITE_MIDTRANS_CLIENT_KEY || 'tempel_kode_SB-Mid-client_kamu_di_sini' }}
+          VITE_MIDTRANS_IS_PRODUCTION: true
+          VITE_MIDTRANS_CLIENT_KEY: ${{ secrets.VITE_MIDTRANS_CLIENT_KEY || 'Mid-client-CqC142X4x0wSTe5q' }}
+          MIDTRANS_IS_PRODUCTION: true
+          MIDTRANS_MERCHANT_ID: ${{ secrets.MIDTRANS_MERCHANT_ID || 'G587072361' }}
 
       - name: 📦 Simpan Build Artifact (dist)
         uses: actions/upload-artifact@v4

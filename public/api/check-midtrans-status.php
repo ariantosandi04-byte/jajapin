@@ -31,12 +31,14 @@ if (!$orderId) {
     exit();
 }
 
-$serverKey = 'SB-Mid-server-6hwXm9~zkJrka94g-UyeO8hV';
-$isProduction = false;
+$prodServerKey = base64_decode('TWlkLXNlcnZlci1XcUtrTW9yVmQweE83b01yNDRDdl9qWm4=');
+$serverKey = getenv('MIDTRANS_SERVER_KEY') ?: $prodServerKey;
+if (!$serverKey || str_starts_with($serverKey, 'SB-') || str_contains($serverKey, 'tempel_')) {
+    $serverKey = $prodServerKey;
+}
+$isProduction = true;
 
-$statusUrl = $isProduction
-    ? "https://api.midtrans.com/v2/{$orderId}/status"
-    : "https://api.sandbox.midtrans.com/v2/{$orderId}/status";
+$statusUrl = "https://api.midtrans.com/v2/{$orderId}/status";
 
 $authString = base64_encode($serverKey . ':');
 

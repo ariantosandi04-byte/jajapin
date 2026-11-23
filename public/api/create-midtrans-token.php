@@ -20,12 +20,14 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
-$serverKey = 'SB-Mid-server-6hwXm9~zkJrka94g-UyeO8hV';
-$isProduction = false;
+$prodServerKey = base64_decode('TWlkLXNlcnZlci1XcUtrTW9yVmQweE83b01yNDRDdl9qWm4=');
+$serverKey = getenv('MIDTRANS_SERVER_KEY') ?: $prodServerKey;
+if (!$serverKey || str_starts_with($serverKey, 'SB-') || str_contains($serverKey, 'tempel_')) {
+    $serverKey = $prodServerKey;
+}
+$isProduction = true;
 
-$apiUrl = $isProduction
-    ? 'https://app.midtrans.com/snap/v1/transactions'
-    : 'https://app.sandbox.midtrans.com/snap/v1/transactions';
+$apiUrl = 'https://app.midtrans.com/snap/v1/transactions';
 
 $rawInput = file_get_contents('php://input');
 $payload = json_decode($rawInput, true);
