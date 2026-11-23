@@ -42,7 +42,31 @@ export const stays = [
       'WiFi Gratis',
       'Kamar Mandi Dalam',
       'Resepsionis 24 Jam',
+      'Paket Surfing Ombak',
     ],
+    surfing_package: {
+      id: 'surfing-pelabuhan-ratu',
+      name: 'Paket Surfing Pantai Pelabuhan Ratu',
+      price: 350000,
+      duration: '2 Jam / Sesi',
+      description: 'Taklukkan ombak Pelabuhan Ratu dengan bimbingan instruktur lokal bersertifikasi. Cocok untuk pemula hingga menengah.',
+      includes: [
+        'Instruktur Surfing Profesional (Coach Pendamping)',
+        'Papan Surfing (Surfboard) Lengkap + Leash Tali Pengaman',
+        'Briefing Teori, Teknik Paddling & Pop-Up di Pasir Pantai',
+        'Pendampingan Praktik Langsung di Atas Ombak',
+      ],
+      addons: [
+        {
+          id: 'drone_documentation',
+          name: 'Dokumentasi Video & Foto Drone Cinematic',
+          price: 100000,
+          description: 'Rekaman video aerial 4K & foto cinematic saat beraksi di atas ombak',
+        },
+      ],
+      location: 'Pantai Pelabuhan Ratu (Tepat Depan Pantai Kumala)',
+      image: '/assets/putri-sari/surfing-pelabuhan-ratu.jpg',
+    },
     room_types: [
       {
         id: 'deluxe',

@@ -19,6 +19,8 @@ import {
   AlertTriangle,
   Lock,
   Clock,
+  Waves,
+  Camera,
 } from 'lucide-react';
 import SiteHeader from '../components/site/SiteHeader';
 import SiteFooter from '../components/site/SiteFooter';
@@ -176,10 +178,19 @@ export default function CheckoutPage() {
     );
   }
 
+  const isPelabuhanRatu = Boolean(stay?.city === 'Pelabuhan Ratu' || stay?.slug?.includes('putri-sari') || stay?.surfing_package);
+  const [includeSurfing, setIncludeSurfing] = useState(searchParams.get('surfing') === 'true');
+  const [includeDrone, setIncludeDrone] = useState(searchParams.get('drone') === 'true');
+
+  const surfingPrice = 350000;
+  const dronePrice = 100000;
+  const addonTotal = (includeSurfing ? surfingPrice : 0) + (includeSurfing && includeDrone ? dronePrice : 0);
+
   const pricePerRoomNight = selectedRoom.price || stay.price;
   const nights = checkIn && checkOut ? calculateNights(checkIn, checkOut) : 1;
   const subtotalPerNight = pricePerRoomNight * roomsCount;
-  const totalPrice = nights * subtotalPerNight;
+  const roomTotalPrice = nights * subtotalPerNight;
+  const totalPrice = roomTotalPrice + addonTotal;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -191,6 +202,16 @@ export default function CheckoutPage() {
     setSubmitting(true);
     setError('');
     const bookingCode = generateBookingCode();
+
+    const noteAddon = includeSurfing
+      ? `[TAMBAHAN: Paket Surfing 2 Jam (Instruktur + Papan)${includeDrone ? ' + Dokumentasi Drone 4K' : ''}]`
+      : '';
+    const finalNotes = [form.notes, noteAddon].filter(Boolean).join(' ');
+
+    let stayNameForMidtrans = `${stay.name} (${roomsCount}x ${selectedRoom.name})`;
+    if (includeSurfing) {
+      stayNameForMidtrans += includeDrone ? ' + Surfing & Drone' : ' + Surfing 2 Jam';
+    }
 
     const baseBooking = {
       booking_code: bookingCode,
@@ -210,13 +231,22 @@ export default function CheckoutPage() {
       room_count: roomsCount,
       price_per_night: pricePerRoomNight,
       subtotal_per_night: subtotalPerNight,
+      room_total_price: roomTotalPrice,
       total_price: totalPrice,
+      surfing_package: includeSurfing ? {
+        included: true,
+        duration: '2 Jam',
+        price: surfingPrice,
+        drone_included: includeDrone,
+        drone_price: includeDrone ? dronePrice : 0,
+        total: addonTotal,
+      } : null,
       status: 'menunggu',
       payment_status: 'menunggu_pembayaran',
       payment_gateway: gateway,
       payment_method: paymentMethod,
       paid_at: null,
-      notes: form.notes,
+      notes: finalNotes,
       source: 'jajapin',
       external_id: null,
       created_at: new Date().toISOString(),
@@ -228,7 +258,7 @@ export default function CheckoutPage() {
       baseBooking.status = 'menunggu'; // TIDAK DIKONFIRMASI / BELUM LOCK SEBELUM ADA PEMBAYARAN!
       baseBooking.is_locked = false;
       const noteWarning = 'CATATAN PENTING: Booking belum dikonfirmasi / ter-lock sebelum ada pembayaran lunas.';
-      baseBooking.notes = form.notes ? `${form.notes} [${noteWarning}]` : noteWarning;
+      baseBooking.notes = finalNotes ? `${finalNotes} [${noteWarning}]` : noteWarning;
       baseBooking.payment_method = 'Bayar di Tempat (di Properti)';
       saveBooking(baseBooking);
       setTimeout(() => navigate(`/konfirmasi/${bookingCode}`), 400);
@@ -243,7 +273,7 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           bookingCode,
           totalPrice,
-          stayName: `${stay.name} (${roomsCount}x ${selectedRoom.name})`,
+          stayName: stayNameForMidtrans.slice(0, 50),
           guestName: form.name,
           guestEmail: form.email,
           guestPhone: form.phone,
@@ -257,7 +287,7 @@ export default function CheckoutPage() {
           body: JSON.stringify({
             bookingCode,
             totalPrice,
-            stayName: `${stay.name} (${roomsCount}x ${selectedRoom.name})`,
+            stayName: stayNameForMidtrans.slice(0, 50),
             guestName: form.name,
             guestEmail: form.email,
             guestPhone: form.phone,
@@ -599,6 +629,105 @@ export default function CheckoutPage() {
                 </Card>
               </form>
 
+              {/* OPSI TAMBAHAN AKTIVITAS (SURFING PELABUHAN RATU) */}
+              {isPelabuhanRatu && (
+                <Card className="rounded-3xl border-emerald-300 dark:border-emerald-800 bg-gradient-to-br from-emerald-50/90 via-white to-emerald-50/40 dark:from-emerald-950/30 dark:to-card overflow-hidden shadow-xs">
+                  <CardContent className="p-5 sm:p-6 space-y-4">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-xl bg-emerald-700 text-white flex items-center justify-center shrink-0 shadow-xs">
+                        <Waves className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="font-display font-bold text-base text-stone-900 dark:text-stone-100">
+                            Tambahan Aktivitas: Paket Surfing Pantai Pelabuhan Ratu
+                          </h3>
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-900 font-bold uppercase tracking-wider">
+                            Rekomendasi
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          Tepat di depan hotel (Pantai Kumala). Bisa dibayar sekaligus bersama kamar.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Checkbox Paket Utama Surfing */}
+                    <div
+                      onClick={() => {
+                        const next = !includeSurfing;
+                        setIncludeSurfing(next);
+                        if (!next) setIncludeDrone(false);
+                      }}
+                      className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-start justify-between gap-3 ${
+                        includeSurfing
+                          ? 'bg-emerald-100/80 border-emerald-600 shadow-xs ring-1 ring-emerald-600'
+                          : 'bg-white dark:bg-card border-border hover:border-emerald-400'
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 border transition-colors ${
+                          includeSurfing
+                            ? 'bg-emerald-700 border-emerald-700 text-white'
+                            : 'border-stone-400 bg-white'
+                        }`}>
+                          {includeSurfing && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-bold text-sm text-stone-900 dark:text-stone-100">
+                              Paket Surfing Sesi 2 Jam
+                            </span>
+                            <span className="text-xs font-extrabold text-emerald-800 dark:text-emerald-300">
+                              +{formatIDR(surfingPrice)}
+                            </span>
+                          </div>
+                          <p className="text-xs text-stone-600 dark:text-stone-300 mt-1 leading-relaxed">
+                            Termasuk instruktur surfing profesional (coach private), sewa papan surfing lengkap + leash tali pengaman, serta briefing teori & keselamatan.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Checkbox Add-on Drone Documentation */}
+                    {includeSurfing && (
+                      <div
+                        onClick={() => setIncludeDrone(!includeDrone)}
+                        className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-start justify-between gap-3 ml-3 sm:ml-5 ${
+                          includeDrone
+                            ? 'bg-emerald-100/80 border-emerald-600 shadow-xs ring-1 ring-emerald-600'
+                            : 'bg-white dark:bg-card border-border hover:border-emerald-400'
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 border transition-colors ${
+                            includeDrone
+                              ? 'bg-emerald-700 border-emerald-700 text-white'
+                              : 'border-stone-400 bg-white'
+                          }`}>
+                            {includeDrone && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-bold text-sm text-stone-900 dark:text-stone-100 flex items-center gap-1.5">
+                                <Camera className="w-4 h-4 text-emerald-700" />
+                                Dokumentasi Video & Foto Drone Cinematic
+                              </span>
+                              <span className="text-xs font-extrabold text-emerald-800 dark:text-emerald-300">
+                                +{formatIDR(dronePrice)}
+                              </span>
+                            </div>
+                            <p className="text-xs text-stone-600 dark:text-stone-300 mt-1 leading-relaxed">
+                              Rekaman video aerial 4K & foto cinematic saat beraksi di atas ombak dari udara. Siap posting di Instagram & TikTok!
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Payment Methods Panel */}
               <PaymentPanel
                 gateway={gateway}
@@ -752,8 +881,26 @@ export default function CheckoutPage() {
                       <span>
                         {roomsCount} kamar × {nights} malam
                       </span>
-                      <span className="text-foreground">{formatIDR(totalPrice)}</span>
+                      <span className="text-foreground">{formatIDR(roomTotalPrice)}</span>
                     </div>
+                    {includeSurfing && (
+                      <div className="flex justify-between text-emerald-800 dark:text-emerald-300 font-semibold">
+                        <span className="flex items-center gap-1.5">
+                          <Waves className="w-4 h-4 text-emerald-600" />
+                          Paket Surfing 2 Jam
+                        </span>
+                        <span>+{formatIDR(surfingPrice)}</span>
+                      </div>
+                    )}
+                    {includeSurfing && includeDrone && (
+                      <div className="flex justify-between text-emerald-800 dark:text-emerald-300 font-semibold pl-4">
+                        <span className="flex items-center gap-1.5">
+                          <Camera className="w-4 h-4 text-emerald-600" />
+                          Dokumentasi Drone 4K
+                        </span>
+                        <span>+{formatIDR(dronePrice)}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between text-muted-foreground">
                       <span>Biaya layanan pemesanan</span>
                       <span className="text-emerald-700 font-medium">Rp0 (Gratis)</span>
@@ -770,7 +917,7 @@ export default function CheckoutPage() {
                         Total Tagihan
                       </span>
                       <span className="text-[11px] text-muted-foreground font-body">
-                        {roomsCount} Kamar, {nights} Malam
+                        {roomsCount} Kamar, {nights} Malam {includeSurfing ? '· Termasuk Surfing' : ''}
                       </span>
                     </div>
                     <span className="font-display font-bold text-2xl text-emerald-700 dark:text-emerald-400">

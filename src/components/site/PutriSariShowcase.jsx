@@ -261,6 +261,34 @@ export default function PutriSariShowcase() {
               </div>
             </div>
 
+            {/* Banner Paket Surfing */}
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-900 via-[#0a291a] to-stone-900 text-white shadow-xs flex items-center justify-between gap-3 border border-emerald-800/40">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 flex items-center justify-center text-lg shrink-0">
+                  🏄‍♂️
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-xs font-bold text-white">
+                      Paket Surfing Pantai Pelabuhan Ratu
+                    </p>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500 text-emerald-950 font-bold">
+                      Rp 350.000 / 2 Jam
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-stone-300 mt-0.5">
+                    Include instruktur & papan surfing · Opsi dokumentasi drone +Rp 100.000
+                  </p>
+                </div>
+              </div>
+              <Link
+                to="/putrisari"
+                className="px-3.5 py-1.5 rounded-xl bg-white text-emerald-950 font-bold text-xs shrink-0 hover:bg-emerald-50 transition-colors shadow-2xs"
+              >
+                Lihat Paket
+              </Link>
+            </div>
+
           </div>
 
           {/* Right Column (7 Cols): Direct Room Selection & Instant Booking */}

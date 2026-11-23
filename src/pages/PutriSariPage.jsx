@@ -187,6 +187,20 @@ export default function PutriSariPage() {
     'Halo Resepsionis Hotel Putri Sari Pelabuhan Ratu, saya ingin menanyakan ketersediaan kamar di depan Pantai Kumala.'
   )}`;
 
+  // State & konfigurasi Paket Surfing Pantai Pelabuhan Ratu
+  const [surfingDroneIncluded, setSurfingDroneIncluded] = useState(false);
+  const surfingBasePrice = 350000;
+  const surfingDronePrice = 100000;
+  const totalSurfingPrice = surfingBasePrice + (surfingDroneIncluded ? surfingDronePrice : 0);
+
+  const waSurfingUrl = `https://wa.me/${waReceptionNumber}?text=${encodeURIComponent(
+    `Halo Resepsionis Hotel Putri Sari Pelabuhan Ratu, saya ingin memesan Paket Surfing di Pantai Pelabuhan Ratu:\n` +
+    `- Paket: Sesi 2 Jam (Include Instruktur Profesional & Papan Surfing) - Rp 350.000\n` +
+    `- Dokumentasi Video & Foto Drone Cinematic: ${surfingDroneIncluded ? 'YA (+Rp 100.000)' : 'Tidak'}\n` +
+    `- Estimasi Total: ${formatIDR(totalSurfingPrice)}\n` +
+    `Mohon info jadwal sesi ombak yang cocok untuk saya ya.`
+  )}`;
+
   const scrollToSection = (id, tabName) => {
     setActiveTab(tabName);
     const element = document.getElementById(id);
@@ -255,6 +269,13 @@ export default function PutriSariPage() {
               Pilihan Kamar & Tarif
             </button>
             <button
+              onClick={() => scrollToSection('surfing-section', 'surfing')}
+              className={`hover:text-emerald-800 transition-colors flex items-center gap-1.5 ${activeTab === 'surfing' ? 'text-emerald-800 font-bold' : ''}`}
+            >
+              <span>🏄‍♂️ Paket Surfing</span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold">Populer</span>
+            </button>
+            <button
               onClick={() => scrollToSection('galeri-section', 'foto')}
               className={`hover:text-emerald-800 transition-colors ${activeTab === 'foto' ? 'text-emerald-800 font-bold' : ''}`}
             >
@@ -320,6 +341,14 @@ export default function PutriSariPage() {
             }`}
           >
             Pilihan Kamar
+          </button>
+          <button
+            onClick={() => scrollToSection('surfing-section', 'surfing')}
+            className={`px-3 py-1.5 rounded-full shrink-0 transition-colors flex items-center gap-1 ${
+              activeTab === 'surfing' ? 'bg-emerald-800 text-white font-bold' : 'bg-emerald-50 text-emerald-900 border border-emerald-300 font-medium'
+            }`}
+          >
+            <span>🏄‍♂️ Paket Surfing</span>
           </button>
           <button
             onClick={() => scrollToSection('galeri-section', 'foto')}
@@ -879,6 +908,210 @@ export default function PutriSariPage() {
               <span>Buka Petunjuk Arah Google Maps</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </a>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 6.5 PAKET SURFING PANTAI PELABUHAN RATU */}
+      <section id="surfing-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="bg-gradient-to-br from-emerald-950 via-[#0a291a] to-stone-900 rounded-3xl p-5 sm:p-8 lg:p-10 border border-emerald-800/50 shadow-xl text-white relative overflow-hidden">
+          
+          {/* Background Decorative Waves */}
+          <div className="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
+          <div className="absolute -left-20 -bottom-20 w-80 h-80 rounded-full bg-emerald-600/10 blur-3xl pointer-events-none" />
+
+          {/* Section Header */}
+          <div className="relative z-10 max-w-3xl mb-8">
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-xs font-bold tracking-wider uppercase mb-3">
+              <Waves className="w-4 h-4 text-emerald-300" />
+              Aktivitas Wisata Ikonik Pelabuhan Ratu
+            </span>
+            <h2 className="font-display font-bold text-2xl sm:text-3xl lg:text-4xl text-white tracking-tight">
+              Paket Belajar & Main Surfing Pantai Pelabuhan Ratu
+            </h2>
+            <p className="text-xs sm:text-sm text-stone-300 mt-2.5 leading-relaxed">
+              Taklukkan gulungan ombak Samudra Hindia tepat di depan Hotel Putri Sari (Pantai Kumala). Didampingi instruktur surfing lokal profesional yang sabar, telaten, dan ramah untuk pemula sekalipun.
+            </p>
+          </div>
+
+          {/* Main Grid: Foto & Detail Paket */}
+          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+            
+            {/* Visual Card (Kiri - 5 cols) */}
+            <div className="lg:col-span-5 rounded-2xl overflow-hidden border border-white/15 bg-black/30 shadow-lg relative group">
+              <div className="relative aspect-[4/3] sm:aspect-[16/10] lg:aspect-[4/3] w-full overflow-hidden">
+                <img
+                  src="/assets/putri-sari/surfing-pelabuhan-ratu.jpg"
+                  alt="Aksi Surfing di Pantai Pelabuhan Ratu"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                
+                <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
+                  <span className="px-2.5 py-1 rounded-lg bg-emerald-600/90 backdrop-blur-md text-white text-[11px] font-bold">
+                    ⏱️ 2 Jam / Sesi Penuh
+                  </span>
+                  <span className="px-2.5 py-1 rounded-lg bg-black/60 backdrop-blur-md text-white text-[11px] font-semibold border border-white/20">
+                    📍 Depan Pantai Kumala
+                  </span>
+                </div>
+
+                <div className="absolute bottom-3 left-3 right-3 text-white">
+                  <p className="text-xs font-bold text-emerald-300">Spot Ombak Ramah Pemula</p>
+                  <p className="text-[11px] text-stone-300">Dasar pasir aman, ombak konsisten sepanjang tahun</p>
+                </div>
+              </div>
+
+              {/* Fasilitas Bilas & Dekat */}
+              <div className="p-4 bg-emerald-950/70 border-t border-white/10 grid grid-cols-2 gap-2 text-[11px] text-stone-300">
+                <div className="flex items-center gap-1.5">
+                  <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <span>Bilas Air Tawar di Hotel</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <span>Jarak 0m ke Bibir Pantai</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <span>Peralatan Disediakan</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <span>Bimbingan 1-on-1 / Private</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Pricing & Includes (Kanan - 7 cols) */}
+            <div className="lg:col-span-7 space-y-5">
+              
+              {/* Box Harga Utama */}
+              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/15">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/10">
+                  <div>
+                    <span className="text-[11px] uppercase tracking-wider font-semibold text-emerald-300 block">
+                      Harga Paket Surfing
+                    </span>
+                    <div className="flex items-baseline gap-2 mt-0.5">
+                      <span className="font-display font-extrabold text-3xl sm:text-4xl text-white">
+                        {formatIDR(surfingBasePrice)}
+                      </span>
+                      <span className="text-xs sm:text-sm text-stone-300 font-normal">
+                        / sesi (2 jam)
+                      </span>
+                    </div>
+                  </div>
+                  <span className="self-start sm:self-center px-3 py-1.5 rounded-full bg-emerald-500/20 text-emerald-200 border border-emerald-400/30 text-xs font-semibold">
+                    Termasuk Pelatih & Alat
+                  </span>
+                </div>
+
+                {/* Termasuk dalam paket */}
+                <div className="pt-4 space-y-2.5">
+                  <p className="text-xs font-bold text-stone-200 uppercase tracking-wider">
+                    Sudah Termasuk (Include):
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-stone-200">
+                    <div className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <span><strong>Instruktur Profesional</strong> (Coach lokal berpengalaman & sabar)</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <span><strong>Papan Surfing Lengkap</strong> (Surfboard sesuai postur + Leash kaki)</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <span><strong>Briefing Teori 30 Mnt</strong> (Teknik dayung paddling & pop-up berdiri)</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <span><strong>Praktik Air Laut 90 Mnt</strong> (Didampingi coach langsung di ombak)</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Opsi Tambahan (Add-on Drone Documentation) */}
+              <div
+                onClick={() => setSurfingDroneIncluded(!surfingDroneIncluded)}
+                className={`p-4 rounded-2xl border transition-all cursor-pointer select-none ${
+                  surfingDroneIncluded
+                    ? 'bg-emerald-900/60 border-emerald-400 shadow-md ring-2 ring-emerald-400/40'
+                    : 'bg-white/5 border-white/15 hover:bg-white/10'
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                      surfingDroneIncluded ? 'bg-emerald-500 text-white' : 'bg-white/10 text-stone-300'
+                    }`}>
+                      <Camera className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-bold text-sm text-white">
+                          Dokumentasi Video & Foto Drone Cinematic
+                        </span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 font-bold">
+                          +Rp 100.000
+                        </span>
+                      </div>
+                      <p className="text-xs text-stone-300 mt-1 leading-relaxed">
+                        Rekaman aerial 4K & foto cinematic saat aksi menunggangi ombak dari udara. Cocok untuk konten Reels, TikTok & Instagram Story!
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Checkbox Visual */}
+                  <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border ${
+                    surfingDroneIncluded
+                      ? 'bg-emerald-500 border-emerald-400 text-white'
+                      : 'border-white/30 bg-white/10'
+                  }`}>
+                    {surfingDroneIncluded && <Check className="w-4 h-4 stroke-[3]" />}
+                  </div>
+                </div>
+              </div>
+
+              {/* Total & Action Buttons */}
+              <div className="p-4 rounded-2xl bg-black/40 border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <span className="text-[11px] text-stone-400 block">Total Paket Surfing:</span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="font-display font-bold text-2xl text-emerald-300">
+                      {formatIDR(totalSurfingPrice)}
+                    </span>
+                    {surfingDroneIncluded && (
+                      <span className="text-[11px] text-stone-400">(Sudah termasuk Drone)</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                  <Link
+                    to={`/pesan/jajapin-hotel-putri-sari?room=${selectedRoomId || 'deluxe'}&surfing=true${surfingDroneIncluded ? '&drone=true' : ''}`}
+                    className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-bold text-xs sm:text-sm transition-colors shadow-lg"
+                  >
+                    <span>Pesan Kamar + Surfing</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+
+                  <a
+                    href={waSurfingUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 font-semibold text-xs sm:text-sm transition-colors"
+                  >
+                    <MessageCircle className="w-4 h-4 text-emerald-400" />
+                    <span>Booking Surfing Saja via WA</span>
+                  </a>
+                </div>
+              </div>
+
+            </div>
           </div>
 
         </div>
