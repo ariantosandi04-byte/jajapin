@@ -3,8 +3,8 @@ node_modules/
 .pnp
 .pnp.js
 
-# Production build
-dist/
+# Production build (disertakan agar Git Deployment di Hostinger otomatis ter-update)
+# dist/
 dist.zip
 
 # Environment files
