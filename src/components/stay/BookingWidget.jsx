@@ -286,6 +286,30 @@ export default function BookingWidget({
               Anda akan diminta masuk / mendaftar singkat sebelum pembayaran untuk menerbitkan bukti reservasi.
             </p>
           )}
+
+          {stay.event_packages && stay.event_packages.length > 0 && (
+            <div className="pt-3 border-t border-border space-y-2">
+              <span className="text-[11px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider block">
+                Paket Spesial Acara:
+              </span>
+              <div className="grid grid-cols-2 gap-2 text-[11px]">
+                <button
+                  type="button"
+                  onClick={() => navigate(`/pesan/${stay.slug}?package=prewedding&packageOnly=true`)}
+                  className="p-2 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50/60 dark:bg-amber-950/30 text-amber-900 dark:text-amber-200 hover:bg-amber-100 font-semibold text-center transition-colors"
+                >
+                  📸 Prewedding (300rb)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate(`/pesan/${stay.slug}?package=wedding&packageOnly=true`)}
+                  className="p-2 rounded-xl border border-purple-200 dark:border-purple-800 bg-purple-50/60 dark:bg-purple-950/30 text-purple-900 dark:text-purple-200 hover:bg-purple-100 font-semibold text-center transition-colors"
+                >
+                  💍 Wedding (6jt)
+                </button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

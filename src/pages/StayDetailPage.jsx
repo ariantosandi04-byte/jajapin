@@ -15,6 +15,10 @@ import {
   Check,
   Plus,
   Minus,
+  Camera,
+  Heart,
+  ArrowRight,
+  MessageCircle,
 } from 'lucide-react';
 import SiteHeader from '../components/site/SiteHeader';
 import SiteFooter from '../components/site/SiteFooter';
@@ -276,6 +280,124 @@ export default function StayDetailPage() {
                                 </Button>
                               </div>
                             </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION: PAKET KHUSUS FOTO PREWEDDING & WEDDING TEMPAT (WANGSALOKA) */}
+              {stay.event_packages && stay.event_packages.length > 0 && (
+                <div className="space-y-6 pt-6 border-t border-border">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-950/60 px-2.5 py-0.5 rounded-full border border-amber-300 dark:border-amber-800">
+                          Momen Spesial & Acara
+                        </span>
+                      </div>
+                      <h3 className="font-display font-semibold text-2xl tracking-tight text-foreground mt-1 flex items-center gap-2">
+                        <Camera className="w-5 h-5 text-amber-600" /> Paket Prewedding & Wedding Venue
+                      </h3>
+                      <p className="text-xs text-muted-foreground font-body">
+                        Abadikan momen bahagia di venue estetik bernuansa Bali dengan panorama sawah lereng Gunung Galunggung
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {stay.event_packages.map((pkg) => {
+                      const isPrewed = pkg.id.includes('prewedding');
+                      const waText = isPrewed
+                        ? `Halo Admin Jajapin & ${stay.name}, saya ingin reservasi/tanya info Paket Foto Prewedding Rp 300.000 (include ruangan ganti baju & make up)...`
+                        : `Halo Admin Jajapin & ${stay.name}, saya ingin konsultasi/survey lokasi untuk Paket Wedding Tempat Rp 6.000.000...`;
+                      const waUrl = `https://wa.me/6281234567890?text=${encodeURIComponent(waText)}`;
+
+                      return (
+                        <div
+                          key={pkg.id}
+                          className="rounded-3xl border border-stone-200 dark:border-stone-800 bg-card overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
+                        >
+                          <div>
+                            <div className="relative aspect-[16/10] w-full overflow-hidden">
+                              <img
+                                src={pkg.image}
+                                alt={pkg.name}
+                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                              />
+                              <div className="absolute top-3 left-3 flex items-center gap-1.5">
+                                <span className="px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[11px] font-semibold border border-white/20">
+                                  {pkg.badge}
+                                </span>
+                              </div>
+                              <div className="absolute bottom-3 left-3 right-3">
+                                <span className="px-3 py-1 rounded-full bg-emerald-600 text-white text-[11px] font-bold shadow-xs inline-block">
+                                  {pkg.tag}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="p-5 space-y-4">
+                              <div className="flex items-start justify-between gap-3">
+                                <div>
+                                  <h4 className="font-display font-bold text-lg text-foreground">
+                                    {pkg.name}
+                                  </h4>
+                                  <p className="text-xs text-muted-foreground mt-0.5">
+                                    {isPrewed ? 'Termasuk 1 Ruangan Privat Ganti Baju & Make Up' : 'Sewa Tempat / Venue Pernikahan Eksklusif'}
+                                  </p>
+                                </div>
+                                <div className="text-right shrink-0">
+                                  <span className="font-display font-extrabold text-xl sm:text-2xl text-emerald-700 dark:text-emerald-400">
+                                    {formatIDR(pkg.price)}
+                                  </span>
+                                  <span className="text-[11px] text-muted-foreground block">
+                                    /{pkg.unit}
+                                  </span>
+                                </div>
+                              </div>
+
+                              <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed">
+                                {pkg.description}
+                              </p>
+
+                              {/* Keunggulan & Fasilitas Include */}
+                              <div className="p-3.5 rounded-2xl bg-stone-50 dark:bg-stone-900/60 border border-stone-200/80 dark:border-stone-800 space-y-2">
+                                <p className="text-[11px] font-bold text-stone-700 dark:text-stone-300 uppercase tracking-wider">
+                                  Sudah Termasuk:
+                                </p>
+                                <div className="space-y-1.5 text-xs text-stone-600 dark:text-stone-300">
+                                  {pkg.includes.map((inc, idx) => (
+                                    <div key={idx} className="flex items-start gap-2">
+                                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                                      <span>{inc}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="p-5 pt-0 space-y-2">
+                            <Link
+                              to={`/pesan/${stay.slug}?package=${isPrewed ? 'prewedding' : 'wedding'}&packageOnly=true`}
+                              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs transition-colors shadow-xs"
+                            >
+                              <span>Pesan {pkg.name}</span>
+                              <ArrowRight className="w-3.5 h-3.5" />
+                            </Link>
+
+                            <a
+                              href={waUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 text-xs font-medium transition-colors border border-stone-200 dark:border-stone-700"
+                            >
+                              <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
+                              <span>{isPrewed ? 'Tanya Jadwal via WhatsApp' : 'Survey Lokasi via WhatsApp'}</span>
+                            </a>
                           </div>
                         </div>
                       );

@@ -287,6 +287,29 @@ export default function ConfirmationPage() {
                 </div>
               </div>
 
+              {/* Tambahan Paket Khusus (Surfing / Wangsaloka Prewedding & Wedding) */}
+              {(booking.surfing_package || booking.wangsaloka_package) && (
+                <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 space-y-2 text-left">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300 block">
+                    Paket Aktivitas & Acara Terkonfirmasi:
+                  </span>
+                  {booking.surfing_package && (
+                    <div className="flex items-center justify-between text-xs text-emerald-950 dark:text-emerald-200">
+                      <span>🏄 Paket Surfing Pelabuhan Ratu (2 Jam, Papan + Instruktur{booking.surfing_package.drone_included ? ' + Drone 4K' : ''})</span>
+                      <strong className="font-mono">{formatIDR(booking.surfing_package.total || 350000)}</strong>
+                    </div>
+                  )}
+                  {booking.wangsaloka_package && (
+                    <div className="flex items-center justify-between text-xs text-emerald-950 dark:text-emerald-200">
+                      <span>
+                        {booking.wangsaloka_package.id === 'prewedding' ? '📸' : '💍'} {booking.wangsaloka_package.name} ({booking.wangsaloka_package.includes})
+                      </span>
+                      <strong className="font-mono">{formatIDR(booking.wangsaloka_package.price)}</strong>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Dates & Guests Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="p-3.5 rounded-2xl bg-muted/40">

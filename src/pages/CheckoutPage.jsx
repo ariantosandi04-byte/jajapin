@@ -183,6 +183,29 @@ export default function CheckoutPage() {
   const [includeSurfing, setIncludeSurfing] = useState(searchParams.get('surfing') === 'true');
   const [includeDrone, setIncludeDrone] = useState(searchParams.get('drone') === 'true');
 
+  // Konfigurasi Paket Spesial Wangsaloka (Foto Prewedding 300rb & Wedding Venue 6jt)
+  const isWangsaloka = Boolean(
+    stay?.slug === 'jajapin-wangsaloka-glamping' ||
+    stay?.id === 2 ||
+    stay?.name?.toLowerCase().includes('wangsaloka')
+  );
+  const packageParam = searchParams.get('package');
+  const isPackageOnlyParam = searchParams.get('packageOnly') === 'true';
+
+  const [selectedWangsalokaPackage, setSelectedWangsalokaPackage] = useState(
+    packageParam === 'prewedding' ? 'prewedding' : packageParam === 'wedding' ? 'wedding' : null
+  );
+  const [isPackageOnly, setIsPackageOnly] = useState(isPackageOnlyParam);
+
+  const preweddingPrice = 300000;
+  const weddingPrice = 6000000;
+  const wangsalokaPackagePrice =
+    selectedWangsalokaPackage === 'prewedding'
+      ? preweddingPrice
+      : selectedWangsalokaPackage === 'wedding'
+      ? weddingPrice
+      : 0;
+
   const surfingPrice = 350000;
   const dronePrice = 100000;
   const addonTotal = (includeSurfing ? surfingPrice : 0) + (includeSurfing && includeDrone ? dronePrice : 0);
@@ -190,8 +213,8 @@ export default function CheckoutPage() {
   const pricePerRoomNight = selectedRoom.price || stay.price;
   const nights = checkIn && checkOut ? calculateNights(checkIn, checkOut) : 1;
   const subtotalPerNight = pricePerRoomNight * roomsCount;
-  const roomTotalPrice = nights * subtotalPerNight;
-  const totalPrice = roomTotalPrice + addonTotal;
+  const roomTotalPrice = isPackageOnly ? 0 : nights * subtotalPerNight;
+  const totalPrice = roomTotalPrice + addonTotal + wangsalokaPackagePrice;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -204,14 +227,25 @@ export default function CheckoutPage() {
     setError('');
     const bookingCode = generateBookingCode();
 
-    const noteAddon = includeSurfing
-      ? `[TAMBAHAN: Paket Surfing 2 Jam (Instruktur + Papan)${includeDrone ? ' + Dokumentasi Drone 4K' : ''}]`
-      : '';
+    const noteAddon = [
+      includeSurfing ? `[TAMBAHAN: Paket Surfing 2 Jam (Instruktur + Papan)${includeDrone ? ' + Dokumentasi Drone 4K' : ''}]` : '',
+      selectedWangsalokaPackage === 'prewedding' ? '[PAKET: Foto Prewedding Rp 300.000 (Include 1 Ruangan Ganti Baju & Make Up)]' : '',
+      selectedWangsalokaPackage === 'wedding' ? '[PAKET: Wedding Tempat / Sewa Venue Rp 6.000.000]' : '',
+    ].filter(Boolean).join(' ');
     const finalNotes = [form.notes, noteAddon].filter(Boolean).join(' ');
 
-    let stayNameForMidtrans = `${stay.name} (${roomsCount}x ${selectedRoom.name})`;
+    let stayNameForMidtrans = isPackageOnly && selectedWangsalokaPackage === 'prewedding'
+      ? `Wangsaloka - Foto Prewedding (Ruang Make Up)`
+      : isPackageOnly && selectedWangsalokaPackage === 'wedding'
+      ? `Wangsaloka - Sewa Tempat Wedding Venue`
+      : `${stay.name} (${roomsCount}x ${selectedRoom.name})`;
+
     if (includeSurfing) {
       stayNameForMidtrans += includeDrone ? ' + Surfing & Drone' : ' + Surfing 2 Jam';
+    } else if (!isPackageOnly && selectedWangsalokaPackage === 'prewedding') {
+      stayNameForMidtrans += ' + Prewedding (Ruang Make Up)';
+    } else if (!isPackageOnly && selectedWangsalokaPackage === 'wedding') {
+      stayNameForMidtrans += ' + Wedding Venue';
     }
 
     const baseBooking = {
@@ -227,9 +261,9 @@ export default function CheckoutPage() {
       check_out: checkOut,
       guests: guests,
       nights: nights,
-      room_type: selectedRoom.name,
+      room_type: isPackageOnly ? (selectedWangsalokaPackage === 'prewedding' ? 'Paket Prewedding (Non-Kamar)' : 'Sewa Tempat Wedding') : selectedRoom.name,
       room_type_id: selectedRoom.id,
-      room_count: roomsCount,
+      room_count: isPackageOnly ? 0 : roomsCount,
       price_per_night: pricePerRoomNight,
       subtotal_per_night: subtotalPerNight,
       room_total_price: roomTotalPrice,
@@ -241,6 +275,15 @@ export default function CheckoutPage() {
         drone_included: includeDrone,
         drone_price: includeDrone ? dronePrice : 0,
         total: addonTotal,
+      } : null,
+      wangsaloka_package: selectedWangsalokaPackage ? {
+        id: selectedWangsalokaPackage,
+        name: selectedWangsalokaPackage === 'prewedding' ? 'Paket Foto Prewedding' : 'Paket Wedding Tempat (Venue Only)',
+        price: wangsalokaPackagePrice,
+        is_package_only: isPackageOnly,
+        includes: selectedWangsalokaPackage === 'prewedding'
+          ? 'Spot Foto Wangsaloka + 1 Ruangan Ganti Baju & Make Up'
+          : 'Sewa Venue Utama Pernikahan Wangsaloka Eksklusif',
       } : null,
       status: 'menunggu',
       payment_status: 'menunggu_pembayaran',
@@ -755,6 +798,155 @@ export default function CheckoutPage() {
                 </Card>
               )}
 
+              {/* Opsi Paket Khusus Wangsaloka (Foto Prewedding 300rb & Wedding Tempat 6jt) */}
+              {isWangsaloka && (
+                <Card className="border-amber-300/80 dark:border-amber-800 bg-amber-50/40 dark:bg-amber-950/20 overflow-hidden shadow-xs">
+                  <CardContent className="p-5 sm:p-6 space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                        <Camera className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="font-display font-bold text-base text-stone-900 dark:text-stone-100">
+                            Pilihan Paket Acara & Foto Wangsaloka
+                          </h3>
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 font-bold uppercase tracking-wider">
+                            Momen Bahagia
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          Spot foto estetik nuansa Bali & lereng Gn. Galunggung untuk prewedding maupun pernikahan.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Banner Mini Wangsaloka */}
+                    <div className="rounded-2xl overflow-hidden border border-amber-200 dark:border-amber-900 bg-stone-900 shadow-xs relative">
+                      <img
+                        src="/assets/wangsaloka/gallery-1.jpg"
+                        alt="Spot Foto Prewedding Wangsaloka"
+                        className="w-full h-36 sm:h-44 object-cover opacity-90"
+                      />
+                      <div className="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-amber-300 border border-white/15 text-[10px] font-bold">
+                        📸 Spot Foto Gapura Bali & Alam Galunggung
+                      </div>
+                      <div className="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-md text-white text-[10px] font-medium border border-white/10">
+                        👗 Termasuk Ruang Ganti & Make Up
+                      </div>
+                    </div>
+
+                    <div className="space-y-3 pt-1">
+                      {/* Opsi 1: Paket Foto Prewedding 300rb */}
+                      <div
+                        onClick={() => {
+                          if (selectedWangsalokaPackage === 'prewedding') {
+                            setSelectedWangsalokaPackage(null);
+                            setIsPackageOnly(false);
+                          } else {
+                            setSelectedWangsalokaPackage('prewedding');
+                          }
+                        }}
+                        className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-start justify-between gap-3 ${
+                          selectedWangsalokaPackage === 'prewedding'
+                            ? 'bg-amber-100/90 border-amber-600 shadow-xs ring-2 ring-amber-600/60'
+                            : 'bg-white dark:bg-card border-border hover:border-amber-400'
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 border transition-colors ${
+                            selectedWangsalokaPackage === 'prewedding'
+                              ? 'bg-amber-600 border-amber-600 text-white'
+                              : 'border-stone-400 bg-white'
+                          }`}>
+                            {selectedWangsalokaPackage === 'prewedding' && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-bold text-sm text-stone-900 dark:text-stone-100">
+                                Paket Foto Prewedding
+                              </span>
+                              <span className="text-xs font-extrabold text-amber-800 dark:text-amber-300">
+                                +{formatIDR(preweddingPrice)}
+                              </span>
+                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold">
+                                Termasuk Ruang Ganti & Make Up
+                              </span>
+                            </div>
+                            <p className="text-xs text-stone-600 dark:text-stone-300 mt-1 leading-relaxed">
+                              Izin pemotretan di seluruh spot estetik Wangsaloka + <strong>1 ruangan privat ber-AC khusus untuk ganti pakaian dan make up</strong> tim penata rias.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Opsi 2: Paket Wedding Tempat 6.000.000 */}
+                      <div
+                        onClick={() => {
+                          if (selectedWangsalokaPackage === 'wedding') {
+                            setSelectedWangsalokaPackage(null);
+                            setIsPackageOnly(false);
+                          } else {
+                            setSelectedWangsalokaPackage('wedding');
+                          }
+                        }}
+                        className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-start justify-between gap-3 ${
+                          selectedWangsalokaPackage === 'wedding'
+                            ? 'bg-amber-100/90 border-amber-600 shadow-xs ring-2 ring-amber-600/60'
+                            : 'bg-white dark:bg-card border-border hover:border-amber-400'
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 border transition-colors ${
+                            selectedWangsalokaPackage === 'wedding'
+                              ? 'bg-amber-600 border-amber-600 text-white'
+                              : 'border-stone-400 bg-white'
+                          }`}>
+                            {selectedWangsalokaPackage === 'wedding' && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-bold text-sm text-stone-900 dark:text-stone-100">
+                                Paket Wedding Tempat (Sewa Venue Pernikahan)
+                              </span>
+                              <span className="text-xs font-extrabold text-amber-800 dark:text-amber-300">
+                                +{formatIDR(weddingPrice)}
+                              </span>
+                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 font-bold">
+                                Venue Eksklusif
+                              </span>
+                            </div>
+                            <p className="text-xs text-stone-600 dark:text-stone-300 mt-1 leading-relaxed">
+                              Sewa tempat / venue eksklusif untuk acara pernikahan outdoor & semi-outdoor bernuansa Bali alami di Tasikmalaya. Parkir luas, ruang persiapan pengantin, dan listrik memadai.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Toggle: Apakah Hanya Pesan Paket Acara Saja Tanpa Kamar? */}
+                      {selectedWangsalokaPackage && (
+                        <div className="p-3 bg-white dark:bg-stone-900 rounded-xl border border-amber-200 dark:border-amber-900 flex items-center justify-between gap-3 text-xs">
+                          <span className="text-stone-700 dark:text-stone-300">
+                            Pesan paket ini saja (tanpa sewa kamar menginap)?
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setIsPackageOnly(!isPackageOnly)}
+                            className={`px-3 py-1 rounded-lg font-bold transition-colors ${
+                              isPackageOnly
+                                ? 'bg-amber-600 text-white shadow-xs'
+                                : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:text-foreground'
+                            }`}
+                          >
+                            {isPackageOnly ? '✓ Ya, Paket Acara Saja' : 'Tidak, Tambah Kamar'}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Payment Methods Panel */}
               <PaymentPanel
                 gateway={gateway}
@@ -780,7 +972,7 @@ export default function CheckoutPage() {
                   ) : gateway === 'midtrans' ? (
                     <span className="flex items-center justify-center gap-2">
                       <Lock className="w-5 h-5 text-emerald-200" />
-                      Bayar Sekarang Online ({roomsCount} Kamar, {nights} Malam) · {formatIDR(totalPrice)}
+                      Bayar Sekarang Online {isPackageOnly ? '' : `(${roomsCount} Kamar, ${nights} Malam) `}· {formatIDR(totalPrice)}
                     </span>
                   ) : (
                     <span>Lanjutkan Booking (Bayar di Tempat) · {formatIDR(totalPrice)}</span>
@@ -900,16 +1092,26 @@ export default function CheckoutPage() {
                   <hr className="border-border" />
 
                   <div className="space-y-2 font-body text-sm">
-                    <div className="flex justify-between text-muted-foreground">
-                      <span>Tarif per kamar</span>
-                      <span>{formatIDR(pricePerRoomNight)} /mlm</span>
-                    </div>
-                    <div className="flex justify-between text-muted-foreground">
-                      <span>
-                        {roomsCount} kamar × {nights} malam
-                      </span>
-                      <span className="text-foreground">{formatIDR(roomTotalPrice)}</span>
-                    </div>
+                    {!isPackageOnly && (
+                      <>
+                        <div className="flex justify-between text-muted-foreground">
+                          <span>Tarif per kamar</span>
+                          <span>{formatIDR(pricePerRoomNight)} /mlm</span>
+                        </div>
+                        <div className="flex justify-between text-muted-foreground">
+                          <span>
+                            {roomsCount} kamar × {nights} malam
+                          </span>
+                          <span className="text-foreground">{formatIDR(roomTotalPrice)}</span>
+                        </div>
+                      </>
+                    )}
+                    {isPackageOnly && (
+                      <div className="flex justify-between text-muted-foreground text-xs italic">
+                        <span>Pemesanan Khusus</span>
+                        <span className="text-emerald-700 font-semibold">Paket Acara Tanpa Kamar</span>
+                      </div>
+                    )}
                     {includeSurfing && (
                       <div className="flex justify-between text-emerald-800 dark:text-emerald-300 font-semibold">
                         <span className="flex items-center gap-1.5">
@@ -928,6 +1130,24 @@ export default function CheckoutPage() {
                         <span>+{formatIDR(dronePrice)}</span>
                       </div>
                     )}
+                    {selectedWangsalokaPackage === 'prewedding' && (
+                      <div className="flex justify-between text-amber-800 dark:text-amber-300 font-semibold">
+                        <span className="flex items-center gap-1.5">
+                          <Camera className="w-4 h-4 text-amber-600" />
+                          Paket Foto Prewedding (Ruang Make Up)
+                        </span>
+                        <span>+{formatIDR(preweddingPrice)}</span>
+                      </div>
+                    )}
+                    {selectedWangsalokaPackage === 'wedding' && (
+                      <div className="flex justify-between text-purple-800 dark:text-purple-300 font-semibold">
+                        <span className="flex items-center gap-1.5">
+                          <Sparkles className="w-4 h-4 text-purple-600" />
+                          Paket Wedding Tempat (Venue Only)
+                        </span>
+                        <span>+{formatIDR(weddingPrice)}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between text-muted-foreground">
                       <span>Biaya layanan pemesanan</span>
                       <span className="text-emerald-700 font-medium">Rp0 (Gratis)</span>
@@ -944,7 +1164,10 @@ export default function CheckoutPage() {
                         Total Tagihan
                       </span>
                       <span className="text-[11px] text-muted-foreground font-body">
-                        {roomsCount} Kamar, {nights} Malam {includeSurfing ? '· Termasuk Surfing' : ''}
+                        {isPackageOnly
+                          ? (selectedWangsalokaPackage === 'prewedding' ? 'Paket Prewedding Wangsaloka' : 'Sewa Tempat Wedding')
+                          : `${roomsCount} Kamar, ${nights} Malam`}
+                        {includeSurfing ? ' · Surfing' : ''}
                       </span>
                     </div>
                     <span className="font-display font-bold text-2xl text-emerald-700 dark:text-emerald-400">
