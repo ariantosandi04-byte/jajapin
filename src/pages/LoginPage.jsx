@@ -128,6 +128,35 @@ export default function LoginPage() {
             </Button>
           </form>
 
+          {/* Akses Cepat Login Akun Super Admin & Owner */}
+          <div className="pt-3 border-t border-border space-y-2 font-body">
+            <span className="text-[11px] font-semibold text-muted-foreground block text-center">
+              Akses Cepat Akun Demo / Kelola:
+            </span>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('admin@jajapin.id');
+                  setPassword('admin123');
+                }}
+                className="p-2.5 rounded-xl border border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-900 dark:text-emerald-200 hover:bg-emerald-100 font-semibold text-center transition-colors text-xs shadow-2xs"
+              >
+                👑 Super Admin
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('owner@bukitsenja.id');
+                  setPassword('owner123');
+                }}
+                className="p-2.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-800 dark:text-stone-200 hover:bg-stone-100 font-semibold text-center transition-colors text-xs"
+              >
+                🏨 Pemilik Properti
+              </button>
+            </div>
+          </div>
+
           <div className="text-center text-xs text-muted-foreground font-body">
             Belum memiliki akun?{' '}
             <Link to="/register" className="text-primary font-semibold hover:underline">
